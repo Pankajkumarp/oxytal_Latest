@@ -1,0 +1,409 @@
+/*
+ * This is a near-verbatim, class-renamed port of the <style> block in
+ * `idea/services.html` (a bespoke, one-off dark-theme design mockup for the
+ * Services page). It leans on CSS custom properties, unusual grid layouts,
+ * ::before/::after pseudo-elements and clamp() fluid type throughout, which
+ * doesn't map cleanly onto this repo's usual Tailwind-utility-class style —
+ * so, per the porting brief, it's kept as a CSS Module instead of being
+ * rewritten into utilities, favoring faithfulness to the source mockup over
+ * consistency with the rest of the codebase.
+ *
+ * Class names are camelCased (BEM `__`/`--` separators removed) because
+ * that's what CSS Modules requires for ergonomic `styles.foo` access; every
+ * selector otherwise keeps the mockup's exact property values, media
+ * queries and pseudo-elements. The mockup's `:root`, bare `body`/`*`
+ * selectors are folded into `.page` (the component's own root element)
+ * since Next.js CSS Modules require every selector to contain at least one
+ * local class — see `app/(content)/service/layout.tsx` for the couple of
+ * truly global (`html`, reduced-motion) rules that can't be expressed that
+ * way and live in a plain <style> tag there instead.
+ *
+ * `--display`/`--body`/`--mono` point at the `next/font/google`-generated
+ * variables wired up in that same layout (Archivo / IBM Plex Sans / IBM
+ * Plex Mono) in place of the mockup's raw Google Fonts <link> tags.
+ */
+
+/*
+ * `--gut`/`--display`/`--body`/`--mono` are plain layout/typography
+ * tokens — not colors, so they don't vary by `themeColor` the way the
+ * rest of this file was migrated to (see ServicesPage.tsx's own
+ * `cardBgClass`/`cardBorderClass`/etc. comment for that story). They used
+ * to be defined in the standalone `/service` route's own `:root` (see
+ * `app/(content)/service/layout.tsx` in git history), which no longer
+ * exists, so they'd gone dangling here too — restored as plain static
+ * values on `.page` itself instead, since a gutter width/font choice
+ * isn't something an editor's `themeColor` pick should change.
+ */
+.page {
+  --gut: clamp(20px, 4vw, 48px);
+  --display: var(--font-poppins), ui-sans-serif, system-ui, sans-serif;
+  --body: var(--font-poppins), ui-sans-serif, system-ui, sans-serif;
+  position: relative;
+  margin: 0;
+  min-height: 100dvh;
+  -webkit-font-smoothing: antialiased;
+}
+/* The dotted grid pattern is now the shared, theme-driven `ThemePattern`
+   component (see app/ui/ThemePattern.tsx and its usage in
+   ServicesPage.tsx) — no longer baked into `.page` as a hardcoded-amber
+   background-image. */
+.page,
+.page *,
+.page *::before,
+.page *::after {
+  box-sizing: border-box;
+}
+.page a {
+  color: inherit;
+}
+/* `--accent` is the one raw-hex custom property this file still relies
+   on — set inline on `.page` from `theme.patternColor` (see
+   `accentVar`/`theme` in ServicesPage.tsx) since these are genuine CSS
+   `:focus-visible`/`:hover` pseudo-states with no equivalent JS-tracked
+   state to swap a Tailwind class against. */
+.page :focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 2px;
+}
+
+.skip {
+  position: absolute;
+  left: -9999px;
+}
+.skip:focus {
+  left: var(--gut);
+  top: 12px;
+  z-index: 20;
+  background: var(--accent);
+  color: #121212;
+  padding: 10px 16px;
+  border-radius: 4px;
+  font-weight: 500;
+}
+
+/* ── Masthead ───────────────────────────────────────────────────────────── */
+/* Not rendered by ServicesPage.tsx — the site's shared Navbar covers this
+   role instead — kept only because the mockup port originally included
+   it; left un-migrated since there's nothing live to fix here. */
+.masthead {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 22px var(--gut);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: rgba(14, 14, 15, 0.88);
+  backdrop-filter: blur(10px);
+}
+.mastheadLogo {
+  display: block;
+  width: 118px;
+  color: #ededea;
+}
+.mastheadLogo svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+.mastheadNav {
+  display: flex;
+  gap: 28px;
+  font-size: 14px;
+  color: #8c8c88;
+}
+.mastheadNav a {
+  text-decoration: none;
+}
+.mastheadNav a:hover,
+.mastheadNav a[aria-current] {
+  color: #ededea;
+}
+@media (max-width: 720px) {
+  .mastheadNav {
+    display: none;
+  }
+}
+
+/* ── Intro ──────────────────────────────────────────────────────────────── */
+/* The eyebrow/heading/lead copy itself is now plain Tailwind utility
+   classes on the elements (see ServicesPage.tsx), themed via
+   `resolveTheme` like every other composableElement section — this
+   module only supplies `.intro`'s own section padding/gutter now. */
+
+
+/* ── Lifecycle rail — the signature element ─────────────────────────────── */
+.rail {
+  margin: clamp(48px, 7vw, 76px) 0 0;
+}
+.railInner {
+  position: relative;
+  display: grid;
+  gap: 1px;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  /* A plain neutral divider for the 1px grid gaps between stages — a
+     decorative flourish, not "necessary" themed content, so (like every
+     other section's own blob/gradient background flourishes — see
+     app/lib/theme.ts) it's left un-themed rather than needing its own
+     Tailwind class. The outer border comes from `cardBorderClass`
+     (ServicesPage.tsx) instead of this rule's own former `border`. */
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 10px;
+  overflow: hidden;
+}
+/* Background (base/active/hover) is applied inline via Tailwind
+   (`cardBgClass`/`activeBgClass` in ServicesPage.tsx), themed like every
+   other composableElement section's cards — replacing this rule's former
+   `background: var(--ink-1)` (and `:hover`/`:focus-visible`/`.isActive`
+   variants), which had gone dangling once the `:root` defining
+   `--ink-1`/`--ink-2` was removed along with the old `/service` layout. */
+.railStage {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 20px 16px 22px;
+  text-decoration: none;
+}
+/* The active-stage indicator bar is a real element now (see
+   `ServicesPage.tsx`), not a ::after pseudo-element, so it can pick up
+   the theme's accent color — nothing to style here for it. */
+/* Color (both the active accent and the inactive muted tone) is applied
+   inline via Tailwind (`accentClass`/`mutedClass` in ServicesPage.tsx),
+   themed like every other composableElement section. */
+.railNum {
+  letter-spacing: 0.1em;
+}
+/* Color is applied inline via Tailwind (`headingClass` in
+   ServicesPage.tsx), themed like every other composableElement section. */
+.railLabel {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+/* Color is applied inline via Tailwind (`mutedClass` in
+   ServicesPage.tsx), themed like every other composableElement section. */
+.railCaption {
+  margin: 14px 0 0;
+  display: flex;
+  justify-content: space-between;
+  letter-spacing: 0.02em;
+}
+@media (max-width: 860px) {
+  .railInner {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+@media (max-width: 460px) {
+  .railInner {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .railCaption {
+    display: none;
+  }
+}
+
+/* ── Services: sticky index + panels ────────────────────────────────────── */
+.services {
+  display: grid;
+  grid-template-columns: minmax(0, 280px) minmax(0, 1fr);
+  gap: clamp(32px, 6vw, 68px);
+  padding: 85px 0 0;
+  align-items: start;
+}
+/* Card chrome (background/border/radius) added so this column reads as
+   its own card, matching `.panel`'s treatment, instead of floating with
+   no background of its own directly over the page's dotted `ThemePattern`
+   backdrop (see ServicesPage.tsx) — previously this was the one piece of
+   the page with no solid background, so the pattern showed through it
+   looking out of place next to the panels' opaque cards. Background/
+   border are now applied inline via Tailwind (`cardBgClass`/
+   `cardBorderClass` in ServicesPage.tsx), same as `.railStage`/`.panel`
+   below — see that file's own comment for why (the `--ink-1`/`--rule`
+   custom properties these used to reference had gone dangling). */
+.index {
+  position: sticky;
+  top: 96px;
+  padding: clamp(24px, 3vw, 32px);
+  border-radius: 12px;
+}
+/* Color is applied inline via Tailwind (`mutedClass` in
+   ServicesPage.tsx), themed like every other composableElement section. */
+.indexHead {
+  margin: 0 0 18px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+.index ol {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+/* Color (both the active/hover "paper" tone and the inactive muted tone)
+   is applied inline via Tailwind (`headingClass`/`mutedClass` in
+   ServicesPage.tsx), themed like every other composableElement section —
+   replacing this rule's former `color: var(--mute)` plus its `:hover`/
+   `.isActive` variants. */
+.indexLink {
+  display: flex;
+  gap: 14px;
+  align-items: baseline;
+  padding: 11px 0;
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+}
+/* Color (both the active accent and the inactive muted tone) is applied
+   inline via Tailwind (`accentClass`/`mutedClass` in ServicesPage.tsx),
+   themed like every other composableElement section. */
+
+.indexLink.isActive .indexName {
+  font-weight: 500;
+}
+
+/* Background (the 1px grid-gap divider) and border: see `.railInner`'s
+   own comment above — same "decorative divider stays un-themed, outer
+   border comes from `cardBorderClass`" treatment. */
+.panels {
+  display: grid;
+  gap: 1px;
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  overflow: hidden;
+  z-index: 1;
+}
+/* Background is applied inline via Tailwind (`cardBgClass` in
+   ServicesPage.tsx) — see `.railStage`'s own comment above. */
+.panel {
+  --pp: clamp(30px, 4vw, 48px);
+  scroll-margin-top: 92px;
+  padding: var(--pp);
+}
+/* Background/border-bottom/aspect-ratio applied inline via Tailwind
+   (`cardBgClass`/`cardBorderClass`/the conditional `aspect-video` vs
+   `aspect-[1200/300]` in ServicesPage.tsx) — the background-image itself
+   lives on a nested scaling layer now too (see that file's own comment),
+   not on this element at all anymore. */
+.panelPlate {
+  margin: calc(-1 * var(--pp)) calc(-1 * var(--pp)) clamp(26px, 3vw, 36px);
+}
+/* Color is applied inline via Tailwind (`mutedClass` in
+   ServicesPage.tsx), themed like every other composableElement section. */
+.panelEyebrow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 0 0 20px;
+  letter-spacing: 0.04em;
+}
+/* Color is applied inline via Tailwind (`accentClass` in
+   ServicesPage.tsx), themed like every other composableElement section. */
+.panelEyebrow span {
+  font-weight: 500;
+}
+/* Color is applied inline via Tailwind (`accentClass` in
+   ServicesPage.tsx), themed like every other composableElement section —
+   replacing this rule's former `color: var(--amber)`. */
+.panelOutcome {
+  margin: 0 0 16px;
+  max-width: 22ch;
+  font: 600 clamp(23px, 3.1vw, 33px)/1.14 var(--display);
+  letter-spacing: -0.025em;
+}
+/* Color is applied inline via Tailwind (`theme?.body` in
+   ServicesPage.tsx), themed like every other composableElement section —
+   replacing this rule's former hardcoded `color: #c9c9c4`. */
+.panelBody {
+  margin: 0 0 26px;
+  max-width: 62ch;
+}
+.panelCaps {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 30px;
+  padding: 0;
+  list-style: none;
+}
+/* Text color (`mutedClass`) and border (`cardBorderClass`) are applied
+   inline via Tailwind per-pill in ServicesPage.tsx, themed like every
+   other composableElement section. */
+.panelCaps li {
+  padding: 6px 13px;
+  border-radius: 100px;
+}
+/* Border is applied inline via Tailwind (`cardBorderClass` in
+   ServicesPage.tsx). */
+.panelFoot {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-top: 22px;
+}
+/* Color is applied inline via Tailwind (`mutedClass` in
+   ServicesPage.tsx), themed like every other composableElement section. */
+.panelProof {
+  margin: 0;
+}
+/* Color is applied inline via Tailwind (`headingClass` in
+   ServicesPage.tsx). */
+.panelProof a {
+  text-underline-offset: 4px;
+}
+/* `.panelProofEmpty` no longer has any rule of its own — its color is
+   now just `mutedClass` (ServicesPage.tsx), the same muted tone
+   `.panelProof` already uses, rather than this rule's own former,
+   slightly-fainter `var(--line-2)`; close enough for a disabled/empty
+   state and one less one-off tone to keep themed. The class is still
+   applied in JSX in case a future visual distinction wants a hook. */
+
+/* Color is applied inline via Tailwind (`headingClass` in
+   ServicesPage.tsx); the hover color swap uses `var(--accent)` (see
+   `.page :focus-visible`'s own comment above) since hover is a genuine
+   CSS pseudo-state with no JS-tracked equivalent to swap a Tailwind
+   class against. */
+.panelCta {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  text-decoration: none;
+  font: 500 14px/1 var(--display);
+}
+.panelCta svg {
+  width: 16px;
+  height: 16px;
+  transition: transform 0.25s ease;
+}
+.panelCta:hover {
+  color: var(--accent);
+}
+.panelCta:hover svg {
+  transform: translateX(4px);
+}
+@media (max-width: 900px) {
+  .services {
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .index {
+    position: static;
+  }
+}
+
+/* Not rendered by ServicesPage.tsx — same as `.masthead` above, kept
+   only because the mockup port originally included it. */
+.colophon {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: space-between;
+  padding: 22px var(--gut) 40px;
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  color: #8c8c88;
+  letter-spacing: 0.04em;
+}

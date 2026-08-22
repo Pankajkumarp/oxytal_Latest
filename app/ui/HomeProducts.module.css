@@ -1,0 +1,321 @@
+/*
+ * A near-verbatim, class-renamed port of the <style> block in
+ * `Refrence/product-section.html` (a bespoke "editorial case index"
+ * mockup for the home Products section). It leans on CSS custom
+ * properties, ::before/::after pseudo-elements, clamp() fluid type and a
+ * sticky two-column grid throughout, which doesn't map cleanly onto this
+ * repo's usual Tailwind-utility-class style — so, same call
+ * `ServicesPage.module.css` already made for its own one-off mockup, this
+ * stays a CSS Module instead of being force-fit into utilities, favoring
+ * faithfulness to the source mockup over consistency with the rest of the
+ * codebase.
+ *
+ * Typography is intentionally NOT part of this port: no bespoke fonts are
+ * loaded here. Every element below uses the site's own default (Poppins,
+ * cascading down from `body` — see `app/(content)/[locale]/layout.tsx`)
+ * at the same sizes/weights every sibling section uses for the equivalent
+ * role, so this section reads as part of the same site rather than a
+ * one-off. The two purely-numeric labels (`exhibitNum`/`rowNum`) get
+ * Tailwind's `font-mono` utility applied directly in `HomeProducts.tsx`
+ * instead — the "index number in mono" convention `HomeServices`/
+ * `AboutApproach` already use for their own numbered items.
+ *
+ * The paper/ink/gold/teal/emerald palette below, and every structural/
+ * decorative mechanic (corner ticks, sticky-preview swap transitions, row
+ * grid), are this section's fixed identity — same precedent
+ * `ServicesPage.module.css`'s own dark/amber palette sets: they don't
+ * swap when an editor sets a `themeColor` in Contentful. The section's
+ * actual background and primary readable text (heading, intro body copy,
+ * eyebrow, exhibit/row titles — all authored as plain Tailwind classes
+ * directly in `HomeProducts.tsx`, not in this module) *do* respond to
+ * `resolveTheme`, a wider reach than `ServicesPage`'s own "intro copy
+ * only" scope — see that component's doc comment for why.
+ */
+
+.page {
+
+  position: relative;
+}
+
+/* ---------- Header ---------- */
+
+.headerRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 48px;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 40px;
+}
+@media (max-width: 880px) {
+  .headerRow {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 20px;
+  }
+}
+
+.heading {
+  font-weight: 800;
+  font-size: 28px;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  max-width: 640px;
+}
+@media (min-width: 640px) {
+  .heading {
+    font-size: 34px;
+  }
+}
+@media (min-width: 768px) {
+  .heading {
+    font-size: 40px;
+  }
+}
+
+.headerSub {
+  max-width: 450px;
+  font-size: 15.5px;
+  line-height: 1.6;
+  padding-bottom: 6px;
+}
+@media (min-width: 768px) {
+  .headerSub {
+    font-size: 17px;
+  }
+}
+
+/* ---------- Index layout ---------- */
+
+.index {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+  gap: 64px;
+  margin-top: 56px;
+}
+@media (max-width: 880px) {
+  .index {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+}
+
+.previewCol {
+  position: sticky;
+  top: 104px;
+  align-self: start;
+  height: 520px;
+  z-index: 2;
+}
+@media (max-width: 880px) {
+  .previewCol {
+    position: relative;
+    top: 0;
+    height: 340px;
+    order: -1;
+  }
+}
+
+.previewFrame {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: var(--paper-panel);
+  border: 1px solid #15181c0a;
+  overflow: hidden;
+}
+
+.exhibit {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 32px;
+  opacity: 0;
+  transform: translateY(10px);
+  transition:
+    opacity 0.45s ease,
+    transform 0.45s ease;
+  pointer-events: none;
+}
+.exhibitActive {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: auto;
+}
+
+.exhibitTop {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+.exhibitStamp {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  border: 1px solid var(--ink);
+  padding: 5px 10px;
+  transform: rotate(-2deg);
+  background: var(--paper-panel);
+}
+.exhibitNum {
+  font-size: 52px;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.exhibitArt {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 16px 0;
+  overflow: hidden;
+}
+.exhibitArt img {
+  max-height: 100%;
+  max-width: 100%;
+  object-fit: contain;
+}
+
+.exClient {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 6px;
+}
+.exTitle {
+  font-size: 24px;
+  font-weight: 500;
+  line-height: 1.1;
+}
+
+/* ---------- Rows ---------- */
+
+.rows {
+  position: relative;
+  z-index: 2;
+}
+
+.row {
+  padding: 28px 8px;
+  cursor: pointer;
+  display: grid;
+  grid-template-columns: 32px 1fr;
+  align-items: center;
+  gap: 16px;
+  transition: background 0.25s ease;
+  background: none;
+  text-align: left;
+  width: 100%;
+  font: inherit;
+  color: inherit;
+  border-left: none;
+  border-right: none;
+  border-top: none;
+}
+@media (min-width: 640px) {
+  .row {
+    grid-template-columns: 56px  auto;
+    gap: 20px;
+     padding: 28px 20px 28px 8px;
+  }
+}
+.row:hover,
+.rowActive {
+  background: rgba(21, 24, 28, 0.04);
+}
+
+.rowNum {
+  font-size: 20px;
+  padding-top: 4px;
+}
+.rowActive .rowNum {
+  color: #007595;
+  font-weight: 700;
+}
+
+.rowTag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 3px 8px;
+  margin-bottom: 12px;
+}
+
+.rowTitle {
+  font-size: 22px;
+  font-weight: 500;
+  line-height: 1.15;
+  margin-bottom: 10px;
+}
+
+.rowDesc {
+  /* No `color` here — themed via `theme?.body` in HomeProducts.tsx
+     (falls back to the same soft-ink tone when untheme), unlike
+     `.exClient`/`.rowMeta`/`.rowNum` below, which stay fixed. */
+  font-size: 14.5px;
+  line-height: 1.6;
+  max-width: 480px;
+}
+
+.rowMeta {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  font-size: 11px;
+  padding-top: 4px;
+  margin-top: 4px;
+}
+@media (min-width: 640px) {
+  .rowMeta {
+    grid-column: auto;
+    flex-direction: row;
+    gap: 4px;
+    text-align: left;
+    white-space: nowrap;
+    margin-top: 0;
+    grid-column: 2 / 4;
+    font-size: 12px;
+    justify-content: space-between;
+  }
+}
+.rowMeta b {
+  font-weight: 700;
+}
+
+.rowArrow {
+  grid-column: 1 / -1;
+  margin-top: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  opacity: 0;
+  transform: translateX(-6px);
+  /* No `transition` here (unlike the rest of this stylesheet) — the
+     active row's arrow is now sprung in by a GSAP tween instead (see
+     the ACTIVE ROW SPRING effect in HomeProducts.tsx), which would
+     otherwise fight a CSS transition animating the same two
+     properties. This resting state (and `.rowArrowActive` below) still
+     stands as the plain instant fallback under prefers-reduced-motion,
+     where that GSAP effect is skipped entirely. */
+  width: fit-content;
+}
+@media (min-width: 640px) {
+  .rowArrow {
+    grid-column: 2 / 4;
+  }
+}
+.rowArrowActive {
+  opacity: 1;
+  transform: translateX(0);
+}
+.rowArrow:hover {
+  text-decoration: underline;
+}
