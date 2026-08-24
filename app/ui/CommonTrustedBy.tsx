@@ -393,7 +393,9 @@ export default function CommonTrustedBy({
                         : {})}
                       aria-label={item.name}
                       className={cx(
-                        "flex h-full items-center justify-center logo-card"
+                        "flex h-full items-center justify-center logo-card",
+                        theme?.sectionBg ?? "border-gray-100",
+                        theme?.cardBg ?? "bg-white"
                       )}
                     >
                       {item.logo ? (
