@@ -17,6 +17,8 @@ export type CommonVideoAspectRatio = "16/9" | "21/9" | "4/3" | "1/1" | "9/16";
 
 export type CommonVideoHeadingLevel = "h1" | "h2" | "h3" | "h4";
 
+export type CommonVideoOverlay = "dark" | "light";
+
 export interface CommonVideoProps {
   /** Primary video source. Any browser-playable URL, e.g. a `dataVideo.videoFile` asset URL from Contentful. */
   videoSrc: string;
@@ -26,34 +28,19 @@ export interface CommonVideoProps {
   poster?: string;
   /** Accessible label for the video. Falls back to `heading`, then a generic label. */
   videoLabel?: string;
-  /** Small label above the heading, e.g. "OUR STORY" (mirrors the `eyebrow` field used across Contentful content types). */
+  /** Small label above the heading, e.g. "OUR STORY" (mirrors the `eyebrow` field used across Contentful content types). Always renders in the default white-on-glass pill style — no per-entry color override. */
   eyebrow?: string;
-  /** `eyebrow`'s text color — a literal Tailwind class name (e.g. "text-cyan-300"), applied directly via `className`, not a CSS color value. Only renders visibly if that exact class also appears elsewhere in this project's source (see the component doc comment); otherwise falls back to the default white-on-glass pill below. */
-  eyebrowColor?: string;
-  /** `eyebrow`'s pill background — same "literal Tailwind class name" convention as `eyebrowColor` (e.g. "bg-emerald-950/40"). */
-  eyebrowBg?: string;
-  /** Section heading. Rendering the text overlay on the video is skipped entirely when this, `description`, and the CTA are all omitted. */
+  /** Section heading. Rendering the text overlay on the video is skipped entirely when this, `description`, and the CTA are all omitted. Always renders in the default responsive size/color — no per-entry override. */
   heading?: string;
   /** Tag used for `heading`. Defaults to "h2" so the section nests correctly under a page's own `<h1>`. */
   headingLevel?: CommonVideoHeadingLevel;
-  /** `heading`'s font size — a literal Tailwind class name (e.g. "text-4xl", or several space-separated responsive variants like "text-3xl md:text-6xl"), applied via `className`, replacing the default responsive scale entirely rather than combining with it. Same "must already appear verbatim elsewhere in source" caveat as `eyebrowColor`. */
-  headingSize?: string;
-  /** `heading`'s text color, same "literal Tailwind class name via `className`" convention as `eyebrowColor`. */
-  headingColor?: string;
+  /** Always renders in the default size/color — no per-entry override. */
   description?: string;
-  /** `description`'s font size, same convention as `headingSize`. */
-  descriptionSize?: string;
-  /** `description`'s text color, same "literal Tailwind class name via `className`" convention as `eyebrowColor`. */
-  descriptionColor?: string;
   buttonText?: string;
   /** Href for the CTA. Renders an `<a>` to match the rest of the codebase (no `next/link` usage exists yet). */
   buttonLink?: string;
   /** Called instead of navigating when there's no `buttonLink` (e.g. open a modal). Ignored if `buttonLink` is set. */
   onButtonClick?: () => void;
-  /** Button background — a literal Tailwind class name, same convention as `eyebrowColor`, applied via `className`. Can include its own hover variant in the same string (e.g. "bg-red-600 hover:bg-red-500") — supplying just the rest-state class skips the hover darken/lighten rather than guessing one. */
-  buttonColor?: string;
-  /** Button label's text color, same "literal Tailwind class name via `className`" convention as `eyebrowColor`. */
-  buttonTextColor?: string;
   /** Horizontal alignment of the text overlaid on the video. Defaults to "center". */
   contentPosition?: CommonVideoContentPosition;
   /** Applied to the root `<section>`. */
@@ -70,6 +57,9 @@ export interface CommonVideoProps {
   controls?: boolean;
   /** Eagerly preloads the video for above-the-fold placements. Defaults to false (`preload="metadata"`). */
   priority?: boolean;
+  /** Tint drawn directly over the video itself (independent of the text overlay's own scrim): "dark" lays a black scrim over it, "light" a white one. Omit for no tint at all — this never defaults to either color. */
+  overlay?: CommonVideoOverlay;
+  textDelay?: number;
 }
 
 const ASPECT_RATIO_CLASSES: Record<CommonVideoAspectRatio, string> = {
@@ -96,6 +86,39 @@ function aspectRatioClasses(
     ? desktopClass
     : `${mobileClass} md:${desktopClass}`;
 }
+
+/**
+ * `overlay` tint classes — a bottom-to-top gradient (strongest at the
+ * bottom, fading to fully transparent at the top) rather than a flat
+ * tint, so it reads as a classic video-caption scrim: it darkens/lightens
+ * the ground behind the bottom-aligned text overlay without dimming the
+ * video's upper portion at all.
+ */
+const OVERLAY_CLASSES: Record<CommonVideoOverlay, string> = {
+  dark: "bg-[#808080] opacity-50",
+  light: "bg-gradient-to-t from-white/90 via-white/30 to-transparent",
+};
+
+/**
+ * Eyebrow badge / description / button label text color follows `overlay`
+ * for legibility against its tint: "dark" (black scrim) gets white text,
+ * "light" (white scrim) gets black text. Falls back to each element's own
+ * original default (see call sites below) when `overlay` is unset — the
+ * heading is deliberately not included here since it wasn't part of the
+ * request this was added for.
+ */
+const OVERLAY_BOX_CLASSES: Record<CommonVideoOverlay, string> = {
+  dark: "bg-white text-slate-800",
+  light: "bg-slate-800 text-white",
+};
+const OVERLAY_BUTTON_CLASSES: Record<CommonVideoOverlay, string> = {
+  dark: "bg-white text-slate-800 hover:bg-white/80 hover:shadow-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/80",
+  light: "bg-slate-800 text-white hover:bg-slate-600 hover:shadow-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-600",
+};
+const OVERLAY_TEXT_CLASSES: Record<CommonVideoOverlay, string> = {
+  dark: "text-white",
+  light: "text-slate-800",
+};
 
 /** Horizontal placement of the overlay's text block *within* the video box (the overlay itself always spans the full box — see `hasContent` below). */
 const CONTENT_ALIGNMENT_CLASSES: Record<CommonVideoContentPosition, string> = {
@@ -159,20 +182,12 @@ export default function CommonVideo({
   poster,
   videoLabel,
   eyebrow,
-  eyebrowColor,
-  eyebrowBg,
   heading,
   headingLevel = "h2",
-  headingSize,
-  headingColor,
   description,
-  descriptionSize,
-  descriptionColor,
   buttonText,
   buttonLink,
   onButtonClick,
-  buttonColor,
-  buttonTextColor,
   contentPosition = "center",
   className,
   aspectRatio = "16/9",
@@ -182,22 +197,11 @@ export default function CommonVideo({
   muted = true,
   controls = false,
   priority = false,
+  overlay,
+  textDelay,
 }: CommonVideoProps) {
   const hasCta = Boolean(buttonText && (buttonLink || onButtonClick));
   const hasContent = Boolean(eyebrow || heading || description || hasCta);
-
-  // Every color/size override on this component (`eyebrowColor`/
-  // `eyebrowBg`, `headingSize`/`headingColor`, `descriptionSize`/
-  // `descriptionColor`, `buttonColor`/`buttonTextColor`) applies as a
-  // literal Tailwind class via `className` (see the elements below), per
-  // explicit request, rather than inline `style` — this only works if the
-  // value an editor types (e.g. "text-cyan-300", "text-4xl",
-  // "bg-emerald-950") is an *exact Tailwind utility class name* that also
-  // appears verbatim somewhere else in this project's source; Tailwind's
-  // build-time scanner can't discover a class that exists only in data
-  // fetched at runtime, so a genuinely novel value (a raw hex/px size, or
-  // a class never used anywhere else in the codebase) silently renders no
-  // color/size change at all.
 
   const sectionRef = useRef<HTMLElement>(null);
   const eyebrowRef = useRef<HTMLSpanElement>(null);
@@ -210,7 +214,7 @@ export default function CommonVideo({
   const HeadingTag = headingLevel;
 
   /** Seconds the whole text overlay (eyebrow/heading/description/button) waits — after the section scrolls into view — before it reveals. The video itself isn't held back by this; it reveals on its own usual timing. */
-  const TEXT_REVEAL_DELAY = 5;
+  const TEXT_REVEAL_DELAY = textDelay || 0;
 
   /* =========================================================
      REVEAL ANIMATIONS (heading split-text, fade-up stagger,
@@ -322,7 +326,7 @@ export default function CommonVideo({
       ctx.revert();
       split?.revert();
     };
-  }, [hasContent, eyebrow, heading, description, buttonText]);
+  }, [hasContent, eyebrow, heading, description, buttonText, TEXT_REVEAL_DELAY]);
 
   /* =========================================================
      VIEWPORT-TRIGGERED PLAYBACK — play once visible, pause once
@@ -381,6 +385,17 @@ export default function CommonVideo({
         )}
         <source src={videoSrc} />
       </video>
+
+      {/* Tint over the video itself — separate from the text overlay's own
+          scrim above/below it. Renders nothing when `overlay` is unset, so
+          a `dataVideo` entry that never sets the field looks exactly as it
+          did before this prop existed. */}
+      {overlay && (
+        <div
+          aria-hidden="true"
+          className={cx("pointer-events-none absolute inset-0", OVERLAY_CLASSES[overlay])}
+        />
+      )}
     </div>
   );
 
@@ -430,7 +445,7 @@ export default function CommonVideo({
                 inside a box that still spans the full stretched width. */}
             <div
               className={cx(
-                "flex max-w-2xl flex-col gap-4 md:gap-5",
+                "flex max-w-4xl flex-col gap-4 md:gap-5",
                 CONTENT_ALIGNMENT_CLASSES[contentPosition]
               )}
             >
@@ -438,9 +453,8 @@ export default function CommonVideo({
                 <span
                   ref={eyebrowRef}
                   className={cx(
-                    "inline-block w-fit rounded-full px-3 py-1.5 text-xs font-bold tracking-wide ring-1 ring-white/20 backdrop-blur-sm",
-                    eyebrowBg ?? "bg-white/10",
-                    eyebrowColor ?? "text-white"
+                    "inline-block w-fit rounded-full  px-3 py-1.5 text-xs font-bold tracking-wide",
+                    overlay ? OVERLAY_BOX_CLASSES[overlay] : "text-white"
                   )}
                 >
                   {eyebrow}
@@ -451,14 +465,8 @@ export default function CommonVideo({
                 <HeadingTag
                   ref={headingRef as never}
                   className={cx(
-                    "leading-[1.1] font-extrabold tracking-tight",
-                    // `headingSize` fully replaces the default responsive
-                    // scale (rather than being combined with it) so an
-                    // editor-supplied size class doesn't end up fighting
-                    // the default's own breakpoint classes for the same
-                    // `font-size` property.
-                    headingSize ?? "text-[28px] sm:text-[34px] md:text-[42px] lg:text-[48px]",
-                    headingColor ?? "text-white"
+                    "text-[28px] leading-[1.2] font-extrabold tracking-tight sm:text-[34px] md:text-[42px] lg:text-[60px]",
+                    overlay ? OVERLAY_TEXT_CLASSES[overlay] : "text-gray-200"
                   )}
                 >
                   {heading}
@@ -469,9 +477,8 @@ export default function CommonVideo({
                 <p
                   ref={descriptionRef}
                   className={cx(
-                    "leading-relaxed",
-                    descriptionSize ?? "text-[15.5px] md:text-[17px]",
-                    descriptionColor ?? "text-gray-200"
+                    "text-[15.5px] leading-relaxed md:text-[17px]",
+                    overlay ? OVERLAY_TEXT_CLASSES[overlay] : "text-gray-200"
                   )}
                 >
                   {description}
@@ -484,13 +491,8 @@ export default function CommonVideo({
                     ref={buttonRef as never}
                     href={buttonLink}
                     className={cx(
-                      "group mt-1 inline-flex w-fit items-center gap-2 rounded-full px-7 py-3.5 text-[15px] font-semibold shadow-lg shadow-black/25 hover:-translate-y-0.5 hover:shadow-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600",
-                      // `buttonColor` can include its own hover variant
-                      // (e.g. "bg-red-600 hover:bg-red-500") — supplying
-                      // just the rest-state class skips the hover
-                      // darken/lighten rather than guessing one.
-                      buttonColor ?? "bg-emerald-600 hover:bg-emerald-500",
-                      buttonTextColor ?? "text-white"
+                      "group mt-1 inline-flex w-fit items-center gap-2 rounded-full bg-emerald-600 px-7 py-3.5 text-[15px] font-semibold shadow-lg shadow-black/25 hover:-translate-y-0.5",
+                      overlay ? OVERLAY_BUTTON_CLASSES[overlay] : "text-white"
                     )}
                   >
                     {buttonText}
@@ -505,13 +507,8 @@ export default function CommonVideo({
                     ref={buttonRef as never}
                     onClick={onButtonClick}
                     className={cx(
-                      "group mt-1 inline-flex w-fit items-center gap-2 rounded-full px-7 py-3.5 text-[15px] font-semibold shadow-lg shadow-black/25  hover:-translate-y-0.5 hover:shadow-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600",
-                      // `buttonColor` can include its own hover variant
-                      // (e.g. "bg-red-600 hover:bg-red-500") — supplying
-                      // just the rest-state class skips the hover
-                      // darken/lighten rather than guessing one.
-                      buttonColor ?? "bg-emerald-600 hover:bg-emerald-500",
-                      buttonTextColor ?? "text-white"
+                      "group mt-1 inline-flex w-fit items-center gap-2 rounded-full bg-emerald-600 px-7 py-3.5 text-[15px] font-semibold shadow-lg shadow-black/25 hover:-translate-y-0.5 hover:bg-emerald-500 hover:shadow-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600",
+                      overlay ? OVERLAY_TEXT_CLASSES[overlay] : "text-white"
                     )}
                   >
                     {buttonText}

@@ -13,9 +13,11 @@ import { cx } from "@/app/lib/cx";
 import { resolveVariant, type Variant } from "../lib/caseStudyVariant";
 import { getAssetUrl } from "../lib/contentfulAsset";
 import { resolveTheme, type SectionTheme } from "../lib/theme";
+import ThemePattern from "./ThemePattern";
 import {
   ContentDetailSkeleton,
   DataImageSkeleton,
+  DataLinkSkeleton,
   StatisticSkeleton,
 } from "../types/contentful";
 
@@ -55,6 +57,15 @@ function isEntry(value: unknown): value is AnyEntry {
   );
 }
 
+/** Best-effort href from a `dataLink` entry: prefers an external URL, falls back to `/<linkedPage>`. Same resolution `CaseStudiesListing`/`PageBody` use. */
+function resolveLinkHref(link: PlainEntry<DataLinkSkeleton>): string | undefined {
+  if (link.fields.externalUrl) {
+    return link.fields.externalUrl;
+  }
+
+  return link.fields.linkedPage ? `/${link.fields.linkedPage}` : undefined;
+}
+
 interface StatItem {
   label: string;
   value: string;
@@ -73,20 +84,14 @@ interface RelatedItem {
   href: string;
 }
 
-const PLACEHOLDER_IMAGES = [
-  "https://picsum.photos/seed/oxytal-case-detail-related-1/600/450",
-  "https://picsum.photos/seed/oxytal-case-detail-related-2/600/450",
-  "https://picsum.photos/seed/oxytal-case-detail-related-3/600/450",
-];
-
 /** Maps a resolved `contentDetail` entry (one of `getRelatedCaseStudies`'s results) to the plain shape the "More case studies" grid renders. */
 function contentDetailToRelatedItem(entry: PlainEntry<ContentDetailSkeleton>): RelatedItem {
   const heroImageEntry = entry.fields.heroImage;
   const imageUrl = isEntry(heroImageEntry)
     ? getAssetUrl(
-        (heroImageEntry as unknown as PlainEntry<DataImageSkeleton>).fields
-          .image
-      )
+      (heroImageEntry as unknown as PlainEntry<DataImageSkeleton>).fields
+        .image
+    )
     : undefined;
 
   return {
@@ -102,6 +107,7 @@ function contentDetailToRelatedItem(entry: PlainEntry<ContentDetailSkeleton>): R
 /** The mapped shape every variant renders from — same fields regardless of which of the 3 designs is picked (see `CaseStudyDetail`'s own doc comment below). */
 interface CaseStudyData {
   title: string;
+  badge?: string;
   category?: string;
   clientName?: string;
   shortDescription?: string;
@@ -116,6 +122,12 @@ interface CaseStudyData {
   metaRows: { k: string; v: string }[];
   variant: Variant;
   theme?: SectionTheme;
+  /** `ThemePattern`'s per-section pattern choice — see `contentDetail.pattern`'s own doc comment (app/types/contentful.ts). Only takes effect together with `patternColor`; otherwise falls back to `theme?.showPattern`'s own dotted-grid default, same as everywhere else `ThemePattern` is dropped in. */
+  pattern?: string;
+  patternColor?: string;
+  /** First resolved entry in `contentDetail.cta` (an array, same "reuse `dataLink`" convention as everywhere else on this site) — its href/label. Renders nothing when `cta` is unset or has no resolved link, same "no placeholder" convention as this component's other optional fields. */
+  ctaHref?: string;
+  ctaLabel?: string;
 }
 
 function mapContentDetail(entry: PlainEntry<ContentDetailSkeleton>): CaseStudyData {
@@ -133,13 +145,20 @@ function mapContentDetail(entry: PlainEntry<ContentDetailSkeleton>): CaseStudyDa
   const heroImageEntry = entry.fields.heroImage;
   const heroPhotoUrl = isEntry(heroImageEntry)
     ? getAssetUrl(
-        (heroImageEntry as unknown as PlainEntry<DataImageSkeleton>).fields
-          .image
-      )
+      (heroImageEntry as unknown as PlainEntry<DataImageSkeleton>).fields
+        .image
+    )
     : undefined;
+
+  const ctaLink = entry.fields.cta?.find(isEntry) as
+    | PlainEntry<DataLinkSkeleton>
+    | undefined;
 
   return {
     title: entry.fields.title ?? "",
+    badge: entry.fields.badge,
+    ctaHref: ctaLink ? resolveLinkHref(ctaLink) : undefined,
+    ctaLabel: ctaLink?.fields.label,
     category: entry.fields.category,
     clientName: entry.fields.clientName,
     shortDescription: entry.fields.shortDescription,
@@ -153,6 +172,8 @@ function mapContentDetail(entry: PlainEntry<ContentDetailSkeleton>): CaseStudyDa
     // standalone recolor rather than the paired feature `overrides`
     // provides once a `page` exists.
     theme: resolveTheme(entry.fields.themeColor),
+    pattern: entry.fields.pattern,
+    patternColor: entry.fields.patternColor,
   };
 }
 
@@ -242,53 +263,47 @@ const VARIANT_TAG_STYLES: Record<Variant, { bg: string; text: string; extra?: st
   bento: { bg: "bg-[#FCE7DE]", text: "text-[#E4572E]" },
 };
 
-/** One card in the "More case studies" grid — same 3 fields (photo/category/client/title) styled per variant. */
-function RelatedCard({ item, variant, theme }: { item: RelatedItem; variant: Variant; theme?: SectionTheme }) {
-  const shell: Record<Variant, string> = {
-    reel: "border-[#2A2A2A] bg-[#1E1E1E] hover:border-[#C97B3D]",
-    editorial: "border-[#E5DFD1] bg-white hover:shadow-lg hover:shadow-[#221F1A]/5",
-    bento: "border-[#E4E0D6] bg-white hover:border-[#E4572E]",
-  };
-  const title: Record<Variant, string> = {
-    reel: "text-white uppercase tracking-tight",
-    editorial: "text-[#221F1A]",
-    bento: "text-[#1B1B18]",
-  };
-  const client: Record<Variant, string> = {
-    reel: "text-[#9A9A9A] uppercase tracking-wide",
-    editorial: "text-[#5C6E4F] uppercase tracking-wide",
-    bento: "text-[#E4572E] uppercase tracking-wide",
-  };
+/** `data.ctaHref`/`ctaLabel`'s pill button default colors, per variant — same "themed override, bespoke fallback" split every other styled element on this page uses. */
+const VARIANT_BUTTON_STYLES: Record<Variant, { bg: string; text: string; hover: string }> = {
+  reel: { bg: "bg-[#C97B3D]", text: "text-white", hover: "hover:bg-[#E0964F]" },
+  editorial: { bg: "bg-[#5C6E4F]", text: "text-white", hover: "hover:bg-[#465A3A]" },
+  bento: { bg: "bg-[#E4572E]", text: "text-white", hover: "hover:bg-[#C8451F]" },
+};
+
+/** `data.ctaHref`/`ctaLabel` rendered as a pill button — only when a `contentDetail.cta` link actually resolved (see `mapContentDetail`); renders nothing otherwise, same "no placeholder" convention as this component's other optional fields. */
+function CaseStudyCta({
+  data,
+  variant,
+  theme,
+  className,
+}: {
+  data: CaseStudyData;
+  variant: Variant;
+  theme?: SectionTheme;
+  className?: string;
+}) {
+  if (!data.ctaHref) {
+    return null;
+  }
+
+  const button = VARIANT_BUTTON_STYLES[variant];
 
   return (
     <Link
-      href={item.href}
+      href={data.ctaHref}
       className={cx(
-        "flex flex-col gap-3 rounded-2xl border p-3 hover:-translate-y-1",
-        theme?.cardBorder ?? shell[variant].split(" ")[0],
-        theme?.cardBg ?? shell[variant].split(" ").slice(1).join(" ")
+        "inline-flex w-fit items-center gap-2 rounded-full px-6 py-3 text-[13.5px] font-bold tracking-wide uppercase transition-colors",
+        theme?.buttonBg ?? button.bg,
+        theme?.buttonText ?? button.text,
+        theme?.buttonHoverBg ?? button.hover,
+        className
       )}
     >
-      <div className="relative aspect-[1672/941] overflow-hidden rounded-xl bg-black/5">
-        {/* eslint-disable-next-line @next/next/no-img-element -- matches the plain <img> convention already used for external/Contentful assets in this project */}
-        <img
-          src={item.imageUrl ?? PLACEHOLDER_IMAGES[0]}
-          alt=""
-          aria-hidden
-          className="h-full w-full object-cover"
-        />
-      </div>
-      {item.clientName && (
-        <p className={cx("text-[11px] font-bold", theme?.accentText ?? client[variant])}>
-          {item.clientName}
-        </p>
-      )}
-      <p className={cx("text-[15px] leading-snug font-bold", theme?.heading ?? title[variant])}>
-        {item.title}
-      </p>
+      {data.ctaLabel || "Learn more"}
     </Link>
   );
 }
+
 
 /** Per-variant heading GSAP params — same split-text word reveal every hero on this site uses, tuned to match each design's personality (reel: large + punchy; editorial: softer; bento: compact + snappy). */
 const HEADING_ANIM: Record<Variant, gsap.TweenVars> = {
@@ -336,6 +351,10 @@ const HEADING_ANIM: Record<Variant, gsap.TweenVars> = {
  *   keeps each variant's own muted reading color for legibility — same
  *   call `ThemePattern`'s decorative blobs make to stay unthemed ("a
  *   subtle accent rather than a necessary themed element").
+ * - `pattern`/`patternColor` (together only — see `ThemePattern`'s own
+ *   doc comment) pick one of its 14 decorative background tiles for this
+ *   fallback path; unset (or half-set) falls back to `theme?.showPattern`'s
+ *   own dotted-grid default, same as every other `ThemePattern` call site.
  *
  * `variant`/`theme`/`heroPhotoUrl` above are `contentDetail`'s own
  * fallback defaults — used as-is when this case study has no dedicated
@@ -364,18 +383,18 @@ const HEADING_ANIM: Record<Variant, gsap.TweenVars> = {
  */
 interface Props {
   entry: PlainEntry<ContentDetailSkeleton>;
-  related: PlainEntry<ContentDetailSkeleton>[];
   /** Set only by `CaseStudyDetailSection` (the `page`/`composableElement` path) — see this component's own doc comment above. */
   overrides?: {
     variant?: Variant;
     theme?: SectionTheme;
     backdropUrl?: string;
+    pattern?: string;
+    patternColor?: string;
   };
 }
 
-export default function CaseStudyDetail({ entry, related, overrides }: Props) {
+export default function CaseStudyDetail({ entry, overrides }: Props) {
   const data = { ...mapContentDetail(entry), ...overrides };
-  const relatedItems = related.map(contentDetailToRelatedItem);
 
   const sectionRef = useRef<HTMLDivElement>(null);
   const headingRef = useRef<HTMLHeadingElement>(null);
@@ -441,10 +460,8 @@ export default function CaseStudyDetail({ entry, related, overrides }: Props) {
     return (
       <ReelLayout
         data={data}
-        related={relatedItems}
         sectionRef={sectionRef}
         headingRef={headingRef}
-        relatedRef={relatedRef}
       />
     );
   }
@@ -453,10 +470,8 @@ export default function CaseStudyDetail({ entry, related, overrides }: Props) {
     return (
       <BentoLayout
         data={data}
-        related={relatedItems}
         sectionRef={sectionRef}
         headingRef={headingRef}
-        relatedRef={relatedRef}
       />
     );
   }
@@ -464,20 +479,16 @@ export default function CaseStudyDetail({ entry, related, overrides }: Props) {
   return (
     <EditorialLayout
       data={data}
-      related={relatedItems}
       sectionRef={sectionRef}
       headingRef={headingRef}
-      relatedRef={relatedRef}
     />
   );
 }
 
 type LayoutProps = {
   data: CaseStudyData;
-  related: RelatedItem[];
   sectionRef: RefObject<HTMLDivElement | null>;
   headingRef: RefObject<HTMLHeadingElement | null>;
-  relatedRef: RefObject<HTMLDivElement | null>;
 };
 
 /** Shared "back to all case studies" link — same position/style across all 3 variants (the reference mockups' own "01/12" index counter is skipped as a low-value flourish that would need fragile global numbering). */
@@ -497,7 +508,7 @@ function BackLink({ className }: { className?: string }) {
 }
 
 /** ================= REEL — dark, copper, display type, scrolling ticker ================= */
-function ReelLayout({ data, related, sectionRef, headingRef, relatedRef }: LayoutProps) {
+function ReelLayout({ data, sectionRef, headingRef }: LayoutProps) {
   const { theme } = data;
   const tickerItems = [
     ...data.headlineStats,
@@ -509,16 +520,15 @@ function ReelLayout({ data, related, sectionRef, headingRef, relatedRef }: Layou
       ref={sectionRef}
       className={cx(
         "relative min-h-screen overflow-hidden",
-        data.backdropUrl ? "bg-cover bg-center" : (theme?.sectionBg ?? "bg-[#141414]")
+        data.backdropUrl ? "bg-cover bg-center" : (theme?.sectionBg ?? "]")
       )}
       style={data.backdropUrl ? { backgroundImage: `url(${data.backdropUrl})` } : undefined}
     >
-      {data.backdropUrl && (
-        <div aria-hidden className="absolute inset-0 -z-10 bg-[#141414]/85" />
-      )}
+      <div aria-hidden className="pointer-events-none absolute inset-0 z-1">
+        <ThemePattern theme={theme} pattern={data.pattern} patternColor={data.patternColor} />
+      </div>
 
-      <div className="mx-auto max-w-[1080px] px-5  md:px-8 py-16 md:py-20 lg:py-24">
-        <BackLink className={theme?.body ?? "text-[#9A9A9A] hover:text-[#C97B3D]"} />
+      <div className="mx-auto relative z-2 max-w-6xl px-5  md:px-8 py-16 md:py-20 lg:py-24">
 
         <div className="mt-10">
           <span
@@ -528,15 +538,13 @@ function ReelLayout({ data, related, sectionRef, headingRef, relatedRef }: Layou
               theme?.eyebrowText ?? VARIANT_TAG_STYLES.reel.text
             )}
           >
-            {data.clientName}
-            {data.clientName && data.category ? " · " : ""}
-            {data.category}
+            {data.badge}
           </span>
 
           <h1
             ref={headingRef}
             className={cx(
-              "max-w-3xl text-[38px] leading-[0.98] font-black tracking-tight uppercase sm:text-[64px] md:text-[92px]",
+              "max-w-3xl text-[36px] leading-[1.2] font-black tracking-tight uppercase sm:text-[48px] md:text-[58px]",
               theme?.heading ?? "text-white"
             )}
           >
@@ -544,13 +552,15 @@ function ReelLayout({ data, related, sectionRef, headingRef, relatedRef }: Layou
           </h1>
 
           {data.shortDescription && (
-            <p className={cx("mt-6 max-w-lg text-[16.5px] leading-relaxed font-medium", theme?.body ?? "text-[#9A9A9A]")}>
+            <p className={cx("mt-6 max-w-6xl text-[15.5px] leading-relaxed", theme?.body ?? "text-[#9A9A9A]")}>
               {data.shortDescription}
             </p>
           )}
 
+          <CaseStudyCta data={data} variant="reel" theme={theme} className="mt-7" />
+
           {data.heroPhotoUrl && (
-            <div className="mt-12  overflow-hidden rounded aspect-[1672/941]">
+            <div className="mt-12  overflow-hidden rounded aspect-[1880/835]">
               {/* eslint-disable-next-line @next/next/no-img-element -- matches the plain <img> convention already used for external/Contentful assets in this project */}
               <img
                 src={data.heroPhotoUrl}
@@ -563,7 +573,13 @@ function ReelLayout({ data, related, sectionRef, headingRef, relatedRef }: Layou
         </div>
 
         {tickerItems.length > 0 && (
-          <div className="my-14 overflow-hidden border-y border-[#2A2A2A] py-5">
+          <div
+            className={cx(
+              "my-14 overflow-hidden py-5 border",
+              theme?.cardBg ?? "bg-white/5",
+              theme?.cardBorder
+            )}
+          >
             <div className="flex w-max gap-16 motion-safe:animate-marquee motion-reduce:flex-wrap">
               {[...tickerItems, ...tickerItems].map((stat, index) => (
                 <div key={index} className="flex shrink-0 items-baseline gap-2.5">
@@ -580,34 +596,14 @@ function ReelLayout({ data, related, sectionRef, headingRef, relatedRef }: Layou
         )}
 
         {data.fullDescription && (
-          <div className="case-narrative case-narrative-reel max-w-[680px]">
+          <div
+          className={cx(
+              "case-narrative case-narrative-reel max-w-[775px]",
+              theme?.heading ?? "text-white"
+            )}
+            >
             {renderNarrative(data.fullDescription, "reel", theme)}
           </div>
-        )}
-
-        {related.length > 0 && (
-          <section className="mt-16 border-t border-[#2A2A2A] pt-14">
-            <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
-              <h3 className={cx("text-[22px] font-extrabold tracking-tight uppercase", theme?.heading ?? "text-white")}>
-                More case studies
-              </h3>
-              <Link
-                href="/case-studies"
-                className={cx(
-                  "text-[13px] font-bold tracking-wide uppercase",
-                  theme?.accentText ?? "text-[#C97B3D]",
-                  theme ? "hover:opacity-75" : "hover:text-[#E0964F]"
-                )}
-              >
-                View all engagements →
-              </Link>
-            </div>
-            <div ref={relatedRef} className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-              {related.map((item) => (
-                <RelatedCard key={item.id} item={item} variant="reel" theme={theme} />
-              ))}
-            </div>
-          </section>
         )}
       </div>
     </div>
@@ -615,7 +611,7 @@ function ReelLayout({ data, related, sectionRef, headingRef, relatedRef }: Layou
 }
 
 /** ================= EDITORIAL — cream/sage, sticky rail + numbered chapters ================= */
-function EditorialLayout({ data, related, sectionRef, headingRef, relatedRef }: LayoutProps) {
+function EditorialLayout({ data, sectionRef, headingRef }: LayoutProps) {
   const { theme } = data;
 
   return (
@@ -630,6 +626,9 @@ function EditorialLayout({ data, related, sectionRef, headingRef, relatedRef }: 
       {data.backdropUrl && (
         <div aria-hidden className="absolute inset-0 -z-10 bg-[#FAF7F0]/92" />
       )}
+      <div aria-hidden className="pointer-events-none absolute inset-0 z-1">
+        <ThemePattern theme={theme} pattern={data.pattern} patternColor={data.patternColor} />
+      </div>
 
       <div className="mx-auto max-w-[1180px] px-5 md:px-8 py-16 md:px-10 md:py-20 lg:py-24">
         <BackLink className={theme?.body ?? "text-[#6B6357] hover:text-[#5C6E4F]"} />
@@ -687,6 +686,8 @@ function EditorialLayout({ data, related, sectionRef, headingRef, relatedRef }: 
                 ))}
               </div>
             )}
+
+            <CaseStudyCta data={data} variant="editorial" theme={theme} className="mt-7" />
           </aside>
 
           <div className="pt-1.5">
@@ -713,31 +714,6 @@ function EditorialLayout({ data, related, sectionRef, headingRef, relatedRef }: 
                 {renderNarrative(data.fullDescription, "editorial", theme)}
               </div>
             )}
-
-            {related.length > 0 && (
-              <section className="mt-14 border-t border-[#E5DFD1] pt-14">
-                <div className="mb-7 flex flex-wrap items-end justify-between gap-4">
-                  <h3 className={cx("text-[24px] font-semibold", theme?.heading ?? "text-[#221F1A]")}>
-                    More case studies
-                  </h3>
-                  <Link
-                    href="/case-studies"
-                    className={cx(
-                      "text-[13.5px] font-bold",
-                      theme?.accentText ?? "text-[#5C6E4F]",
-                      theme ? "hover:opacity-75" : "hover:text-[#465A3A]"
-                    )}
-                  >
-                    View all engagements →
-                  </Link>
-                </div>
-                <div ref={relatedRef} className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-                  {related.map((item) => (
-                    <RelatedCard key={item.id} item={item} variant="editorial" theme={theme} />
-                  ))}
-                </div>
-              </section>
-            )}
           </div>
         </div>
       </div>
@@ -746,7 +722,7 @@ function EditorialLayout({ data, related, sectionRef, headingRef, relatedRef }: 
 }
 
 /** ================= BENTO — paper/coral/navy CSS-grid cells ================= */
-function BentoLayout({ data, related, sectionRef, headingRef, relatedRef }: LayoutProps) {
+function BentoLayout({ data, sectionRef, headingRef }: LayoutProps) {
   const { theme } = data;
   const cell = "rounded-[20px] border p-6 flex flex-col";
 
@@ -762,6 +738,9 @@ function BentoLayout({ data, related, sectionRef, headingRef, relatedRef }: Layo
       {data.backdropUrl && (
         <div aria-hidden className="absolute inset-0 -z-10 bg-[#F4F2ED]/92" />
       )}
+      <div aria-hidden className="pointer-events-none absolute inset-0 z-1">
+        <ThemePattern theme={theme} pattern={data.pattern} patternColor={data.patternColor} />
+      </div>
 
       <div className="mx-auto max-w-[1160px] px-5 pt-8 pb-20 md:px-8">
         <BackLink className={theme?.body ?? "text-[#6E6A60] hover:text-[#E4572E]"} />
@@ -798,6 +777,8 @@ function BentoLayout({ data, related, sectionRef, headingRef, relatedRef }: Layo
                 {data.shortDescription}
               </p>
             )}
+
+            <CaseStudyCta data={data} variant="bento" theme={theme} className="mt-4" />
           </div>
 
           {data.heroPhotoUrl && (
@@ -850,19 +831,6 @@ function BentoLayout({ data, related, sectionRef, headingRef, relatedRef }: Layo
             </div>
           )}
         </div>
-
-        {related.length > 0 && (
-          <section className="mt-10">
-            <h3 className={cx("mb-5 text-[20px] font-bold tracking-tight", theme?.heading ?? "text-[#1B1B18]")}>
-              More case studies
-            </h3>
-            <div ref={relatedRef} className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {related.map((item) => (
-                <RelatedCard key={item.id} item={item} variant="bento" theme={theme} />
-              ))}
-            </div>
-          </section>
-        )}
       </div>
     </div>
   );

@@ -347,7 +347,7 @@ export default function AboutServices({ entry }: Props) {
         backgroundUrl ? { backgroundImage: `url(${backgroundUrl})` } : undefined
       }
     >
-      <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
+      <div aria-hidden className="pointer-events-none absolute inset-0 z-1">
         {backgroundUrl ? (
           <div className={cx("absolute inset-0 opacity-90", theme?.sectionBg ?? "bg-gray-50")} />
         ) : (
@@ -355,7 +355,7 @@ export default function AboutServices({ entry }: Props) {
         )}
       </div>
 
-      <div className="container mx-auto px-5 md:px-10">
+      <div className="container relative z-2 mx-auto px-5 md:px-10">
         <div className="grid gap-6 lg:grid-cols-12 lg:items-end">
           <div className="lg:col-span-6">
             {eyebrow && (

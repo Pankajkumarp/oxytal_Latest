@@ -323,7 +323,7 @@ export default function AboutHero({ entry }: Props) {
     >
       <ThemePattern theme={theme} pattern={entry?.fields.pattern} patternColor={entry?.fields.patternColor} />
 
-      <div className="container mx-auto grid gap-10 lg:grid-cols-12 lg:items-center lg:gap-8">
+      <div className="container mx-auto grid gap-10 lg:grid-cols-12 lg:items-center lg:gap-8  px-5 md:px-10">
         <div className="lg:col-span-7">
           {eyebrow && (
             <div aria-label="breadcrumb">

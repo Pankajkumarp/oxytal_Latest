@@ -165,7 +165,12 @@ body {
 .case-narrative :where(ul) {
   margin-top: 1em;
   padding-left: 1.5em;
-  list-style: none;
+  list-style: unset;
+}
+.case-narrative :where(ol) {
+  margin-top: 1em;
+  padding-left: 1.5em;
+  list-style: decimal;
 }
 .case-narrative :where(li) {
   position: relative;
@@ -196,13 +201,6 @@ body {
 .case-narrative-reel :where(li) {
   padding-left: 1.2em;
   font-size: 14.5px;
-}
-.case-narrative-reel :where(li)::before {
-  content: "—";
-  position: absolute;
-  left: 0;
-  color: #c97b3d;
-  font-weight: 700;
 }
 .case-narrative-reel :where(blockquote p) {
   font-weight: 900;

@@ -7,6 +7,7 @@ import { resolveHeadingLevel } from "../lib/headingLevel";
 import DynamicHeading from "./DynamicHeading";
 import CommonVideo, {
   type CommonVideoAspectRatio,
+  type CommonVideoOverlay,
 } from "./CommonVideo";
 import BannerImage from "./BannerImage";
 import { getAssetUrl } from "../lib/contentfulAsset";
@@ -90,6 +91,16 @@ function resolveAspectRatio(value: unknown): CommonVideoAspectRatio | undefined 
   return (ASPECT_RATIOS as readonly string[]).includes(normalized)
     ? (normalized as CommonVideoAspectRatio)
     : undefined;
+}
+
+/**
+ * `dataVideo.overlay` is a locked "dark"/"light" enum in Contentful, but
+ * genuinely optional — unlike `resolveNavContrast` (which always falls
+ * back to "light"), an unset or unrecognized value here resolves to
+ * `undefined` so `CommonVideo` renders no tint at all.
+ */
+function resolveOverlay(value: unknown): CommonVideoOverlay | undefined {
+  return value === "dark" || value === "light" ? value : undefined;
 }
 
 interface AnyEntry {
@@ -186,19 +197,13 @@ function renderBlock(
             aspectRatioMobile={resolveAspectRatio(entry.fields.aspectRatioMobile)}
             autoPlay={entry.fields.autoPlay ?? true}
             loop={entry.fields.loop ?? true}
+            overlay={resolveOverlay(entry.fields.overlay)}
+            textDelay={entry.fields.textDelay}
             eyebrow={entry.fields.eyebrow}
-            eyebrowColor={entry.fields.eyebrowColor}
-            eyebrowBg={entry.fields.eyebrowBg}
             heading={entry.fields.heading}
-            headingSize={entry.fields.headingSize}
-            headingColor={entry.fields.headingColor}
             description={entry.fields.text}
-            descriptionSize={entry.fields.textSize}
-            descriptionColor={entry.fields.textColor}
             buttonText={buttonLink?.fields.label}
             buttonLink={buttonLink ? resolveLinkHref(buttonLink) : undefined}
-            buttonColor={entry.fields.buttonColor}
-            buttonTextColor={entry.fields.buttonTextColor}
             // Video-only CommonVideo renders with no wrapper by design. Give
             // it the same horizontal gutter as the rest of the page (not the
             // narrow text `container`, which made it look squeezed on wide

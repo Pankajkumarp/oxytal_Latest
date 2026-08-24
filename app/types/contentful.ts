@@ -44,45 +44,31 @@ export type DataVideoSkeleton = EntrySkeletonType<
      * least one of `eyebrow`/`heading`/`text`/`button` is set; each piece
      * also only renders individually when its own field is set — an editor
      * who fills in just `heading` gets only a heading, no empty eyebrow/
-     * text/button slots.
-     *
-     * Every `*Color`/`*Bg`/`*Size` field below takes a *literal Tailwind
-     * class name* (e.g. "text-cyan-300", "text-4xl", "bg-emerald-950/40"),
-     * applied directly via `className` — NOT a CSS color/size value. This
-     * only renders visibly if that exact class also appears verbatim
-     * elsewhere in this project's source: Tailwind's build-time scanner
-     * can only discover class names it finds literally in source, not
-     * ones assembled at runtime from an editor-supplied string (same
-     * constraint `ThemePattern`'s `patternColor` documents). A genuinely
-     * novel value (a raw hex/px size, or a class never used anywhere else
-     * in the codebase) silently renders no change at all. Leaving a field
-     * unset keeps `CommonVideo`'s own default (near-black heading / gray
-     * body / white-on-emerald button).
+     * text/button slots. Each piece always renders with `CommonVideo`'s
+     * fixed default styling (white-on-glass eyebrow pill, white heading,
+     * gray body, white-on-emerald button) — there's no per-entry color/size
+     * override for any of them.
      */
     eyebrow?: EntryFieldTypes.Symbol;
-    /** Literal Tailwind class name (e.g. "text-cyan-300") — see this field group's own comment above. Falls back to `CommonVideo`'s default white-on-glass pill when unset/not found in source. */
-    eyebrowColor?: EntryFieldTypes.Symbol;
-    /** Literal Tailwind class name (e.g. "bg-emerald-950/40") — same convention as `eyebrowColor`. */
-    eyebrowBg?: EntryFieldTypes.Symbol;
     heading?: EntryFieldTypes.Symbol;
-    /** Literal Tailwind class name (e.g. "text-4xl", or several space-separated responsive variants like "text-3xl md:text-6xl") — replaces `CommonVideo`'s default responsive heading scale entirely rather than combining with it. */
-    headingSize?: EntryFieldTypes.Symbol;
-    /** Literal Tailwind class name — same convention as `eyebrowColor`. */
-    headingColor?: EntryFieldTypes.Symbol;
     /** Plain (non-rich) overlay body copy — short by design (a video caption, not a full article), unlike `dataText.text`'s `RichText`. */
     text?: EntryFieldTypes.Text;
-    /** Literal Tailwind class name, same convention as `headingSize`. */
-    textSize?: EntryFieldTypes.Symbol;
-    /** Literal Tailwind class name — same convention as `eyebrowColor`. */
-    textColor?: EntryFieldTypes.Symbol;
     /** The overlay's CTA — reuses `dataLink` for its `label`/href, same convention every other CTA in this project uses. */
     button?: EntryFieldTypes.EntryLink<DataLinkSkeleton>;
-    /** Literal Tailwind class name — same convention as `eyebrowColor`. Can include its own hover variant in the same string (e.g. "bg-red-600 hover:bg-red-500"); supplying just the rest-state class skips the hover darken/lighten rather than guessing one. */
-    buttonColor?: EntryFieldTypes.Symbol;
-    /** Literal Tailwind class name — same convention as `eyebrowColor`. */
-    buttonTextColor?: EntryFieldTypes.Symbol;
     /** Locked Contentful enum — "dark" or "light" only. Only meaningful when this entry is placed directly in a `page.body` field (see `PageBody`) — a `dataVideo` nested inside a `composableElement`'s `elements` ignores it entirely. `PageBody` stamps it onto this block's own wrapper as a `data-nav-contrast` attribute, same mechanism `ComposableElementRenderer`'s own `navType` uses — see `Navbar.tsx`'s "NAV CONTRAST" comment. Falls back to "light" when unset. */
     navType?: EntryFieldTypes.Symbol;
+    /**
+     * Locked Contentful enum — "dark" or "light" only, and unlike `navType`
+     * above, genuinely optional with no fallback: `PageBody` passes this
+     * straight through to `CommonVideo`'s own `overlay` prop, which tints
+     * the video itself ("dark" → black scrim, "light" → white scrim) only
+     * when the field is actually set, and renders no tint at all otherwise.
+     * Independent of `navType` — that field only affects the fixed navbar's
+     * icon color, not anything drawn over the video.
+     */
+    overlay?: EntryFieldTypes.Symbol;
+    /** Seconds the text overlay (eyebrow/heading/description/button) waits — after the section scrolls into view — before it reveals, passed straight through to `CommonVideo`'s own `textDelay` prop. The video itself isn't held back by this. Falls back to 0 (no delay) when unset. */
+    textDelay?: EntryFieldTypes.Number;
   },
   "dataVideo"
 >;
@@ -260,6 +246,23 @@ export type ContentDetailSkeleton = EntrySkeletonType<
     layoutVariant?: EntryFieldTypes.Symbol;
     /** Resolves via `resolveTheme` (see app/lib/theme.ts) to `CaseStudyDetail`'s colors, same "themeColor" convention every `composableElement` section uses. `undefined`/unrecognized falls back to the selected `layoutVariant`'s own bespoke default palette (its reference mockup's identity) rather than this project's usual light/dark defaults. */
     themeColor?: EntryFieldTypes.Symbol;
+    /**
+     * Locked Contentful enum naming one of the 14 decorative background
+     * tiles ported from `Refrence/patterns-preview.html` (see
+     * `ThemePattern` in app/ui) — "baseline-grid", "contour",
+     * "iso-lattice", "node-field", "halftone", "hatch", "registration",
+     * "token-stream", "attention-matrix", "layer-graph",
+     * "embedding-cloud", "dither", "circuit-trace", or "grain". Same
+     * "only takes effect together with `patternColor`" rule every other
+     * `pattern` field in this project follows (see `composableElement.
+     * pattern`'s own doc comment) — this is the fallback-path pair,
+     * read by `CaseStudyDetail` only when this case study has no
+     * dedicated `page` yet (same fallback-vs-`page` split `themeColor`
+     * above already documents).
+     */
+    pattern?: EntryFieldTypes.Symbol;
+    /** The hex color `pattern` renders in (e.g. "#2F5CFF") — see `pattern` above. Ignored for `pattern: "grain"`, which is inherently monochrome, but still required to "arm" it. */
+    patternColor?: EntryFieldTypes.Symbol;
   },
   "contentDetail"
 >;

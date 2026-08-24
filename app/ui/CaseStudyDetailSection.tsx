@@ -67,14 +67,16 @@ function isContentDetail(value: unknown): value is PlainEntry<ContentDetailSkele
  * one — its own `isFor` field picks which of `CaseStudyDetail`'s 3
  * designs renders (falling back to the linked case study's own
  * `contentDetail.layoutVariant` when `isFor` is unset), and its own
- * `themeColor`/`backgroundImage` (the same fields every other
- * composableElement subtype already carries) independently recolor the
- * page and give it a full-bleed photo behind everything — same
- * convention as every other section on the site: each applies on its own
- * whenever it's set, with no dependency on the other. This is separate
- * from — and can coexist with — the case study's *own* `heroImage`, which
- * `CaseStudyDetail` always shows in its own dedicated hero-area slot
- * regardless of this composableElement's backdrop.
+ * `themeColor`/`backgroundImage`/`pattern`+`patternColor` (the same
+ * fields every other composableElement subtype already carries)
+ * independently recolor the page, give it a full-bleed photo behind
+ * everything, and pick its decorative background tile — same convention
+ * as every other section on the site: each applies on its own whenever
+ * it's set, with no dependency on the others (`pattern` still needs
+ * `patternColor` alongside it — see `ThemePattern`'s own doc comment).
+ * This is separate from — and can coexist with — the case study's *own*
+ * `heroImage`, which `CaseStudyDetail` always shows in its own dedicated
+ * hero-area slot regardless of this composableElement's backdrop.
  */
 interface Props {
   entry: PlainEntry<ComposableElementSkeleton>;
@@ -102,8 +104,13 @@ export default function CaseStudyDetailSection({ entry }: Props) {
   return (
     <CaseStudyDetail
       entry={study}
-      related={related.slice(0, 3)}
-      overrides={{ variant, theme, backdropUrl }}
+      overrides={{
+        variant,
+        theme,
+        backdropUrl,
+        pattern: entry.fields.pattern,
+        patternColor: entry.fields.patternColor,
+      }}
     />
   );
 }
