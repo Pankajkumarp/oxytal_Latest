@@ -322,7 +322,7 @@ export default function CommonTrustedBy({
         <ThemePattern theme={theme} pattern={entry?.fields.pattern} patternColor={entry?.fields.patternColor} />
       </div>
 
-      <div className="container mx-auto px-5 py-12 md:px-10">
+      <div className="container mx-auto px-5 py-8 md:px-10">
         {/* =================================================
             INTRO
         ================================================= */}
@@ -342,7 +342,7 @@ export default function CommonTrustedBy({
           <DynamicHeading level={resolveHeadingLevel(copy?.fields.headingLevel, "h2")}
             ref={headingRef}
             className={cx(
-              "text-[28px] leading-[1.15] font-extrabold tracking-tight sm:text-[34px] md:text-[40px]",
+              "text-[28px] leading-[1] font-extrabold tracking-tight sm:text-[34px] md:text-[40px]",
               theme?.heading ?? "text-gray-900"
             )}
           >
@@ -369,7 +369,7 @@ export default function CommonTrustedBy({
         ================================================= */}
         <div
           className={cx(
-            "relative mx-auto mt-4 z-2",
+            "relative mx-auto mt-1 z-2",
             SLIDER_WIDTH_CLASSES[sliderWidth]
           )}
         >
@@ -446,7 +446,7 @@ export default function CommonTrustedBy({
                 </>
               )}
 
-              <div className="mt-4 flex items-center justify-center gap-2">
+              <div className="mt-0 flex items-center justify-center gap-2">
                 {scrollSnaps.map((_, index) => (
                   <button
                     key={index}
