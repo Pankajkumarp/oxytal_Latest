@@ -75,35 +75,6 @@ function statisticToStatItem(entry: PlainEntry<StatisticSkeleton>): StatItem {
   return { value: entry.fields.value ?? "", label: entry.fields.label ?? "" };
 }
 
-interface RelatedItem {
-  id: string;
-  title: string;
-  category?: string;
-  clientName?: string;
-  imageUrl?: string;
-  href: string;
-}
-
-/** Maps a resolved `contentDetail` entry (one of `getRelatedCaseStudies`'s results) to the plain shape the "More case studies" grid renders. */
-function contentDetailToRelatedItem(entry: PlainEntry<ContentDetailSkeleton>): RelatedItem {
-  const heroImageEntry = entry.fields.heroImage;
-  const imageUrl = isEntry(heroImageEntry)
-    ? getAssetUrl(
-      (heroImageEntry as unknown as PlainEntry<DataImageSkeleton>).fields
-        .image
-    )
-    : undefined;
-
-  return {
-    id: entry.sys.id,
-    title: entry.fields.title ?? "",
-    category: entry.fields.category,
-    clientName: entry.fields.clientName,
-    imageUrl,
-    href: entry.fields.slug ? `/case-studies/${entry.fields.slug}` : "#",
-  };
-}
-
 /** The mapped shape every variant renders from — same fields regardless of which of the 3 designs is picked (see `CaseStudyDetail`'s own doc comment below). */
 interface CaseStudyData {
   title: string;
@@ -112,7 +83,7 @@ interface CaseStudyData {
   clientName?: string;
   shortDescription?: string;
   fullDescription?: RichTextDocument;
-  /** This case study's own photo (`contentDetail.heroImage` — the same field/asset `CaseStudiesListing`'s card and `RelatedCard` show) — a dedicated image *within* the hero area (the reference mockups' own `.reel-art`/`.chapter-art`/`.cell-art` boxes), not a full-bleed backdrop. Every variant has a slot for it; it just doesn't render at all when unset, same "no placeholder" convention as everywhere else on this page. */
+  /** This case study's own photo (`contentDetail.heroImage` — the same field/asset `CaseStudiesListing`'s card shows) — a dedicated image *within* the hero area (the reference mockups' own `.reel-art`/`.chapter-art`/`.cell-art` boxes), not a full-bleed backdrop. Every variant has a slot for it; it just doesn't render at all when unset, same "no placeholder" convention as everywhere else on this page. */
   heroPhotoUrl?: string;
   /** A full-bleed photo behind the *entire* page — a `page`/`composableElement`-only feature (its `backgroundImage` field), set via `overrides` below; applies independently of `theme`, same as every other section's `backgroundImage`. There's no fallback-path equivalent: without a dedicated `page` yet, a case study only has `heroPhotoUrl` and a standalone `theme` to work with. */
   backdropUrl?: string;
@@ -378,8 +349,7 @@ const HEADING_ANIM: Record<Variant, gsap.TweenVars> = {
  *
  * The heading gets the same GSAP split-text word reveal every hero on
  * this site uses (see `HEADING_ANIM`), skipped under
- * `prefers-reduced-motion`. The "More case studies" grid fades + rises in
- * with a stagger as it scrolls into view.
+ * `prefers-reduced-motion`.
  */
 interface Props {
   entry: PlainEntry<ContentDetailSkeleton>;
@@ -398,7 +368,6 @@ export default function CaseStudyDetail({ entry, overrides }: Props) {
 
   const sectionRef = useRef<HTMLDivElement>(null);
   const headingRef = useRef<HTMLHeadingElement>(null);
-  const relatedRef = useRef<HTMLDivElement>(null);
 
   useLayoutEffect(() => {
     if (!headingRef.current) {
@@ -431,30 +400,6 @@ export default function CaseStudyDetail({ entry, overrides }: Props) {
       split?.revert();
     };
   }, [data.variant]);
-
-  useLayoutEffect(() => {
-    if (!relatedRef.current) {
-      return;
-    }
-
-    if (prefersReducedMotion()) {
-      gsap.set(relatedRef.current.children, { opacity: 1, y: 0 });
-      return;
-    }
-
-    const ctx = gsap.context(() => {
-      gsap.from(relatedRef.current!.children, {
-        y: 24,
-        opacity: 0,
-        duration: 0.6,
-        ease: "power3.out",
-        stagger: 0.08,
-        scrollTrigger: { trigger: relatedRef.current, start: "top 90%", once: true },
-      });
-    }, relatedRef);
-
-    return () => ctx.revert();
-  }, []);
 
   if (data.variant === "reel") {
     return (

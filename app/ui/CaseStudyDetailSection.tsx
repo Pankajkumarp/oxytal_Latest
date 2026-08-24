@@ -53,15 +53,13 @@ function isContentDetail(value: unknown): value is PlainEntry<ContentDetailSkele
  * tooling walks `page` entries, or eventually carry extra `body` blocks
  * of its own) rather than relying purely on the fallback.
  *
- * `elements` holds a small ordered list of `contentDetail` entries: the
- * *first* one is this case study's own data (the same entry
- * `CaseStudiesListing`'s card and the fallback route both already use);
- * every one after it becomes one card in the "More case studies" grid at
- * the bottom. This mirrors how `HomeCaseStudies`/`CaseStudiesListing`
- * already put several `contentDetail` entries directly in one
- * composableElement and tell them apart by position — and means the
- * "related" roster is authored right here in Contentful (reorder/replace
- * those links to change it) rather than computed by an extra query.
+ * `elements` holds an ordered list of `contentDetail` entries, but only
+ * the *first* one is read — this case study's own data (the same entry
+ * `CaseStudiesListing`'s card and the fallback route both already use).
+ * Any entries after it are currently ignored: `CaseStudyDetail` has no
+ * "More case studies" grid at all anymore (removed along with its
+ * `related` prop) — the `[locale]/[[...slug]]` catch-all fallback route
+ * below no longer renders one either.
  *
  * This composableElement is also where the design lives, once a page has
  * one — its own `isFor` field picks which of `CaseStudyDetail`'s 3
@@ -84,7 +82,7 @@ interface Props {
 
 export default function CaseStudyDetailSection({ entry }: Props) {
   const contentDetails = (entry.fields.elements ?? []).filter(isContentDetail);
-  const [study, ...related] = contentDetails;
+  const [study] = contentDetails;
 
   if (!study) {
     return null;

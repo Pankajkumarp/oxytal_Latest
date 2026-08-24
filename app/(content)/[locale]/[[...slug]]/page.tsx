@@ -5,7 +5,6 @@ import {
   getFooter,
   getNavigation,
   getPageBySlug,
-  getRelatedCaseStudies,
 } from "../../../lib/contentEntry";
 import { getAssetUrl } from "../../../lib/contentfulAsset";
 import Navbar from "@/app/ui/Navbar";
@@ -169,12 +168,10 @@ export default async function Page({ params }: Props) {
     notFound();
   }
 
-  const related = await getRelatedCaseStudies(caseStudySlug!, 3);
-
   return (
     <main>
       <Navbar entry={navigation} />
-      <CaseStudyDetail entry={study} related={related} />
+      <CaseStudyDetail entry={study} />
       <Footer entry={footer} />
     </main>
   );
