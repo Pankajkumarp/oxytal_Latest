@@ -456,7 +456,7 @@ export default function Footer({ entry }: Props) {
             <Link
               href="/"
               className={cx(
-                "inline-flex w-fit items-center gap-1 text-2xl font-extrabold tracking-tight",
+                "inline-flex w-fit items-center text-[30px] font-extrabold tracking-tight pointer-events-none",
                 theme?.link ?? "text-gray-600",
               )}
             >
@@ -470,8 +470,7 @@ export default function Footer({ entry }: Props) {
                     className={theme?.accentText ?? "text-emerald-500"}
                     aria-hidden
                   />
-                  OXY
-                  <span className={theme?.accentText ?? "text-emerald-600"}>TAL</span>
+                  OXY<span className={theme?.accentText ?? "text-emerald-600"}>TAL</span>
                 </>
               )}
             </Link>

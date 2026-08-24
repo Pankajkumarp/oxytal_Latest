@@ -85,8 +85,8 @@ function technologyToTrustedByItem(
     name: entry.fields.name,
     logo: isEntry(logoEntry)
       ? getAssetUrl(
-          (logoEntry as unknown as PlainEntry<DataImageSkeleton>).fields.image
-        )
+        (logoEntry as unknown as PlainEntry<DataImageSkeleton>).fields.image
+      )
       : undefined,
     description: entry.fields.category,
     website: entry.fields.website,
@@ -179,9 +179,9 @@ export default function CommonTrustedBy({
   const backgroundImageEntry = entry.fields.backgroundImage;
   const backgroundUrl = isEntry(backgroundImageEntry)
     ? getAssetUrl(
-        (backgroundImageEntry as unknown as PlainEntry<DataImageSkeleton>)
-          .fields.image
-      )
+      (backgroundImageEntry as unknown as PlainEntry<DataImageSkeleton>)
+        .fields.image
+    )
     : undefined;
 
   // Resolves `themeColor` (e.g. "dark", "blue", "emerald" — see
@@ -259,12 +259,12 @@ export default function CommonTrustedBy({
     () =>
       autoPlay && !prefersReducedMotion()
         ? [
-            Autoplay({
-              delay: autoPlayDelay,
-              stopOnMouseEnter: true,
-              stopOnInteraction: false,
-            }),
-          ]
+          Autoplay({
+            delay: autoPlayDelay,
+            stopOnMouseEnter: true,
+            stopOnInteraction: false,
+          }),
+        ]
         : [],
     [autoPlay, autoPlayDelay]
   );
@@ -304,11 +304,11 @@ export default function CommonTrustedBy({
       style={
         backgroundUrl
           ? {
-              backgroundImage: `url(${backgroundUrl})`,
-              backgroundSize: "cover",
-              backgroundRepeat: "no-repeat",
-              backgroundPosition: "center",
-            }
+            backgroundImage: `url(${backgroundUrl})`,
+            backgroundSize: "cover",
+            backgroundRepeat: "no-repeat",
+            backgroundPosition: "center",
+          }
           : undefined
       }
     >
@@ -322,7 +322,7 @@ export default function CommonTrustedBy({
         <ThemePattern theme={theme} pattern={entry?.fields.pattern} patternColor={entry?.fields.patternColor} />
       </div>
 
-      <div className="container mx-auto px-5 py-16 md:px-10 md:py-24 lg:py-28">
+      <div className="container mx-auto px-5 py-12 md:px-10">
         {/* =================================================
             INTRO
         ================================================= */}
@@ -369,7 +369,7 @@ export default function CommonTrustedBy({
         ================================================= */}
         <div
           className={cx(
-            "relative mx-auto mt-12 md:mt-16 z-2",
+            "relative mx-auto mt-4 z-2",
             SLIDER_WIDTH_CLASSES[sliderWidth]
           )}
         >
@@ -386,26 +386,24 @@ export default function CommonTrustedBy({
                     <LinkTag
                       {...(item.website
                         ? {
-                            href: item.website,
-                            target: "_blank",
-                            rel: "noopener noreferrer",
-                          }
+                          href: item.website,
+                          target: "_blank",
+                          rel: "noopener noreferrer",
+                        }
                         : {})}
                       aria-label={item.name}
-                       className={cx(
-                                      "flex h-full items-center justify-center logo-card",
-                                      theme?.cardBorder ?? "border-gray-100",
-                                      theme?.cardBg ?? "bg-white"
-                                    )}
+                      className={cx(
+                        "flex h-full items-center justify-center logo-card"
+                      )}
                     >
                       {item.logo ? (
                         // eslint-disable-next-line @next/next/no-img-element -- matches the plain <img> convention already used for external/Contentful assets in this project
                         <img
                           src={item.logo}
                           alt={item.name}
-                          width={185}
+                          width={145}
                           height={80}
-                          className="h-[auto] w-[185px] object-contain"
+                          className="h-[auto] w-[145px] object-contain"
                         />
                       ) : (
                         <span
@@ -448,7 +446,7 @@ export default function CommonTrustedBy({
                 </>
               )}
 
-              <div className="mt-6 flex items-center justify-center gap-2">
+              <div className="mt-4 flex items-center justify-center gap-2">
                 {scrollSnaps.map((_, index) => (
                   <button
                     key={index}

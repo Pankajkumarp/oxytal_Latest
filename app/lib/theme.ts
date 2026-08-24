@@ -43,6 +43,7 @@ export type ThemeName =
   | "frescapink"
   | "frescaruby"
   | "oxytalfooter"
+  | "oxytalnavbar"
 
 export interface SectionTheme {
   /** Section's outer background. */
@@ -369,6 +370,23 @@ oxytalfooter: {
   divider: "border-white/10",
   patternColor: "#00D4FF",
   showPattern: true,
+},
+oxytalnavbar: {
+  sectionBg:"bg-gradient-to-b from-[#F8FCFD] via-white to-[#F1F9FC]",
+  eyebrowBg: "bg-cyan-100",
+  eyebrowText: "text-cyan-400",
+  heading: "text-slate-900",
+  body: "text-slate-600",
+  muted: "text-slate-400",
+  buttonBg: "bg-cyan-600",
+  buttonText: "text-white",
+  buttonHoverBg: "hover:bg-cyan-500",
+  accentText: "text-cyan-600",
+  link: "text-slate-900 hover:text-cyan-400",
+  cardBg: "bg-white shadow-[0_4px_14px_-8px_rgba(16,24,40,0.08)]",
+  cardBorder: "border-cyan-100",
+  patternColor: "#00D4FF",
+  showPattern: false,
 }
 };
 

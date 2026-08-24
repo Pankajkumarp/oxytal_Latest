@@ -281,7 +281,7 @@ function ServiceCardView({
       <div
         ref={imageRef}
         className={cx(
-          "relative aspect-[4/3] w-full bg-cover bg-center",
+          "relative aspect-[4/4] w-full bg-cover bg-center",
           !service.heroImageUrl && accent.gradient
         )}
         style={
@@ -302,28 +302,9 @@ function ServiceCardView({
 
       <div className="flex flex-1 flex-col gap-4 p-6">
         <div className="flex items-start gap-3">
-          <div
-            className={cx(
-              "flex h-11 w-11 shrink-0 items-center justify-center rounded-xl",
-              accent.iconBg,
-              accent.accentText
-            )}
-          >
-            {service.iconUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element -- matches the plain <img> convention already used for external/Contentful assets in this project
-              <img
-                src={service.iconUrl}
-                alt=""
-                aria-hidden
-                className="h-5 w-5 object-contain"
-              />
-            ) : (
-              <FallbackIcon size={20} aria-hidden />
-            )}
-          </div>
           <h3
             className={cx(
-              "pt-1.5 text-[24px] leading-snug font-bold max-w-[300px]",
+              "pt-1.5 text-[24px] leading-snug font-bold min-h-[65px]",
               theme?.heading ?? "text-gray-900"
             )}
           >

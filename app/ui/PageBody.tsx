@@ -7,6 +7,7 @@ import { resolveHeadingLevel } from "../lib/headingLevel";
 import DynamicHeading from "./DynamicHeading";
 import CommonVideo, {
   type CommonVideoAspectRatio,
+  type CommonVideoHeadingLevel,
   type CommonVideoOverlay,
 } from "./CommonVideo";
 import BannerImage from "./BannerImage";
@@ -90,6 +91,26 @@ function resolveAspectRatio(value: unknown): CommonVideoAspectRatio | undefined 
 
   return (ASPECT_RATIOS as readonly string[]).includes(normalized)
     ? (normalized as CommonVideoAspectRatio)
+    : undefined;
+}
+
+const VIDEO_HEADING_LEVELS: readonly CommonVideoHeadingLevel[] = [
+  "h1",
+  "h2",
+  "h3",
+  "h4",
+];
+
+/** `dataVideo.headingLevel` is free text in Contentful — unlike `resolveHeadingLevel` (dataText's own resolver, which allows h1–h6), CommonVideo's `headingLevel` only accepts h1–h4, so this validates against that narrower set instead and falls back to CommonVideo's own default ("h2") for anything unrecognized, including h5/h6. */
+function resolveVideoHeadingLevel(value: unknown): CommonVideoHeadingLevel | undefined {
+  if (typeof value !== "string") {
+    return undefined;
+  }
+
+  const normalized = value.trim().toLowerCase();
+
+  return (VIDEO_HEADING_LEVELS as readonly string[]).includes(normalized)
+    ? (normalized as CommonVideoHeadingLevel)
     : undefined;
 }
 
@@ -201,6 +222,7 @@ function renderBlock(
             textDelay={entry.fields.textDelay}
             eyebrow={entry.fields.eyebrow}
             heading={entry.fields.heading}
+            headingLevel={resolveVideoHeadingLevel(entry.fields.headingLevel)}
             description={entry.fields.text}
             buttonText={buttonLink?.fields.label}
             buttonLink={buttonLink ? resolveLinkHref(buttonLink) : undefined}

@@ -1,0 +1,417 @@
+/*
+ * A faithful, class-renamed port of the <style> block in
+ * `Refrence/oxytal-ai-section.html` — the "live delivery pipeline" demo
+ * panel (its only actually-rendered piece; that file's <body> is just
+ * this one `.demo` block, so the header/cols/cta rules elsewhere in its
+ * <style> are dead CSS and aren't ported). Appended as static content at
+ * the bottom of HomeAI (see AIPipelineDemo.tsx) — kept as a CSS Module
+ * rather than rewritten into Tailwind utilities, same "faithfulness over
+ * consistency" rule ServicesPage.module.css documents for the same
+ * situation: this design leans on CSS custom properties and several
+ * bespoke keyframe animations that don't map cleanly onto utility
+ * classes. Class names are camelCased; every selector otherwise keeps
+ * the mockup's exact property values, media queries and pseudo-elements.
+ * The mockup's `:root` variables are folded into `.demo` (this
+ * component's own root element) since CSS Modules require every
+ * selector to contain at least one local class.
+ */
+
+.demo {
+  --ink: #0f1b2d;
+  --body: #5a6b85;
+  --muted: #8595ae;
+  --panel: #ffffff;
+  --line: #e1e9f2;
+  --line2: #eef3f8;
+  --agent: #0e9fbf; /* machine work */
+  --agentSoft: #e3f6fa;
+  --human: #f0801f; /* your decision */
+  --humanSoft: #fef0e2;
+  --ok: #12a67c;
+  --fd: var(--font-bricolage), system-ui, sans-serif;
+  --fb: var(--font-plex-sans), system-ui, sans-serif;
+  --fm: var(--font-plex-mono), ui-monospace, monospace;
+
+  background: var(--panel);
+  color: var(--ink);
+  font-family: var(--fb);
+  -webkit-font-smoothing: antialiased;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow:
+    0 2px 4px rgba(15, 27, 45, 0.03),
+    0 18px 44px -18px rgba(15, 27, 45, 0.14);
+}
+
+/* ── top bar ──────────────────────────────────────── */
+.bar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-wrap: wrap;
+  padding: 15px 20px;
+  border-bottom: 1px solid var(--line);
+  background: #fcfdfe;
+}
+.title {
+  font-family: var(--fm);
+  font-size: 11.5px;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--muted);
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+}
+.dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--agent);
+}
+.running .dot {
+  animation: breathe 1.8s ease-in-out infinite;
+}
+@keyframes breathe {
+  0%,
+  100% {
+    opacity: 0.3;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+.spacer {
+  flex: 1;
+}
+.models {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.lbl {
+  font-family: var(--fm);
+  font-size: 10.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-right: 4px;
+}
+.chip {
+  font-family: var(--fb);
+  font-size: 0.8rem;
+  padding: 5px 12px;
+  border-radius: 99px;
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--body);
+  cursor: pointer;
+  transition: 0.18s;
+}
+.chip:hover {
+  border-color: var(--agent);
+}
+.chipActive {
+  background: var(--agentSoft);
+  border-color: var(--agent);
+  color: var(--agent);
+  font-weight: 500;
+}
+.chip:focus-visible,
+.btn:focus-visible,
+.replay:focus-visible {
+  outline: 2px solid var(--agent);
+  outline-offset: 2px;
+}
+.replay {
+  font-family: var(--fm);
+  font-size: 10.5px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  background: none;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 7px 12px;
+  cursor: pointer;
+  transition: 0.18s;
+}
+.replay:hover {
+  color: var(--ink);
+  border-color: var(--muted);
+}
+
+/* ── layout split ─────────────────────────────────── */
+.split {
+  display: grid;
+  grid-template-columns: 1.35fr 0.95fr;
+}
+.rail {
+  padding: 12px 8px 16px;
+  border-right: 1px solid var(--line);
+}
+
+/* ── stages ───────────────────────────────────────── */
+.stage {
+  display: grid;
+  grid-template-columns: 52px 1fr auto;
+  align-items: center;
+  gap: 14px;
+  padding: 15px 18px;
+  border-radius: 12px;
+  margin: 2px 8px;
+  opacity: 0.4;
+  transition: opacity 0.4s, background-color 0.4s;
+}
+.stage.stageOn,
+.stage.stageDone {
+  opacity: 1;
+}
+.mark {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--line2);
+  border: 1px solid var(--line);
+  transition: 0.35s;
+  position: relative;
+}
+.stage.stageOn .mark {
+  background: var(--agentSoft);
+  border-color: var(--agent);
+}
+.stage.stageDone .mark {
+  background: var(--agent);
+  border-color: var(--agent);
+}
+.mark svg {
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.stage.stageDone .mark svg {
+  opacity: 1;
+}
+.spin {
+  position: absolute;
+  inset: -1px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  border-top-color: var(--agent);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+.stage.stageOn .spin {
+  opacity: 1;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.name {
+  font-size: 0.945rem;
+  font-weight: 500;
+  line-height: 1.3;
+}
+.sub {
+  font-size: 0.8rem;
+  color: var(--muted);
+  margin-top: 2px;
+}
+.tag {
+  font-family: var(--fm);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 4px 9px;
+  border-radius: 5px;
+  border: 1px solid var(--line);
+  color: var(--muted);
+  white-space: nowrap;
+}
+.stage.stageDone .tag,
+.stage.stageOn .tag {
+  color: var(--agent);
+  border-color: #bfe9f2;
+  background: var(--agentSoft);
+}
+
+/* the human gate */
+.stage.stageGate {
+  background: var(--humanSoft);
+  border: 1px solid #f9d6b4;
+}
+.stage.stageGate .mark {
+  background: var(--human);
+  border-color: var(--human);
+}
+.stage.stageGate .tag {
+  color: var(--human);
+  border-color: #f7c79b;
+  background: #fff;
+}
+.stage.stageGate .spin {
+  display: none;
+}
+.stage.stageGateWait {
+  opacity: 1;
+  position: relative;
+}
+.stage.stageGateWait::after {
+  content: "";
+  position: absolute;
+  inset: -5px;
+  border-radius: 16px;
+  border: 2px solid var(--human);
+  opacity: 0.4;
+  animation: pulse 1.9s ease-out infinite;
+  pointer-events: none;
+}
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.45;
+  }
+  100% {
+    transform: scale(1.045);
+    opacity: 0;
+  }
+}
+.decide {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  padding: 14px 0 2px 66px;
+}
+.btn {
+  font-family: var(--fb);
+  font-size: 0.875rem;
+  font-weight: 500;
+  padding: 10px 18px;
+  border-radius: 9px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: 0.18s;
+}
+.btnGo {
+  background: var(--human);
+  color: #fff;
+}
+.btnGo:hover {
+  background: #de7115;
+}
+.btnNo {
+  background: #fff;
+  border-color: var(--line);
+  color: var(--body);
+}
+.btnNo:hover {
+  border-color: var(--muted);
+  color: var(--ink);
+}
+
+/* ── audit log ────────────────────────────────────── */
+.log {
+  padding: 18px 20px;
+  background: #fbfdfe;
+  display: flex;
+  flex-direction: column;
+  min-height: 430px;
+}
+.log h4 {
+  font-family: var(--fm);
+  font-size: 10.5px;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 0 0 14px;
+  font-weight: 400;
+}
+.lines {
+  flex: 1;
+  font-family: var(--fm);
+  font-size: 11.5px;
+  line-height: 1.55;
+  color: var(--body);
+  overflow: hidden;
+}
+.line {
+  display: flex;
+  gap: 9px;
+  padding: 5px 0;
+  border-bottom: 1px solid var(--line2);
+  animation: slip 0.35s ease both;
+}
+@keyframes slip {
+  from {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.t {
+  color: var(--muted);
+  flex-shrink: 0;
+}
+.lineHuman {
+  color: var(--human);
+}
+.lineDone {
+  color: var(--ok);
+}
+.tally {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+.tally div {
+  text-align: left;
+}
+.n {
+  font-family: var(--fd);
+  font-weight: 700;
+  font-size: 1.45rem;
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+.k {
+  font-family: var(--fm);
+  font-size: 9.5px;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin-top: 5px;
+}
+.tallyHuman .n {
+  color: var(--human);
+}
+
+@media (max-width: 900px) {
+  .split {
+    grid-template-columns: 1fr;
+  }
+  .rail {
+    border-right: 0;
+    border-bottom: 1px solid var(--line);
+  }
+  .log {
+    min-height: 280px;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .demo * {
+    animation: none !important;
+    transition: none !important;
+  }
+}

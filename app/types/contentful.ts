@@ -51,6 +51,8 @@ export type DataVideoSkeleton = EntrySkeletonType<
      */
     eyebrow?: EntryFieldTypes.Symbol;
     heading?: EntryFieldTypes.Symbol;
+    /** Free text in Contentful — "h1"–"h4" only (narrower than `dataText.headingLevel`'s h1–h6, since `CommonVideo`'s `headingLevel` prop doesn't accept h5/h6). Validated against that narrower set in `PageBody` before use; falls back to `CommonVideo`'s own default ("h2") for anything unset or unrecognized. */
+    headingLevel?: EntryFieldTypes.Symbol;
     /** Plain (non-rich) overlay body copy — short by design (a video caption, not a full article), unlike `dataText.text`'s `RichText`. */
     text?: EntryFieldTypes.Text;
     /** The overlay's CTA — reuses `dataLink` for its `label`/href, same convention every other CTA in this project uses. */

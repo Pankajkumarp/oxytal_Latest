@@ -388,7 +388,7 @@ function MegaPanel({ menu, theme }: { menu: MegaMenu; theme?: SectionTheme }) {
               <h4
                 className={cx(
                   "text-[18px]",
-                  theme?.heading ?? "text-gray-900"
+                  theme?.link ?? "text-gray-900"
                 )}
               >
                 {entry.title}
@@ -817,7 +817,7 @@ export default function Navbar({ entry }: Props) {
                   : "lg:text-gray-900"
             )}
           >
-            OXYTAL
+            OXY<span className={theme?.accentText ?? "text-emerald-600"}>TAL</span>
           </Link>
         </div>
 
@@ -846,8 +846,7 @@ export default function Navbar({ entry }: Props) {
                       href={menu.href ?? "#"}
                       className={cx(
                         "block rounded-lg px-3.5 py-2.5 text-[17px] font-medium transition-colors",
-                        theme?.heading ?? "text-gray-900",
-                        theme ? "hover:opacity-70" : "hover:text-emerald-700"
+                        theme?.link ?? "text-gray-900",
                       )}
                     >
                       {menu.label}
@@ -884,8 +883,7 @@ export default function Navbar({ entry }: Props) {
                     <div
                       className={cx(
                         "flex items-center gap-1 rounded-lg pl-3.5 pr-2 py-2.5 text-[17px] font-medium transition-colors",
-                        theme?.heading ?? "text-gray-900",
-                        theme ? "hover:opacity-70" : "hover:text-emerald-700"
+                        theme?.link ?? "text-gray-900",
                       )}
                     >
                       <Link href={menu.href}>{menu.label}</Link>
@@ -928,8 +926,7 @@ export default function Navbar({ entry }: Props) {
                       }}
                       className={cx(
                         "flex items-center gap-1.5 rounded-lg px-3.5 py-2.5 text-[14.5px] font-medium transition-colors",
-                        theme?.heading ?? "text-gray-900",
-                        theme ? "hover:opacity-70" : "hover:text-emerald-700"
+                        theme?.link ?? "text-gray-900",
                       )}
                     >
                       {menu.label}
@@ -1022,7 +1019,7 @@ export default function Navbar({ entry }: Props) {
                 aria-label={social.label}
                 className={cx(
                   "flex h-8 w-8 items-center justify-center text-[10px] font-bold transition-colors",
-                  theme?.heading ?? "text-gray-900",
+                  theme?.link ?? "text-gray-900",
                   theme ? "hover:opacity-70" : "hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700"
                 )}
               >
@@ -1146,7 +1143,7 @@ export default function Navbar({ entry }: Props) {
                           <div
                             className={cx(
                               "text-[14.5px] font-bold",
-                              theme?.heading ?? "text-gray-900"
+                              theme?.link ?? "text-gray-900"
                             )}
                           >
                             {entry.title}
@@ -1236,7 +1233,7 @@ export default function Navbar({ entry }: Props) {
                 aria-label={social.label}
                 className={cx(
                   "flex h-8 w-8 items-center justify-center rounded-full text-[11px] font-bold transition-colors",
-                  theme?.heading ?? "text-gray-900",
+                  theme?.link ?? "text-gray-900",
                   theme ? "hover:opacity-70" : "hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700"
                 )}
               >

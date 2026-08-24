@@ -13,6 +13,7 @@ import { resolveTheme } from "../lib/theme";
 import { resolveHeadingLevel } from "../lib/headingLevel";
 import DynamicHeading from "./DynamicHeading";
 import ThemePattern from "./ThemePattern";
+import AIPipelineDemo from "./AIPipelineDemo";
 import {
   ComposableElementSkeleton,
   ContentDetailSkeleton,
@@ -201,9 +202,9 @@ export default function HomeAI({ entry }: Props) {
   const backgroundImageEntry = entry.fields.backgroundImage;
   const backgroundUrl = isEntry(backgroundImageEntry)
     ? getAssetUrl(
-        (backgroundImageEntry as unknown as PlainEntry<DataImageSkeleton>)
-          .fields.image
-      )
+      (backgroundImageEntry as unknown as PlainEntry<DataImageSkeleton>)
+        .fields.image
+    )
     : undefined;
 
   // Resolves `themeColor` (e.g. "dark", "blue", "emerald" — see
@@ -338,11 +339,11 @@ export default function HomeAI({ entry }: Props) {
       style={
         backgroundUrl
           ? {
-              backgroundImage: `url(${backgroundUrl})`,
-              backgroundSize: "cover",
-              backgroundRepeat: "no-repeat",
-              backgroundPosition: "center",
-            }
+            backgroundImage: `url(${backgroundUrl})`,
+            backgroundSize: "cover",
+            backgroundRepeat: "no-repeat",
+            backgroundPosition: "center",
+          }
           : undefined
       }
     >
@@ -356,7 +357,7 @@ export default function HomeAI({ entry }: Props) {
         <ThemePattern theme={theme} pattern={entry?.fields.pattern} patternColor={entry?.fields.patternColor} />
       </div>
 
-      <div className="container mx-auto px-5 py-16 md:px-10 md:py-24 lg:py-28">
+      <div className="container mx-auto px-5 py-16 md:px-10 md:py-20 lg:py-20">
         {/* =================================================
             INTRO
         ================================================= */}
@@ -399,73 +400,75 @@ export default function HomeAI({ entry }: Props) {
             GROUPS — one per contentDetail entry, items from its
             statistics array.
         ================================================= */}
-        <div className="mt-16 grid gap-6 md:mt-20 md:grid-cols-3">
-          {groups.map((group) => (
-            <div
-              key={group.label}
-              onMouseEnter={handleGroupEnter}
-              onMouseLeave={handleGroupLeave}
-              className={cx(
-                "rounded-2xl border p-7 z-2 shadow-[0_4px_14px_-10px_rgba(16,24,40,0.06)]",
-                theme?.cardBorder ?? "border-gray-100",
-                theme?.cardBg ?? "bg-white"
-              )}
-            >
-              <div className="relative mb-5 pb-3">
-                <p
-                  className={cx(
-                    "text-xs font-bold tracking-wide uppercase",
-                    theme?.accentText ?? "text-emerald-600"
-                  )}
-                >
-                  {group.label}
-                </p>
-                {/* Static base rule, full width. */}
-                <span
-                  aria-hidden
-                  className={cx(
-                    "absolute bottom-0 left-0 h-0 w-full border-t",
-                    theme?.cardBorder ?? "border-gray-100"
-                  )}
-                />
-                {/* Accent overlay — starts as a short dash, grows to the
+        {groups?.length > 0 && (
+          <div className="mt-16 grid gap-6 md:mt-20 md:grid-cols-3">
+            {groups.map((group) => (
+              <div
+                key={group.label}
+                onMouseEnter={handleGroupEnter}
+                onMouseLeave={handleGroupLeave}
+                className={cx(
+                  "rounded-2xl border p-7 z-2 shadow-[0_4px_14px_-10px_rgba(16,24,40,0.06)]",
+                  theme?.cardBorder ?? "border-gray-100",
+                  theme?.cardBg ?? "bg-white"
+                )}
+              >
+                <div className="relative mb-5 pb-3">
+                  <p
+                    className={cx(
+                      "text-xs font-bold tracking-wide uppercase",
+                      theme?.accentText ?? "text-emerald-600"
+                    )}
+                  >
+                    {group.label}
+                  </p>
+                  {/* Static base rule, full width. */}
+                  <span
+                    aria-hidden
+                    className={cx(
+                      "absolute bottom-0 left-0 h-0 w-full border-t",
+                      theme?.cardBorder ?? "border-gray-100"
+                    )}
+                  />
+                  {/* Accent overlay — starts as a short dash, grows to the
                     rule's full width on hover (see GROUP CARD HOVER
                     above). */}
-                <span
-                  aria-hidden
-                  data-group-underline
-                  className={cx(
-                    "absolute bottom-0 left-0 h-px w-full origin-left scale-x-[0.22]",
-                    theme?.buttonBg ?? "bg-emerald-600"
-                  )}
-                />
-              </div>
+                  <span
+                    aria-hidden
+                    data-group-underline
+                    className={cx(
+                      "absolute bottom-0 left-0 h-px w-full origin-left scale-x-[0.22]",
+                      theme?.buttonBg ?? "bg-emerald-600"
+                    )}
+                  />
+                </div>
 
-              <ul className="flex flex-col gap-5">
-                {group.items.map((item) => (
-                  <li key={item.name} data-group-item>
-                    <h3
-                      className={cx(
-                        "text-[16px] font-bold",
-                        theme?.heading ?? "text-gray-900"
-                      )}
-                    >
-                      {item.name}
-                    </h3>
-                    <p
-                      className={cx(
-                        "mt-1 text-[14px] leading-relaxed",
-                        theme?.body ?? "text-gray-500"
-                      )}
-                    >
-                      {item.description}
-                    </p>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
+                <ul className="flex flex-col gap-5">
+                  {group.items.map((item) => (
+                    <li key={item.name} data-group-item>
+                      <h3
+                        className={cx(
+                          "text-[16px] font-bold",
+                          theme?.heading ?? "text-gray-900"
+                        )}
+                      >
+                        {item.name}
+                      </h3>
+                      <p
+                        className={cx(
+                          "mt-1 text-[14px] leading-relaxed",
+                          theme?.body ?? "text-gray-500"
+                        )}
+                      >
+                        {item.description}
+                      </p>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* =================================================
             PROOF CALLOUT — left-accent bar. Only rendered when the
@@ -511,12 +514,15 @@ export default function HomeAI({ entry }: Props) {
             </div>
           </div>
         )}
+        <div className="relative z-2 mt-10 max-w-6xl mx-auto">
+          <AIPipelineDemo />
+        </div>
 
         {/* =================================================
             FOOTER — text link + CTA button.
         ================================================= */}
         {(secondaryLabel || primaryLabel) && (
-          <div className="mt-10 flex flex-wrap items-center justify-between gap-6">
+          <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
             {secondaryLabel && (
               <Link
                 href={secondaryHref}
@@ -536,7 +542,7 @@ export default function HomeAI({ entry }: Props) {
             )}
 
             {primaryLabel && (
-              <a
+              <Link
                 href={primaryHref}
                 className={cx(
                   "inline-flex z-2 w-fit items-center gap-2 rounded-full px-7 py-3.5 text-[15px] font-semibold shadow-lg transition-all duration-300 hover:-translate-y-0.5",
@@ -546,10 +552,11 @@ export default function HomeAI({ entry }: Props) {
                 )}
               >
                 {primaryLabel}
-              </a>
+              </Link>
             )}
           </div>
         )}
+
       </div>
     </section>
   );
