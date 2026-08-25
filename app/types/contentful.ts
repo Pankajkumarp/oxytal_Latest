@@ -225,6 +225,8 @@ export type ContentDetailSkeleton = EntrySkeletonType<
     /** Locked Contentful enum of business-catalog labels ("Featured", "Digital Product", "Workforce Management Platform", "Student Community Platform", …) — not free text, so components needing a free-text subtitle/tag (e.g. `ProductShowcase`'s product-card tagline) reuse `industry` instead. */
     category?: EntryFieldTypes.Symbol;
     icon?: EntryFieldTypes.EntryLink<DataImageSkeleton>;
+    /** Whether a consumer should render `icon`/its fallback glyph at all — e.g. `HomeAboutUs`'s feature cards. Defaults to shown (`true`) when unset, so existing entries with no value set keep rendering their icon exactly as before this field existed; set explicitly to `false` to hide it for a given entry. */
+    showIcon?: EntryFieldTypes.Boolean;
     heroImage?: EntryFieldTypes.EntryLink<DataImageSkeleton>;
     clientName?: EntryFieldTypes.Symbol;
     /** The client's logo/wordmark — pairs with `clientName` above. Used by `HomeCaseStudies`' case-study cards; falls back to plain `clientName` text when unset. */

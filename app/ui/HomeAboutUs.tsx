@@ -77,12 +77,15 @@ interface FeatureItem {
   name: string;
   description?: string;
   iconUrl?: string;
+  badge?: string;
+  /** Whether the icon slot (image or fallback glyph) should render at all — from `contentDetail.showIcon`, defaulting to shown when unset. */
+  showIcon: boolean;
 }
 
 /** Cycled by item index as a fallback when a `contentDetail` entry has no `icon` image set. */
 const FALLBACK_ICONS: LucideIcon[] = [Brain, ShieldCheck, Box, Sparkles];
 
-/** Maps a resolved `contentDetail` entry to the plain `FeatureItem` shape this component renders — reusing `contentDetail` (title/shortDescription/icon) instead of a dedicated content type, same pattern as HomeProducts/HomeTalkToUs. */
+/** Maps a resolved `contentDetail` entry to the plain `FeatureItem` shape this component renders — reusing `contentDetail` (title/shortDescription/icon/showIcon) instead of a dedicated content type, same pattern as HomeProducts/HomeTalkToUs. */
 function contentDetailToFeatureItem(
   entry: PlainEntry<ContentDetailSkeleton>
 ): FeatureItem {
@@ -97,6 +100,11 @@ function contentDetailToFeatureItem(
     name: entry.fields.title ?? "",
     description: entry.fields.shortDescription,
     iconUrl,
+    badge: entry.fields.badge,
+    // `showIcon` is optional in Contentful — an entry that has never set it
+    // comes back as `undefined`, which should still show the icon (today's
+    // behavior, unchanged). Only an explicit `false` hides it.
+    showIcon: entry.fields.showIcon !== false,
   };
 }
 
@@ -115,12 +123,16 @@ const DEFAULT_FEATURES: FeatureItem[] = [];
  * - the first `callToAction` entry among `elements` supplies the intro:
  *   `eyebrow` for the small label, `title` + `highlightText` for the
  *   heading (`highlightText` renders in emerald, same convention
- *   PageBody's own `callToAction` case uses), and the first entry in
- *   `ctaButton` for the "Learn how we work" link
+ *   PageBody's own `callToAction` case uses), `description` (plain
+ *   `Text`, not `RichText` — rendered directly into a `<p>`, same as
+ *   PageBody's own `callToAction` case) for the paragraph under the
+ *   heading, and the first entry in `ctaButton` for the "Learn how we
+ *   work" link
  * - every `contentDetail` entry among `elements` becomes one feature item
  *   (via `contentDetailToFeatureItem`) — `title`/`shortDescription` as the
- *   name/description, `icon` (falls back to a cycled Lucide icon) as the
- *   glyph
+ *   name/description, `icon` (falls back to a cycled Lucide icon, unless
+ *   `showIcon` is explicitly `false`) as the glyph, and `badge` as a small
+ *   label above the title (renders nothing when unset)
  * - the composableElement's own `backgroundImage` field (links to a
  *   `dataImage` entry, same field HomeTalkToUs uses) is an *optional*
  *   full-bleed section background image — unlike HomeTalkToUs there's no
@@ -166,6 +178,11 @@ export default function HomeAboutUs({ entry }: Props) {
     intro?.fields.title ??
     "";
   const highlight = intro?.fields.highlightText ?? "";
+  // `description` is a plain `Text` field on `callToAction` (see
+  // app/types/contentful.ts), not `RichText` — same plain-string value
+  // PageBody's own `callToAction` case (in app/ui/PageBody.tsx) renders
+  // directly into a `<p>`, no `documentToReactComponents` involved.
+  const description = intro?.fields.description;
   const features = contentDetailFeatures.length
     ? contentDetailFeatures
     : DEFAULT_FEATURES;
@@ -389,7 +406,14 @@ export default function HomeAboutUs({ entry }: Props) {
               {highlight}
             </span>
           </h2>
-
+          {description && (
+            <p
+              className={cx("mt-1 max-w-2xl text-[15px] leading-relaxed", theme?.body ?? "text-[#565A57]")}
+            >
+              {description}
+            </p>
+          )}
+{ctaLabel ? (
           <Link
             href={ctaHref}
             className={cx(
@@ -409,6 +433,7 @@ export default function HomeAboutUs({ entry }: Props) {
             </span>
             {ctaLabel}
           </Link>
+):null}
         </div>
 
         {/* =================================================
@@ -420,7 +445,6 @@ export default function HomeAboutUs({ entry }: Props) {
         >
           {features.map((feature, index) => {
             const FallbackIcon = FALLBACK_ICONS[index % FALLBACK_ICONS.length];
-
             return (
               <div key={feature.name}
               onMouseEnter={handleCardEnter}
@@ -431,31 +455,44 @@ export default function HomeAboutUs({ entry }: Props) {
                 theme?.cardBg ?? "bg-white"
               )}
               >
-                <div
-                  data-feature-icon
-                  className={cx(
-                    "flex h-11 w-11 items-center justify-center rounded-xl z-2 mb-3",
-                    theme?.eyebrowBg ?? "bg-emerald-50",
-                    theme?.accentText ?? "text-emerald-600"
-                  )}
-                >
-                  {feature.iconUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element -- matches the plain <img> convention already used for external/Contentful assets in this project
-                    <img
-                      src={feature.iconUrl}
-                      alt=""
-                      aria-hidden
-                      className="h-5 w-5 object-contain"
-                    />
-                  ) : (
-                    <FallbackIcon size={20} aria-hidden />
-                  )}
-                </div>
+                
+                {feature.showIcon && (
+                  <div
+                    data-feature-icon
+                    className={cx(
+                      "flex h-11 w-11 items-center justify-center rounded-xl z-2 mb-3",
+                      theme?.eyebrowBg ?? "bg-emerald-50",
+                      theme?.accentText ?? "text-emerald-600"
+                    )}
+                  >
+                    {feature.iconUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element -- matches the plain <img> convention already used for external/Contentful assets in this project
+                      <img
+                        src={feature.iconUrl}
+                        alt=""
+                        aria-hidden
+                        className="h-5 w-5 object-contain"
+                      />
+                    ) : (
+                      <FallbackIcon size={20} aria-hidden />
+                    )}
+                  </div>
+                )}
 
                 <div>
+                  {feature.badge && (
+                    <span
+                      className={cx(
+                        "text-[14px] font-semibold uppercase mb-2 block",
+                        theme?.accentText ?? "text-emerald-600"
+                      )}
+                    >
+                      {feature.badge}
+                    </span>
+                  )}
                   <h3
                     className={cx(
-                      "text-[15px] font-bold",
+                      "text-[17px] font-bold",
                       theme?.heading ?? "text-gray-900"
                     )}
                   >
