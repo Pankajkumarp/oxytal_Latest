@@ -54,6 +54,7 @@ import LandingTestimonials from "@/app/ui/LandingTestimonials";
 import LandingExplore from "@/app/ui/LandingExplore";
 import LandingFaq from "@/app/ui/LandingFaq";
 import LandingInsights from "@/app/ui/LandingInsights";
+import ProductsCarousel from "./ProductsCarousel";
 import { Entry, EntrySkeletonType } from "contentful";
 import { ComposableElementSkeleton } from "../types/contentful";
 import { resolveNavContrast } from "../lib/navContrast";
@@ -78,7 +79,7 @@ const subtypeComponents: Record<
   client: CommonTrustedBy,
   service: HomeServices,
   ai: HomeAI,
-  producthome: HomeProducts,
+  producthome: ProductsCarousel,
   talktous: HomeTalkToUs,
   aboutus: HomeAboutUs,
   casestudy: HomeCaseStudies,

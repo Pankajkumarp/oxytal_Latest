@@ -342,7 +342,7 @@ function ServiceCardView({
           CONTENT
       ===================================================== */}
 
-      <div className="flex flex-1 flex-col gap-2 p-3 absolute bg-white w-full bottom-0">
+      <div className="flex flex-1 flex-col gap-2 p-3 py-5 absolute bg-white w-full bottom-0 text-section-card">
         <div className="flex items-start gap-3">
           {service.iconUrl && (
             <img
@@ -366,7 +366,7 @@ function ServiceCardView({
         {service.description && (
           <p
             className={cx(
-              "flex-1 text-[14px] leading-relaxed  short-discription-card",
+              "flex-1 text-[15.6px] leading-relaxed  short-discription-card",
               theme?.body ??
               "text-gray-500"
             )}
@@ -956,6 +956,13 @@ export default function HomeServices({
 .service-card:hover .short-discription-card {
   opacity: 1;
   max-height: 200px;
+}
+.text-section-card {
+  transition: background 0.5s ease;
+}
+
+.service-card:hover .text-section-card {
+  background: transparent;
 }
         .services-swiper {
           width: 100%;

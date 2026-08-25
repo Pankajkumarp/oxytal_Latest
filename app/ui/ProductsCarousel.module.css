@@ -1,0 +1,699 @@
+/*
+ * A faithful, class-renamed port of the <style> block in
+ * `Refrence/oxytal-products-carousel.html` — the "Our Products" six-slide
+ * showcase. Kept as a CSS Module rather than rewritten into Tailwind
+ * utilities, same "faithfulness over consistency" rule
+ * `ServicesPage.module.css`/`AIPipelineDemo.module.css` document for the
+ * same situation: this design leans on absolute-positioned slide layers,
+ * several bespoke keyframe animations, and per-product inline colors that
+ * don't map cleanly onto utility classes.
+ *
+ * Deviations from the reference (see `ProductsCarousel.tsx`'s own doc
+ * comment for why): every control that was `position:fixed` to the
+ * browser window (`.top-bar`, `.dots`, `.arrows`, `.kbd-hint`,
+ * `.scroll-label`, `.overlay`) is `position:absolute` within `.stage`
+ * instead, and `.stage` itself is a fixed-height panel rather than
+ * `100vh` with `overflow:hidden` on `<html,body>`. Class names are
+ * camelCased; structural/decorative property values are otherwise kept
+ * as close to the mockup as the embedded layout allows.
+ */
+
+.stage {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
+  height: auto;
+  min-height: 100vh;
+  color: #fff;
+}
+
+/* ── SLIDES ── */
+.slides {
+  position: absolute;
+  inset: 56px 0 0 0;
+}
+.slide {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  opacity: 0;
+  transform: translateY(40px);
+  transition:
+    opacity 0.65s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+  pointer-events: none;
+}
+.slideActive {
+  opacity: 1;
+  transform: translateY(0);
+  pointer-events: all;
+  z-index: 2;
+}
+.slidePrev {
+  opacity: 0;
+  transform: translateY(-40px);
+}
+
+/* ── LEFT PANEL ── */
+.left {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 36px 48px;
+  position: relative;
+  z-index: 2;
+  overflow-y: auto;
+}
+.productNum {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin-bottom: 16px;
+}
+.metrics {
+  display: flex;
+  gap: 28px;
+  margin-bottom: 26px;
+  flex-wrap: wrap;
+}
+.metricBox {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+.metricVal {
+  font-size: 23px;
+  letter-spacing: -1px;
+  line-height: 1;
+}
+.metricLab {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.35);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.productTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 26px;
+}
+.tag {
+  padding: 5px 14px;
+  border-radius: 100px;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  border: 1px solid;
+}
+.productCtas {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.btnPrimary {
+  padding: 12px 22px;
+  border-radius: 9px;
+  font-size: 14px;
+  text-decoration: none;
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  border: none;
+  cursor: pointer;
+  color: #fff;
+}
+.btnPrimary:hover {
+  transform: translateY(-2px);
+}
+.btnOutline {
+  padding: 12px 22px;
+  border-radius: 9px;
+  background: transparent;
+  font-size: 14px;
+  text-decoration: none;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  cursor: pointer;
+  color: rgba(255, 255, 255, 0.75);
+}
+.btnOutline:hover {
+  border-color: rgba(255, 255, 255, 0.5);
+  color: #fff;
+}
+
+/* ── RIGHT PANEL ── */
+.right {
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.rightVisual {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 40px;
+}
+
+/* ── PRODUCT VISUALS ── */
+.mockCard {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  padding: 22px;
+  width: 100%;
+  max-width: 420px;
+}
+.mockHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 18px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+.mockLogo {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+.mockTitle {
+  font-size: 14px;
+}
+.mockSub {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.4);
+  margin-top: 1px;
+}
+
+/* Pipeline steps (ForgePipeline) */
+.pipeSteps {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.ps {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.02);
+}
+.psDone {
+  border-color: rgba(74, 222, 128, 0.25);
+  background: rgba(74, 222, 128, 0.04);
+}
+.psRun {
+  border-color: rgba(99, 102, 241, 0.45);
+  background: rgba(99, 102, 241, 0.08);
+  animation: agentGlow 2s ease-in-out infinite;
+}
+@keyframes agentGlow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(99, 102, 241, 0);
+  }
+  50% {
+    box-shadow: 0 0 12px rgba(99, 102, 241, 0.2);
+  }
+}
+.psIcon {
+  font-size: 13px;
+  width: 24px;
+  text-align: center;
+}
+.psName {
+  font-size: 11px;
+  flex: 1;
+}
+.psStatus {
+  margin-left: auto;
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.3);
+}
+.tickGreen {
+  color: #4ade80;
+}
+.spinIcon {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(99, 102, 241, 0.4);
+  border-top-color: #818cf8;
+  animation: spin 0.9s linear infinite;
+  display: inline-block;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.shimmerLine {
+  height: 2px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, transparent, #6366f1, #8b5cf6, #4ade80, transparent);
+  background-size: 200%;
+  animation: shimmer 3s linear infinite;
+  margin-top: 14px;
+}
+@keyframes shimmer {
+  0% {
+    background-position: 200%;
+  }
+  100% {
+    background-position: -200%;
+  }
+}
+
+/* Exam card (ExamVerge) */
+.examStats {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.examStat {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 10px;
+  padding: 12px;
+  text-align: center;
+}
+.esVal {
+  font-size: 19px;
+}
+.esLab {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.35);
+  margin-top: 2px;
+}
+.progressBar {
+  height: 6px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.08);
+  margin-bottom: 8px;
+  overflow: hidden;
+}
+.progressFill {
+  height: 100%;
+  border-radius: 3px;
+}
+.subjectRow {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.5);
+  margin-bottom: 6px;
+}
+.subjectRow span:last-child {
+  color: #fff;
+}
+
+/* Kollabry board */
+.boardCols {
+  display: flex;
+  gap: 10px;
+}
+.boardCol {
+  flex: 1;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  padding: 10px;
+}
+.boardColTitle {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.4);
+  margin-bottom: 10px;
+}
+.boardItem {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 7px;
+  padding: 8px 10px;
+  margin-bottom: 7px;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.75);
+  cursor: default;
+}
+.boardItemActive {
+  border-color: rgba(99, 102, 241, 0.4);
+  background: rgba(99, 102, 241, 0.06);
+}
+.biTag {
+  font-size: 9px;
+  color: rgba(255, 255, 255, 0.3);
+  margin-top: 3px;
+}
+
+/* SamVault vault grid */
+.vaultItems {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.vaultItem {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 10px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.vaultIcon {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: rgba(201, 168, 76, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+.vaultName {
+  font-size: 12px;
+}
+.vaultMeta {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.35);
+  margin-top: 2px;
+}
+.vaultBadge {
+  margin-left: auto;
+  padding: 2px 7px;
+  border-radius: 10px;
+  font-size: 9px;
+  flex-shrink: 0;
+}
+.vbEnc {
+  background: rgba(201, 168, 76, 0.15);
+  color: #c9a84c;
+}
+.vbExp {
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+}
+
+/* Oxyem workforce */
+.oxyemStats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.oxyemStat {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  padding: 14px;
+}
+.osVal {
+  font-size: 21px;
+}
+.osLab {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.35);
+  margin-top: 3px;
+}
+.employeeRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+}
+.empAvatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  flex-shrink: 0;
+}
+.empName {
+  font-size: 12px;
+  flex: 1;
+}
+.empDept {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.35);
+}
+.empStatus {
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  flex-shrink: 0;
+}
+
+/* ActionPulse */
+.actionRows {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.actionRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 9px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(255, 255, 255, 0.03);
+}
+.arPriority {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.arText {
+  font-size: 12px;
+  flex: 1;
+}
+.arOwner {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.4);
+}
+.arDue {
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+.dueOk {
+  background: rgba(74, 222, 128, 0.12);
+  color: #4ade80;
+}
+.dueWarn {
+  background: rgba(251, 146, 60, 0.12);
+  color: #fb923c;
+}
+.dueLate {
+  background: rgba(239, 68, 68, 0.12);
+  color: #f87171;
+}
+.pulseRing {
+  animation: pulseRing 2s ease-in-out infinite;
+}
+@keyframes pulseRing {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 currentColor;
+    opacity: 1;
+  }
+  50% {
+    box-shadow: 0 0 0 4px transparent;
+    opacity: 0.7;
+  }
+}
+
+/* ── TOP BAR (scoped to the stage, not the browser window) ── */
+.topBar {
+  position: absolute;
+  top: 40px;
+  left: 20px;
+  right: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 28px;
+  height: 56px;
+}
+
+/* ── DOTS NAV ── */
+.dots {
+  position: absolute;
+  right: 20px;
+  top: calc(50% + 28px);
+  transform: translateY(-50%);
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  cursor: pointer;
+  transition: all 0.3s;
+  border: none;
+}
+.dotActive {
+  background: #fff;
+  transform: scale(1.3);
+}
+.dot:hover:not(.dotActive) {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+/* ── ARROW NAV ── */
+.arrows {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.arrowBtn {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: #fff;
+  font-size: 18px;
+  line-height: 1;
+}
+.arrowBtn:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+.arrowBtn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+.progressPips {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0 14px;
+}
+.pip {
+  width: 8px;
+  height: 3px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.2);
+  transition: all 0.35s;
+  cursor: pointer;
+}
+.pipActive {
+  background: #fff;
+  width: 24px;
+}
+
+/* ── KEYBOARD HINT ── */
+.kbdHint {
+  position: absolute;
+  bottom: 20px;
+  right: 20px;
+  z-index: 10;
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.25);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.kbd {
+  padding: 2px 7px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  font-family: "JetBrains Mono", monospace;
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.35);
+}
+
+/* ── TRANSITION OVERLAY ── */
+
+.hintCaption {
+  margin-top: 16px;
+  text-align: center;
+  font-size: 13px;
+  color: #565a57;
+}
+.hintCaption strong {
+  color: #15181c;
+}
+
+@media (max-width: 900px) {
+  .stage {
+    height: auto;
+    min-height: 0;
+  }
+  .slides {
+    position: static;
+    padding-top: 56px;
+  }
+  .slide {
+    position: relative;
+    inset: auto;
+    grid-template-columns: 1fr;
+    min-height: 560px;
+  }
+  .slide:not(.slideActive) {
+    display: none;
+  }
+  .right {
+    display: none;
+  }
+  .left {
+    padding: 24px 20px 88px;
+    overflow-y: visible;
+  }
+  .dots {
+    display: none;
+  }
+  .kbdHint {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stage * {
+    animation: none !important;
+    transition: none !important;
+  }
+}

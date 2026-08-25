@@ -23,6 +23,7 @@ import {
   StatisticSkeleton,
 } from "../types/contentful";
 import styles from "./HomeProducts.module.css";
+import ProductsCarousel from "./ProductsCarousel";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger, SplitText);
@@ -461,6 +462,7 @@ export default function HomeProducts({ entry }: Props) {
   }, [activeId]);
 
   return (
+    <>
     <section
       ref={sectionRef}
       className={cx(
@@ -689,5 +691,7 @@ export default function HomeProducts({ entry }: Props) {
         )}
       </div>
     </section>
+    <ProductsCarousel entry={entry} />
+    </>
   );
 }
