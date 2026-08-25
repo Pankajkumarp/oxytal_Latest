@@ -324,7 +324,7 @@ function ServiceCardView({
 
       <div
         className={cx(
-          "relative aspect-[4/4] w-full bg-cover bg-center bg-section-card",
+          "relative aspect-[4/5] w-full bg-cover bg-center bg-section-card",
           !service.heroImageUrl &&
           accent.gradient
         )}
@@ -336,21 +336,13 @@ function ServiceCardView({
             : undefined
         }
       >
-        <span
-          className={cx(
-            "absolute right-4 top-4 flex h-9 w-9 items-center justify-center rounded-full bg-white text-xs font-bold shadow-sm",
-            accent.accentText
-          )}
-        >
-          {service.number}
-        </span>
       </div>
 
       {/* =====================================================
           CONTENT
       ===================================================== */}
 
-      <div className="flex flex-1 flex-col gap-2 p-3">
+      <div className="flex flex-1 flex-col gap-2 p-3 absolute bg-white w-full bottom-0">
         <div className="flex items-start gap-3">
           {service.iconUrl && (
             <img
@@ -362,7 +354,7 @@ function ServiceCardView({
 
           <h3
             className={cx(
-              "min-h-[50px] pt-1.5 text-[20px] font-bold leading-snug uppercase",
+              "pt-1.5 text-[20px] font-bold leading-snug uppercase",
               theme?.heading ??
               "text-gray-900"
             )}
@@ -374,7 +366,7 @@ function ServiceCardView({
         {service.description && (
           <p
             className={cx(
-              "flex-1 text-[14px] leading-relaxed",
+              "flex-1 text-[14px] leading-relaxed  short-discription-card",
               theme?.body ??
               "text-gray-500"
             )}
@@ -951,6 +943,19 @@ export default function HomeServices({
       }
     .service-card:hover {
   transform: translateY(-10px) scale(1.01);
+}
+.short-discription-card {
+  opacity: 0;
+  max-height: 0;
+  overflow: hidden;
+  transition:
+    opacity 0.5s ease,
+    max-height 1s ease;
+}
+
+.service-card:hover .short-discription-card {
+  opacity: 1;
+  max-height: 200px;
 }
         .services-swiper {
           width: 100%;
