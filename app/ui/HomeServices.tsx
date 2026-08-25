@@ -324,7 +324,7 @@ function ServiceCardView({
 
       <div
         className={cx(
-          "relative aspect-[4/4] w-full bg-cover bg-center",
+          "relative aspect-[4/4] w-full bg-cover bg-center bg-section-card",
           !service.heroImageUrl &&
           accent.gradient
         )}
@@ -350,7 +350,7 @@ function ServiceCardView({
           CONTENT
       ===================================================== */}
 
-      <div className="flex flex-1 flex-col gap-4 p-6">
+      <div className="flex flex-1 flex-col gap-2 p-3">
         <div className="flex items-start gap-3">
           {service.iconUrl && (
             <img
@@ -362,7 +362,7 @@ function ServiceCardView({
 
           <h3
             className={cx(
-              "min-h-[65px] pt-1.5 text-[24px] font-bold leading-snug",
+              "min-h-[50px] pt-1.5 text-[20px] font-bold leading-snug uppercase",
               theme?.heading ??
               "text-gray-900"
             )}
@@ -945,40 +945,21 @@ export default function HomeServices({
       ===================================================== */}
 
       <style jsx global>{`
-        /* ===================================================
-           SWIPER CONTAINER
-        =================================================== */
-
+      .service-card{
+  transition:
+    transform .8s ease;
+      }
+    .service-card:hover {
+  transform: translateY(-10px) scale(1.01);
+}
         .services-swiper {
           width: 100%;
-
-          /*
-           * Only the horizontal axis needs to clip (to hide off-screen
-           * slides) — the active slide's own \`scale: 1.04\` grows
-           * upward from \`transform-origin: center bottom\` below, so
-           * clipping the vertical axis too would cut its top edge off.
-           * \`!important\` here because \`swiper/css\`'s own base \`.swiper\`
-           * rule sets a plain \`overflow: hidden\` (both axes) on this
-           * same element, and — depending on stylesheet load order —
-           * could otherwise win back the vertical clip this overrides.
-           */
           overflow-x: hidden;
           overflow-y: visible !important;
-
-          /*
-           * Bottom padding gives pagination enough room.
-           */
           padding: 40px 4px 58px;
         }
-
-        /* ===================================================
-           SLIDES
-        =================================================== */
-
-        .services-swiper
-          .swiper-wrapper {
+        .services-swiper .swiper-wrapper {
           align-items: stretch;
-
           transition-timing-function:
             cubic-bezier(
               0.22,
@@ -987,168 +968,85 @@ export default function HomeServices({
               1
             );
         }
-
-        .services-swiper
-          .swiper-slide {
+        .services-swiper .swiper-slide {
           height: auto;
           transition:
             transform 0.4s ease,
             opacity 0.4s ease;
         }
-
-        .services-swiper
-  .swiper-slide
-  > a {
+        .services-swiper .swiper-slide > a {
   height: 100%;
-
   transform-origin: center bottom;
-
   scale: 0.94;
-
-  opacity: 1;
-
-  transition:
-    scale 0.4s
-      cubic-bezier(
-        0.22,
-        1,
-        0.36,
-        1
-      ),
-    opacity 0.4s ease,
-    box-shadow 0.4s ease;
 }
-
-.services-swiper
-  .swiper-slide-active
-  > a {
+.services-swiper .swiper-slide-active > a {
   scale: 1.04;
-  opacity: 1;
-  z-index: 2;
 }
-        
-
-        /* ===================================================
-           PAGINATION
-        =================================================== */
-
-        .services-swiper
-          .swiper-pagination {
+        .services-swiper .swiper-pagination {
           position: absolute;
-
           left: 0 !important;
           right: 0 !important;
-
           bottom: 10px !important;
-
           width: 100% !important;
-
           display: flex;
-
           align-items: center;
-
           justify-content: center;
-
           gap: 8px;
-
           text-align: center;
         }
-
-        .services-swiper
-          .swiper-pagination-bullet {
+        .services-swiper .swiper-pagination-bullet {
           width: 8px;
           height: 8px;
-
           margin: 0 !important;
-
           opacity: 1;
-
           border-radius: 999px;
-
           background: #d9dee5;
-
           transition:
             width 0.3s ease,
             background 0.3s ease,
             transform 0.3s ease;
         }
-
-        .services-swiper
-          .swiper-pagination-bullet-active {
+        .services-swiper .swiper-pagination-bullet-active {
           width: 24px;
-
           background: #007595;
         }
-
-        /* ===================================================
-           ARROWS
-        =================================================== */
-
-        .services-swiper-prev,
-        .services-swiper-next {
+        .services-swiper-prev, .services-swiper-next {
           transition:
             scale 0.25s ease,
             background-color 0.25s ease,
             box-shadow 0.25s ease;
         }
-
-        .services-swiper-prev:hover,
-        .services-swiper-next:hover {
+        .services-swiper-prev:hover, .services-swiper-next:hover {
           scale: 1.08;
         }
-
-        /* ===================================================
-           MOBILE
-        =================================================== */
-
         @media (max-width: 767px) {
           .services-swiper {
             padding-left: 4px;
             padding-right: 4px;
-
             padding-bottom: 52px;
           }
-
-          .services-swiper
-            .swiper-slide
-            > a {
+          .services-swiper .swiper-slide > a {
             scale: 1;
             opacity: 1;
           }
-
-          .services-swiper
-            .swiper-slide-active
-            > a {
+          .services-swiper .swiper-slide-active > a {
             scale: 1;
             box-shadow: none;
           }
-
-          .services-swiper-prev,
-          .services-swiper-next {
+          .services-swiper-prev, .services-swiper-next {
             display: none;
           }
         }
-
-        /* ===================================================
-           TABLET
-        =================================================== */
-
         @media (min-width: 768px) and (max-width: 1023px) {
-          .services-swiper
-            .swiper-slide
-            > a {
+          .services-swiper .swiper-slide > a {
             scale: 1;
             opacity: 1;
           }
-
-          .services-swiper
-            .swiper-slide-active
-            > a {
+          .services-swiper .swiper-slide-active > a {
             scale: 1;
             box-shadow: none;
           }
         }
-
       `}</style>
     </section>
   );
