@@ -1,14 +1,15 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { ReactNode, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { Entry, EntrySkeletonType } from "contentful";
 import { cx } from "@/app/lib/cx";
 import { resolveTheme } from "../lib/theme";
 import { getAssetUrl } from "../lib/contentfulAsset";
-import { ComposableElementSkeleton, DataImageSkeleton } from "../types/contentful";
+import { ComposableElementSkeleton, DataImageSkeleton, DataTextSkeleton } from "../types/contentful";
 import styles from "./ProductsCarousel.module.css";
 import ThemePattern from "./ThemePattern";
+import { documentToReactComponents } from "@contentful/rich-text-react-renderer";
 
 /**
  * `Entry<Skeleton>` on its own leaves `Modifiers` unconstrained, which
@@ -768,6 +769,16 @@ export default function ProductsCarousel({ entry }: Props) {
       navigate(dx < 0 ? 1 : -1);
     }
   }
+  const elements = entry.fields.elements ?? [];
+  
+    const copy = elements.find(
+      (element): element is PlainEntry<DataTextSkeleton> =>
+        isEntry(element) && element.sys.contentType.sys.id === "dataText"
+    );
+    const heading = copy?.fields.heading;
+    const description: ReactNode = copy?.fields.text
+      ? documentToReactComponents(copy.fields.text)
+      : undefined;
 
   return (
     <section
@@ -805,10 +816,19 @@ export default function ProductsCarousel({ entry }: Props) {
         >
 
           <div className={styles.topBar}>
+            <div>
             <span className={cx(
               "text-[28px] leading-[1.15] font-extrabold tracking-tight sm:text-[34px] md:text-[40px] z-2",
               theme?.heading ?? "text-gray-900"
-            )}>Our Products</span>
+            )}>{heading}</span>
+            {description && (
+            <div
+              className={cx("rich-text mt-1 max-w-2xl text-[15px] leading-relaxed", theme?.body ?? "text-[#565A57]")}
+            >
+              {description}
+            </div>
+          )}
+            </div>
             <span className={cx(
               "text-[20px] leading-[1.15] font-extrabold tracking-tight sm:text-[26px] md:text-[30px] z-2",
               theme?.heading ?? "text-gray-900"

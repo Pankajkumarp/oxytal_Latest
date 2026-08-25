@@ -534,7 +534,7 @@
 /* ── TOP BAR (scoped to the stage, not the browser window) ── */
 .topBar {
   position: absolute;
-  top: 40px;
+  top: 55px;
   left: 20px;
   right: 0;
   z-index: 10;
