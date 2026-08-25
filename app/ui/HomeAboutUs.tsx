@@ -79,7 +79,7 @@ interface FeatureItem {
   iconUrl?: string;
   badge?: string;
   /** Whether the icon slot (image or fallback glyph) should render at all — from `contentDetail.showIcon`, defaulting to shown when unset. */
-  showIcon: boolean;
+  showIcon?: boolean;
 }
 
 /** Cycled by item index as a fallback when a `contentDetail` entry has no `icon` image set. */

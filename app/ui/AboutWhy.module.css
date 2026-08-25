@@ -1,0 +1,243 @@
+/*
+ * A faithful, class-renamed port of the closing `.band.band--rule` block's
+ * styles in `Refrence/oxytal-about.html` — the "AI & Agentic Engineering"
+ * band `AboutWhy.tsx` renders directly, appended after its own main
+ * `<section>`. Kept as a CSS Module rather than rewritten into Tailwind
+ * utilities, same "faithfulness over consistency" rule
+ * `AIPipelineDemo.module.css`/`ServicesPage.module.css` document for the
+ * same situation — this design leans on CSS counters, several bespoke
+ * keyframe animations, and a fixed dark/amber palette that doesn't map
+ * cleanly onto utility classes.
+ *
+ * The reference's `:root` variables are folded into `.band` (the band's
+ * own root element), same convention `AIPipelineDemo.module.css` uses for
+ * the same reason (CSS Modules require every selector to contain at least
+ * one local class). Only the variables this block's own markup actually
+ * uses are carried over — the reference's `:root` also defines masthead/
+ * hero/facts/etc. tokens that belong to the rest of that standalone
+ * mockup page, not this one section.
+ */
+
+.band {
+  --ink: #0e0e0f;
+  --ink1: #141416;
+  --ink2: #1a1a1d;
+  --line: #26262a;
+  --line2: #33333a;
+  --paper: #ededea;
+  --mute: #8c8c88;
+  --amber: #53eafd;
+  --amberDeep: #53eafd;
+  --gut: clamp(20px, 5vw, 72px);
+  --display: var(--font-archivo), system-ui, sans-serif;
+  --body: var(--font-plex-sans), system-ui, sans-serif;
+  --mono: var(--font-plex-mono), ui-monospace, monospace;
+
+  /*
+   * No `background` here (unlike the reference's own `.band`) — the
+   * outer background is theme/backgroundImage-driven now, applied via
+   * inline `style`/Tailwind class from AboutWhy.tsx (same mechanism its
+   * "Why Choose Us" section already uses), falling back to a flat
+   * `--ink` background only when neither is set. Keeping it in this
+   * class instead would fight that at equal CSS specificity.
+   */
+  position: relative;
+  color: var(--paper);
+  -webkit-font-smoothing: antialiased;
+  padding: clamp(64px, 9vw, 110px) var(--gut);
+}
+
+.buildsEyebrow {
+  margin-bottom: 18px;
+}
+
+.heading {
+  margin: 0 0 18px;
+  max-width: 22ch;
+  font: 600 clamp(28px, 4.2vw, 44px) / 1.08 var(--display);
+  letter-spacing: -0.032em;
+}
+
+.lead {
+  margin: 0 0 clamp(34px, 5vw, 50px);
+  max-width: 62ch;
+  color: var(--mute);
+  font-size: clamp(16px, 1.8vw, 17.5px);
+}
+
+/* ── story: copy + pull-quote demo card ── */
+.story {
+  display: grid;
+  gap: clamp(32px, 5vw, 72px);
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+  align-items: start;
+  margin-bottom: clamp(40px, 6vw, 64px);
+}
+
+@media (max-width: 920px) {
+  .story {
+    grid-template-columns: 1fr;
+  }
+}
+
+.pull {
+  margin: 0;
+  padding: clamp(28px, 3.6vw, 40px);
+  border-radius: 12px;
+  position: relative;
+  overflow: hidden;
+}
+/* Approximates the reference's own tiny inline-SVG single-dot background
+   (see this file's own doc comment above) with an equivalent CSS dot
+   grid. */
+.pullDots {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: radial-gradient(
+    circle,
+    rgba(255, 196, 81, 0.18) 1px,
+    transparent 1.5px
+  );
+  background-size: 32px 32px;
+}
+.pullInner {
+  position: relative;
+}
+.pullLabel {
+  margin-bottom: 16px;
+  font: 500 11px/1 var(--mono);
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--amberDeep);
+}
+.pullCaption {
+  margin: 18px 0 0;
+  position: relative;
+  font: 400 13px/1.5 var(--mono);
+  color: var(--mute);
+}
+
+/* ── ForgePipeline live-run demo ── */
+.pipeline {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.pstep {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: var(--ink2);
+  font: 400 14px/1 var(--body);
+  transition:
+    border-color 0.3s,
+    background 0.3s;
+}
+.pdone {
+  border-color: #53eafd;
+  background: rgba(255, 196, 81, 0.04);
+}
+.prun {
+  border-color: #53eafd;
+  background: rgba(255, 196, 81, 0.07);
+  animation: pRun 2s ease-in-out infinite;
+}
+@keyframes pRun {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(255, 196, 81, 0);
+  }
+  50% {
+    box-shadow: 0 0 10px rgba(255, 196, 81, 0.15);
+  }
+}
+.pnum {
+  font: 500 11px/1 var(--mono);
+  letter-spacing: 0.12em;
+  color: var(--amberDeep);
+}
+.pname {
+  font: 500 14px/1 var(--display);
+  letter-spacing: -0.01em;
+  flex: 1;
+}
+.ptick {
+  font-size: 14px;
+  color: var(--amber);
+  margin-left: auto;
+}
+.pspin {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  border: 1.5px solid rgba(255, 196, 81, 0.3);
+  border-top-color: var(--amber);
+  animation: spin 0.9s linear infinite;
+  display: inline-block;
+  margin-left: auto;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.pqueued {
+  margin-left: auto;
+  font: 500 11px/1 var(--mono);
+  color: var(--mute);
+}
+
+.shimmer {
+  height: 1px;
+  margin-top: 14px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    var(--amber),
+    var(--amberDeep),
+    transparent
+  );
+  background-size: 200%;
+  animation: shimAI 3s linear infinite;
+}
+@keyframes shimAI {
+  0% {
+    background-position: 200%;
+  }
+  100% {
+    background-position: -200%;
+  }
+}
+
+/* ── "What the AI Lab builds" 4-up grid ── */
+/* Just the grid layout — each card itself is now styled directly in
+   AboutWhy.tsx via Tailwind classes (theme-driven `cardBg`/`cardBorder`),
+   and its hover is GSAP-driven (see BUILD CARD HOVER in AboutWhy.tsx),
+   not CSS `:hover` — nothing else to put here. */
+.steps {
+  display: grid;
+  gap: clamp(14px, 2vw, 20px);
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+@media (max-width: 980px) {
+  .steps {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 560px) {
+  .steps {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .band * {
+    animation: none !important;
+    transition: none !important;
+  }
+}

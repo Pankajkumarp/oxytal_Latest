@@ -328,7 +328,7 @@ export default function AboutApproach({ entry }: Props) {
     const bounds = card.getBoundingClientRect();
     const x = event.clientX - bounds.left;
     const y = event.clientY - bounds.top;
-    spotlight.style.background = `radial-gradient(220px circle at ${x}px ${y}px, rgb(196 187 236 / 36%), transparent 65%)`;
+    spotlight.style.background = `radial-gradient(220px circle at ${x}px ${y}px, rgb(0 117 149 / 15%), transparent 65%)`;
   };
 
   const handleCardLeave = (event: React.MouseEvent<HTMLDivElement>) => {
@@ -426,7 +426,7 @@ export default function AboutApproach({ entry }: Props) {
                 </p>
                 <div
                   data-approach-icon
-                  className="mt-4 flex h-12 w-12 items-center justify-center text-white"
+                  className="mt-4 flex h-16 w-16 items-center justify-center text-white"
                 >
                   {step.iconUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element -- matches the plain <img> convention already used for Contentful assets in this project
@@ -434,7 +434,7 @@ export default function AboutApproach({ entry }: Props) {
                       src={step.iconUrl}
                       alt=""
                       aria-hidden
-                      className="h-15 w-15 object-contain"
+                      className="h-16 w-16 object-contain"
                     />
                   ) : (
                     <FallbackIcon size={20} aria-hidden />

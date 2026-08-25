@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import { useLayoutEffect, useRef } from "react";
@@ -73,11 +74,11 @@ const DEFAULT_CARDS: MissionVisionCard[] = [];
 function contentDetailToCard(
   entry: PlainEntry<ContentDetailSkeleton>
 ): MissionVisionCard {
-  const iconEntry = entry.fields.icon;
+  const iconEntry = entry.fields.heroImage;
   const iconUrl = isEntry(iconEntry)
     ? getAssetUrl(
-        (iconEntry as unknown as PlainEntry<DataImageSkeleton>).fields.image
-      )
+      (iconEntry as unknown as PlainEntry<DataImageSkeleton>).fields.image
+    )
     : undefined;
 
   return {
@@ -122,10 +123,13 @@ function contentDetailToCard(
  * no background photo, same call every sibling section makes.
  *
  * The heading gets the same GSAP split-text scroll-reveal every other
- * section's heading uses. The Mission/Vision cards get their own
- * scroll-triggered load animation too — a fade + rise, staggered one
- * card after another as the grid scrolls into view (no hover animation
- * here, load only). Both are skipped under `prefers-reduced-motion`.
+ * section's heading uses, and the cards get their own scroll-triggered
+ * load animation — a fade + rise, staggered one card after another as
+ * the grid scrolls into view. Each card also gets its own hover (see
+ * CARD HOVER below) — distinct from every other card hover in this
+ * codebase, built around what these cards actually have that most
+ * sibling cards don't: a full banner image/gradient up top. All three
+ * are skipped under `prefers-reduced-motion`.
  */
 interface Props {
   entry?: PlainEntry<ComposableElementSkeleton>;
@@ -165,9 +169,9 @@ export default function AboutMissionVision({ entry }: Props) {
   const backgroundImageEntry = entry?.fields.backgroundImage;
   const backgroundUrl = isEntry(backgroundImageEntry)
     ? getAssetUrl(
-        (backgroundImageEntry as unknown as PlainEntry<DataImageSkeleton>)
-          .fields.image
-      )
+      (backgroundImageEntry as unknown as PlainEntry<DataImageSkeleton>)
+        .fields.image
+    )
     : undefined;
 
   const sectionRef = useRef<HTMLElement>(null);
@@ -254,6 +258,60 @@ export default function AboutMissionVision({ entry }: Props) {
     return () => ctx.revert();
   }, []);
 
+  /* =========================================================
+     CARD HOVER — the banner (image or gradient block) does a slow
+     Ken-Burns zoom, clipped by the card's own `overflow-hidden`, while
+     the card itself lifts with a soft shadow and the uppercase label
+     below spreads out slightly. Distinct from every other card hover in
+     this codebase (HomeAboutUs's icon scale, HomeAI's underline grow,
+     AboutWhy's number-badge pop) — this is the first card with a full
+     banner to zoom instead of just an icon. GSAP rather than CSS so all
+     three animate off one trigger. Skipped under prefers-reduced-motion.
+  ========================================================= */
+  const handleCardEnter = (event: React.MouseEvent<HTMLDivElement>) => {
+    if (prefersReducedMotion()) {
+      return;
+    }
+
+    const card = event.currentTarget;
+    const banner = card.querySelector<HTMLElement>("[data-mv-banner]");
+    const label = card.querySelector<HTMLElement>("[data-mv-label]");
+
+    gsap.to(card, {
+      y: -8,
+      boxShadow:
+        "0 30px 54px -30px rgba(20,80,212,0.35), 0 14px 30px -18px rgba(16,24,40,0.14)",
+      duration: 0.45,
+      ease: "power2.out",
+    });
+
+    if (banner) {
+      gsap.to(banner, { scale: 1.08, duration: 0.7, ease: "power2.out" });
+    }
+    if (label) {
+      gsap.to(label, { letterSpacing: "0.12em", duration: 0.4, ease: "power2.out" });
+    }
+  };
+
+  const handleCardLeave = (event: React.MouseEvent<HTMLDivElement>) => {
+    if (prefersReducedMotion()) {
+      return;
+    }
+
+    const card = event.currentTarget;
+    const banner = card.querySelector<HTMLElement>("[data-mv-banner]");
+    const label = card.querySelector<HTMLElement>("[data-mv-label]");
+
+    gsap.to(card, { y: 0, duration: 0.4, ease: "power2.out", clearProps: "boxShadow" });
+
+    if (banner) {
+      gsap.to(banner, { scale: 1, duration: 0.5, ease: "power2.out" });
+    }
+    if (label) {
+      gsap.to(label, { duration: 0.35, ease: "power2.out", clearProps: "letterSpacing" });
+    }
+  };
+
   return (
     <section
       ref={sectionRef}
@@ -268,7 +326,7 @@ export default function AboutMissionVision({ entry }: Props) {
     >
       <div aria-hidden className="pointer-events-none absolute inset-0 z-1">
 
-          <ThemePattern theme={theme} pattern={entry?.fields.pattern} patternColor={entry?.fields.patternColor} />
+        <ThemePattern theme={theme} pattern={entry?.fields.pattern} patternColor={entry?.fields.patternColor} />
       </div>
 
       <div className="container mx-auto px-5 md:px-10">
@@ -293,34 +351,40 @@ export default function AboutMissionVision({ entry }: Props) {
         </DynamicHeading>
 
         <div ref={cardsRef} className="mt-12 grid gap-6 lg:grid-cols-2">
-          {cards.map((card, index) => {
-            const FallbackIcon = FALLBACK_ICONS[index % FALLBACK_ICONS.length];
+          {cards.map((card) => {
 
             return (
               <div
                 key={card.id}
+                onMouseEnter={handleCardEnter}
+                onMouseLeave={handleCardLeave}
                 className={cx(
-                  "rounded-2xl border p-9 z-2",
+                  "rounded-2xl border z-2 overflow-hidden",
                   theme?.cardBorder ?? "border-blue-100",
                   theme?.cardBg ?? "bg-white"
                 )}
               >
-                <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-gradient-to-br from-[#1450d4] to-[#2d7dfa] text-white">
+
+                <div
+                  data-mv-banner
+                  className="w-full aspect-[1600/400] flex items-center justify-center bg-gradient-to-br from-[#1450d4] to-[#2d7dfa]"
+                >
                   {card.iconUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element -- matches the plain <img> convention already used for Contentful assets in this project
                     <img
                       src={card.iconUrl}
                       alt=""
                       aria-hidden
-                      className="h-6 w-6 object-contain"
+                      className="h-full w-full object-cover"
                     />
                   ) : (
-                    <FallbackIcon size={22} aria-hidden />
+                    null
                   )}
                 </div>
+                <div className="p-9">
                 <p
+                  data-mv-label
                   className={cx(
-                    "mt-5 text-[11px] font-bold tracking-wide uppercase",
+                    "text-[20px] font-bold tracking-wide uppercase",
                     theme?.accentText ?? "text-blue-600"
                   )}
                 >
@@ -342,6 +406,7 @@ export default function AboutMissionVision({ entry }: Props) {
                 >
                   {card.description}
                 </p>
+              </div>
               </div>
             );
           })}

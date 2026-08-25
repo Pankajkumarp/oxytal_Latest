@@ -462,7 +462,7 @@ export default function HomeTalkToUs({ entry }: Props) {
           {description && (
             <div
               className={cx(
-                "rich-text max-w-md text-[15.5px] leading-relaxed md:text-[17px] z-2",
+                "rich-text max-w-2xl text-[15.5px] leading-relaxed md:text-[17px] z-2",
                 TEXT_ALIGN[align],
                 align === "center" ? "max-w-3xl": "max-w-md",
                 theme?.body ?? "text-gray-500"
@@ -475,6 +475,7 @@ export default function HomeTalkToUs({ entry }: Props) {
           {/* =================================================
               FEATURES — one per contentDetail entry.
           ================================================= */}
+          {features?.length > 0 && (
           <div
             ref={cardsRef}
             className="mt-2 grid grid-cols-2 gap-x-6 gap-y-7 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-2"
@@ -541,6 +542,7 @@ export default function HomeTalkToUs({ entry }: Props) {
               );
             })}
           </div>
+          )}
 
           {/* =================================================
               CTA + handwritten-style note.

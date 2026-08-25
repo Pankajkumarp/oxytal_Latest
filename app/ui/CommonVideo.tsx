@@ -95,7 +95,7 @@ function aspectRatioClasses(
  * video's upper portion at all.
  */
 const OVERLAY_CLASSES: Record<CommonVideoOverlay, string> = {
-  dark: "bg-[#808080] opacity-50",
+  dark: "bg-[#808080] opacity-40",
   light: "bg-gradient-to-t from-white/90 via-white/30 to-transparent",
 };
 

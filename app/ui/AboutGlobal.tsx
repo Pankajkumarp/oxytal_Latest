@@ -358,58 +358,7 @@ export default function AboutGlobal({ entry }: Props) {
           </div>
         </div>
 
-        <div className="mt-12 grid gap-6 lg:grid-cols-12">
-          <div className="lg:col-span-4">
-            <div
-              className={cx(
-                "rounded-2xl relative p-10 text-center z-1",
-                theme?.cardBg,
-                theme?.cardBorder
-              )}
-            >
-              <Globe aria-hidden size={50} className="mx-auto text-white" />
-              <p
-                className={cx(
-                  "mt-2 text-[38px] font-extrabold",
-                  theme?.heading ?? "text-gray-900"
-                )}
-              >
-                {regions.length}
-                <span className={theme?.accentText ?? "text-blue-600"}>+</span>
-              </p>
-              <p
-                className={cx(
-                  "text-[12px] font-semibold tracking-wide uppercase",
-                  theme?.muted ?? "text-gray-500"
-                )}
-              >
-                {statLabel}
-              </p>
-              <div className="mt-5 flex flex-wrap justify-center gap-2">
-                {regions.map((region) => (
-                  <span
-                    key={region.id}
-                    className={cx(
-                      "rounded-full border bg-white px-3.5 py-1.5 text-[12.5px] font-semibold",
-                      theme?.cardBorder ?? "border-blue-100",
-                      theme?.accentText ?? "text-blue-600"
-                    )}
-                  >
-                    {region.country}
-                  </span>
-                ))}
-              </div>
-            </div>
-            <div
-              className={cx(
-                "rich-text mt-4 text-[13.5px] leading-relaxed",
-                theme?.body ?? "text-gray-500"
-              )}
-            >
-              {aside}
-            </div>
-          </div>
-
+        <div className="mt-12 grid gap-6">
           <div ref={cardsRef} className="grid gap-5 sm:grid-cols-3 lg:col-span-8">
             {regions.map((region) => (
               <div
@@ -427,7 +376,7 @@ export default function AboutGlobal({ entry }: Props) {
                     data-region-ripple
                     aria-hidden
                     className={cx(
-                      "pointer-events-none absolute inset-0 m-auto h-10 w-10 scale-0 rounded-full bg-current opacity-0",
+                      "pointer-events-none absolute inset-0 m-auto h-16 w-16 scale-0 rounded-full bg-current opacity-0",
                       theme?.accentText ?? "text-blue-600"
                     )}
                   />
@@ -437,7 +386,7 @@ export default function AboutGlobal({ entry }: Props) {
                       src={region.flagUrl}
                       alt=""
                       aria-hidden
-                      className="h-12 w-12  object-cover"
+                      className="h-16 w-16  object-cover"
                     />
                   ) : (
                     <Globe
@@ -449,7 +398,7 @@ export default function AboutGlobal({ entry }: Props) {
                 </div>
                 <p
                   className={cx(
-                    "mt-2 text-[17px] font-extrabold",
+                    "mt-2 text-[21px] font-extrabold",
                     theme?.heading ?? "text-gray-900"
                   )}
                 >
@@ -458,7 +407,7 @@ export default function AboutGlobal({ entry }: Props) {
                 {region.role && (
                   <p
                     className={cx(
-                      "mt-1 text-[11px] font-bold tracking-wide uppercase",
+                      "mt-1 text-[11px] font-semibold tracking-wide uppercase",
                       theme?.accentText ?? "text-blue-600"
                     )}
                   >

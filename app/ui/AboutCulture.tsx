@@ -27,6 +27,7 @@ import {
   DataImageSkeleton,
   DataTextSkeleton,
 } from "../types/contentful";
+import Link from "next/link";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger, SplitText);
@@ -69,6 +70,9 @@ interface CultureItem {
   title: string;
   description: string;
   iconUrl?: string;
+  badge?: string;
+  slug?: string;
+  showIcon?: boolean;
 }
 
 /** Cycled by item index as a fallback when a `contentDetail` entry has no `icon` image set — same pattern AboutApproach/AboutServices use. */
@@ -84,15 +88,18 @@ function contentDetailToCultureItem(
   const iconEntry = entry.fields.icon;
   const iconUrl = isEntry(iconEntry)
     ? getAssetUrl(
-        (iconEntry as unknown as PlainEntry<DataImageSkeleton>).fields.image
-      )
+      (iconEntry as unknown as PlainEntry<DataImageSkeleton>).fields.image
+    )
     : undefined;
 
   return {
     id: entry.sys.id,
     title: entry.fields.title ?? "",
     description: entry.fields.shortDescription ?? "",
+    badge: entry.fields.badge ?? "",
+    slug: entry.fields.slug ?? "",
     iconUrl,
+    showIcon: entry.fields.showIcon !== false,
   };
 }
 
@@ -185,9 +192,9 @@ export default function AboutCulture({ entry }: Props) {
   const backgroundImageEntry = entry?.fields.backgroundImage;
   const backgroundUrl = isEntry(backgroundImageEntry)
     ? getAssetUrl(
-        (backgroundImageEntry as unknown as PlainEntry<DataImageSkeleton>)
-          .fields.image
-      )
+      (backgroundImageEntry as unknown as PlainEntry<DataImageSkeleton>)
+        .fields.image
+    )
     : undefined;
 
   const backgroundStyle = backgroundUrl
@@ -325,8 +332,8 @@ export default function AboutCulture({ entry }: Props) {
       )}
       style={backgroundStyle}
     >
- 
-          <ThemePattern theme={theme} pattern={entry?.fields.pattern} patternColor={entry?.fields.patternColor} />
+
+      <ThemePattern theme={theme} pattern={entry?.fields.pattern} patternColor={entry?.fields.patternColor} />
 
       <div className="container relative mx-auto px-5 md:px-10">
         <div className="max-w-xl">
@@ -369,31 +376,34 @@ export default function AboutCulture({ entry }: Props) {
                 onMouseEnter={handleCardEnter}
                 onMouseLeave={handleCardLeave}
                 className={cx(
-                  "flex flex-col items-center rounded-2xl p-8 text-center ring-1 ring-white/10 z-1",
+                  "flex flex-col rounded-xl p-6  ring-1 ring-white/10 z-1",
                   theme?.cardBg ?? "bg-white/5",
                   theme?.cardBorder
                 )}
               >
-                <div
-                  data-culture-icon
-                  className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-[#1450d4] to-[#2d7dfa] text-white"
-                >
-                  {item.iconUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element -- matches the plain <img> convention already used for Contentful assets in this project
-                    <img
-                      src={item.iconUrl}
-                      alt=""
-                      aria-hidden
-                      className="h-6 w-6 object-contain"
-                    />
-                  ) : (
-                    <FallbackIcon size={22} aria-hidden />
-                  )}
-                </div>
+                {item.showIcon && (
+                  <div
+                    data-culture-icon
+                    className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-[#1450d4] to-[#2d7dfa] text-white"
+                  >
+                    {item.iconUrl ? (
+                      // eslint-disable-next-line @next/next/no-img-element -- matches the plain <img> convention already used for Contentful assets in this project
+                      <img
+                        src={item.iconUrl}
+                        alt=""
+                        aria-hidden
+                        className="h-6 w-6 object-contain"
+                      />
+                    ) : (
+                      <FallbackIcon size={22} aria-hidden />
+                    )}
+                  </div>
+                )}
                 <h3
                   className={cx(
-                    "mt-4 text-[15px] font-bold",
-                    theme?.heading ?? "text-white"
+                    "text-[20px] font-semibold",
+                    item.showIcon ? "mt-4" : "",
+                    theme?.eyebrowText ?? "text-white"
                   )}
                 >
                   {item.title}
@@ -406,6 +416,19 @@ export default function AboutCulture({ entry }: Props) {
                 >
                   {item.description}
                 </p>
+                {item.badge && (
+                  <Link
+                    href={item.slug || ""}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={cx(
+                      "mt-1 text-[15px] font-medium hover:opacity-60 transition-opacity underline",
+                      theme?.eyebrowText ?? "text-white"
+                    )}
+                  >
+                    {item.badge}
+                  </Link>
+                )}
               </div>
             );
           })}
