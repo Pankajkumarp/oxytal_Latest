@@ -962,7 +962,7 @@ export default function HomeServices({
 }
 
 .service-card:hover .text-section-card {
-  background: transparent;
+  background: #ffffff78;
 }
         .services-swiper {
           width: 100%;
