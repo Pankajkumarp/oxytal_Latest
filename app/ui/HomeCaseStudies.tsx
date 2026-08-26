@@ -315,7 +315,7 @@ function CaseStudySlide({
   return (
     <div
      className={cx(
-            "grid items-center gap-10 lg:grid-cols-12 lg:gap-12 xl:gap-16 border",
+            "grid items-center gap-10 lg:grid-cols-12 lg:gap-12 xl:gap-16",
             theme?.cardBorder,
             theme?.cardBg
           )}>
@@ -334,16 +334,6 @@ function CaseStudySlide({
             {study.category}
           </span>
         </div>
-
-        <span
-          className={cx(
-            "text-xs font-bold tracking-[0.15em] uppercase",
-             theme?.accentText ?? "text-emerald-700"
-          )}
-        >
-          Case Study {String(index + 1).padStart(2, "0")} /{" "}
-          {String(total).padStart(2, "0")}
-        </span>
 
         <h3
           className={cx(
