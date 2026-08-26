@@ -1,11 +1,19 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useMemo, useReducer, useRef } from "react";
+import { useLayoutEffect, useRef } from "react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SplitText } from "gsap/SplitText";
-import useEmblaCarousel from "embla-carousel-react";
-import Autoplay from "embla-carousel-autoplay";
+import { Swiper, SwiperSlide } from "swiper/react";
+import {
+  Autoplay as SwiperAutoplay,
+  Navigation,
+  Pagination,
+  A11y,
+} from "swiper/modules";
+import "swiper/css";
+import "swiper/css/navigation";
+import "swiper/css/pagination";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cx } from "@/app/lib/cx";
 import { documentToReactComponents } from "@contentful/rich-text-react-renderer";
@@ -108,9 +116,10 @@ function technologyToTrustedByItem(
  * description render normally, with no animation. Below that, each client
  * is just its logo at a fixed 200×80, linking out to `website` when set
  * (falls back to plain name text when `logo` is omitted) — no card chrome,
- * name label, or badge. Logos sit in an Embla Carousel: 1 per view on
- * mobile, 2 on tablet, 3 on desktop+ (via each slide's own responsive
- * width), looping. Autoplay is skipped under `prefers-reduced-motion`.
+ * name label, or badge. Logos sit in a Swiper carousel: 1 per view on
+ * mobile, 2 on tablet, 4 on desktop+ (via `breakpoints` below), looping
+ * with an eased slide transition. Autoplay is skipped under
+ * `prefers-reduced-motion`.
  *
  * The composableElement's own `backgroundImage` field (links to a
  * `dataImage` entry, same field HomeAboutUs/HomeAI/HomeProducts use) is an
@@ -143,7 +152,7 @@ export default function CommonTrustedBy({
 }: Props) {
   const showArrows = false;
   const autoPlay = true;
-  const autoPlayDelay = 4000;
+  const autoPlayDelay = 50000;
   const className = "";
 
   const elements = entry.fields.elements ?? [];
@@ -240,58 +249,7 @@ export default function CommonTrustedBy({
     // run once on mount, not re-run reactively.
   }, []);
 
-  /* =========================================================
-     SLIDER — Embla Carousel. Loops, autoplays (paused on
-     hover/interaction, skipped entirely under reduced-motion), 1
-     slide per view on mobile / 2 on tablet / 3 on desktop+ via each
-     slide's own responsive flex-basis below.
-
-     `emblaApi`'s own state (selected index, snap list) isn't cached
-     into React state — that would mean calling setState synchronously
-     during this effect just to seed the initial value, which is the
-     exact anti-pattern react-hooks/set-state-in-effect flags. Instead
-     a plain re-render counter is bumped from within Embla's own event
-     callbacks, and the actual values are read fresh from `emblaApi`
-     directly during render — always current, no separate copy to
-     keep in sync.
-  ========================================================= */
-  const plugins = useMemo(
-    () =>
-      autoPlay && !prefersReducedMotion()
-        ? [
-          Autoplay({
-            delay: autoPlayDelay,
-            stopOnMouseEnter: true,
-            stopOnInteraction: false,
-          }),
-        ]
-        : [],
-    [autoPlay, autoPlayDelay]
-  );
-
-  const [emblaRef, emblaApi] = useEmblaCarousel(
-    { loop: true, align: "start" },
-    plugins
-  );
-
-  const [, rerender] = useReducer((tick: number) => tick + 1, 0);
-
-  useEffect(() => {
-    if (!emblaApi) {
-      return;
-    }
-
-    emblaApi.on("select", rerender);
-    emblaApi.on("reInit", rerender);
-
-    return () => {
-      emblaApi.off("select", rerender);
-      emblaApi.off("reInit", rerender);
-    };
-  }, [emblaApi]);
-
-  const scrollSnaps = emblaApi?.scrollSnapList() ?? [];
-  const selectedIndex = emblaApi?.selectedScrollSnap() ?? 0;
+  const reducedMotion = prefersReducedMotion();
 
   return (
     <section
@@ -362,34 +320,57 @@ export default function CommonTrustedBy({
         </div>
 
         {/* =================================================
-            SLIDER — 1 logo per view on mobile, 2 on tablet, 3 on
-            desktop+ (each slide's flex-basis below). Each slide is just
-            the logo image (fixed 200×80) linking out to the client's
-            site — no card chrome, name, or badge.
+            SLIDER — Swiper carousel: 1 logo per view on mobile, 2 on
+            tablet, 4 on desktop+ (breakpoints below). Loops, autoplays
+            (paused on hover/interaction, skipped under reduced-motion).
+            Each slide is just the logo image (fixed 200×80) linking out
+            to the client's site — no card chrome, name, or badge.
         ================================================= */}
-        <div
-          className={cx(
-            "relative mx-auto mt-1 z-2",
-            SLIDER_WIDTH_CLASSES[sliderWidth]
-          )}
-        >
-          <div className="overflow-hidden" ref={emblaRef}>
-            <div className="-ml-5 flex">
+        {items.length > 0 && (
+          <div
+            className={cx(
+              "relative mx-auto mt-1 z-2",
+              SLIDER_WIDTH_CLASSES[sliderWidth]
+            )}
+          >
+            <Swiper
+              modules={[Navigation, Pagination, SwiperAutoplay, A11y]}
+              loop={items.length > 4}
+              speed={reducedMotion ? 0 : 700}
+              slidesPerView={1}
+              spaceBetween={20}
+              autoplay={
+                autoPlay && !reducedMotion
+                  ? {
+                      delay: autoPlayDelay,
+                      disableOnInteraction: false,
+                      pauseOnMouseEnter: true,
+                    }
+                  : false
+              }
+              navigation={{
+                prevEl: ".trusted-by-swiper-prev",
+                nextEl: ".trusted-by-swiper-next",
+              }}
+              pagination={{ clickable: true }}
+              breakpoints={{
+                768: { slidesPerView: 2, spaceBetween: 20 },
+                1024: { slidesPerView: 4, spaceBetween: 24 },
+              }}
+              className="trusted-by-swiper"
+            >
               {items.map((item) => {
                 const LinkTag = item.website ? "a" : "div";
 
                 return (
-                  <div
-                    key={item.name}
-                    className="flex-[0_0_100%] pl-5 md:flex-[0_0_50%] lg:flex-[0_0_25%]"
-                  >
+                  <SwiperSlide key={item.name}>
                     <LinkTag
                       {...(item.website
                         ? {
-                          href: item.website,
-                          target: "_blank",
-                          rel: "noopener noreferrer",
-                        }
+                            href: item.website,
+                            target: "_blank",
+                            rel: "noopener noreferrer",
+                          }
                         : {})}
                       aria-label={item.name}
                       className={cx(
@@ -418,56 +399,70 @@ export default function CommonTrustedBy({
                         </span>
                       )}
                     </LinkTag>
-                  </div>
+                  </SwiperSlide>
                 );
               })}
-            </div>
+            </Swiper>
+
+            {showArrows && items.length > 1 && (
+              <>
+                <button
+                  type="button"
+                  aria-label="Previous"
+                  className="trusted-by-swiper-prev absolute top-1/2 left-0 z-20 flex -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-gray-100 bg-white p-2.5 text-gray-700 shadow-lg transition-colors hover:bg-gray-50"
+                >
+                  <ChevronLeft size={18} />
+                </button>
+
+                <button
+                  type="button"
+                  aria-label="Next"
+                  className="trusted-by-swiper-next absolute top-1/2 right-0 z-20 flex translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-gray-100 bg-white p-2.5 text-gray-700 shadow-lg transition-colors hover:bg-gray-50"
+                >
+                  <ChevronRight size={18} />
+                </button>
+              </>
+            )}
           </div>
-
-          {scrollSnaps.length > 1 && (
-            <>
-              {showArrows && (
-                <>
-                  <button
-                    type="button"
-                    onClick={() => emblaApi?.scrollPrev()}
-                    aria-label="Previous"
-                    className="absolute top-1/2 left-0 z-20 flex -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-gray-100 bg-white p-2.5 text-gray-700 shadow-lg transition-colors hover:bg-gray-50"
-                  >
-                    <ChevronLeft size={18} />
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => emblaApi?.scrollNext()}
-                    aria-label="Next"
-                    className="absolute top-1/2 right-0 z-20 flex translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-gray-100 bg-white p-2.5 text-gray-700 shadow-lg transition-colors hover:bg-gray-50"
-                  >
-                    <ChevronRight size={18} />
-                  </button>
-                </>
-              )}
-
-              <div className="mt-0 flex items-center justify-center gap-2">
-                {scrollSnaps.map((_, index) => (
-                  <button
-                    key={index}
-                    type="button"
-                    onClick={() => emblaApi?.scrollTo(index)}
-                    aria-label={`Go to slide ${index + 1}`}
-                    className={cx(
-                      "h-2 rounded-full transition-all duration-300",
-                      index === selectedIndex
-                        ? cx("w-6", theme?.buttonBg ?? "bg-emerald-600")
-                        : "w-2 bg-gray-200 hover:bg-gray-300"
-                    )}
-                  />
-                ))}
-              </div>
-            </>
-          )}
-        </div>
+        )}
       </div>
+
+      {/* =====================================================
+          SWIPER CSS — dot pagination for the logo-wall slider.
+      ===================================================== */}
+      <style jsx global>{`
+        .trusted-by-swiper {
+          padding: 4px 4px 34px;
+        }
+        .logo-card{
+        min-height:145px;
+        }
+        .trusted-by-swiper .swiper-pagination {
+          position: absolute;
+          bottom: 0 !important;
+          left: 0 !important;
+          right: 0 !important;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+        }
+        .trusted-by-swiper .swiper-pagination-bullet {
+          width: 8px;
+          height: 8px;
+          margin: 0 !important;
+          opacity: 1;
+          border-radius: 999px;
+          background: #d9dee5;
+          transition:
+            width 0.3s ease,
+            background 0.3s ease;
+        }
+        .trusted-by-swiper .swiper-pagination-bullet-active {
+          width: 24px;
+          background: #0092b8;
+        }
+      `}</style>
     </section>
   );
 }
