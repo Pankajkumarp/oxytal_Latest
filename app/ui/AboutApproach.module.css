@@ -1,0 +1,683 @@
+/*
+ * A faithful, class-renamed port of the <style> block in
+ * `Refrence/focus_journey_gsap.html` — the "focus journey" radial process
+ * layout (one large active "center" card, 4 corner "side" cards, a
+ * decorative halo/orbit ring behind them, and diagonal connector lines).
+ * Kept as a CSS Module rather than rewritten into Tailwind utilities,
+ * same "faithfulness over consistency" rule `ProductsCarousel.module.css`/
+ * `ServicesPage.module.css`/`AIPipelineDemo.module.css` document for the
+ * same situation: absolute-positioned halo/orbit rings, diagonal
+ * connector lines with hand-tuned rotation angles, and a dozen
+ * fine-grained breakpoints don't map cleanly onto utility classes.
+ *
+ * Deviations from the reference (see `AboutApproach.tsx`'s own doc
+ * comment for the animation-side ones): class names are camelCased;
+ * `.centerCard`'s number/icon/title/text are each rendered once *per
+ * step* (stacked via `.centerContentLayer`) rather than one shared node
+ * whose `textContent` gets overwritten, since this is React — see the
+ * component doc comment. The reference's own unused `.center-status`
+ * rule (defined in its stylesheet but never referenced by any element in
+ * its markup) isn't ported. Colors are the reference's own literal light
+ * palette (white cards, blue/cyan accents) — kept as-is regardless of
+ * `themeColor`/background, same "this section's own bespoke identity,
+ * not something a theme preset overrides" reasoning `HomeProducts`'s own
+ * doc comment gives for its corner ticks/tag palette, and safe to do
+ * here since every card is a near-opaque white (`rgba(255,255,255,.95)`
+ * / `.84`), so it reads the same over any section background.
+ */
+
+.focusStage {
+  position: relative;
+  min-height: 500px;
+  display: grid;
+  place-items: center;
+}
+
+.halo {
+  position: absolute;
+  width: 320px;
+  height: 320px;
+  border: 1px solid #cefafe;
+  border-radius: 50%;
+}
+
+.halo::before,
+.halo::after {
+  content: "";
+  position: absolute;
+  inset: 28px;
+  border: 1px dashed #cefafe;
+  border-radius: 50%;
+}
+
+.halo::after {
+  inset: 72px;
+  border-style: solid;
+  opacity: 0.65;
+}
+
+.orbitPath {
+  position: absolute;
+  width: 370px;
+  height: 370px;
+  border: 1px solid #cefafe;
+  border-radius: 50%;
+}
+
+.orbitLight {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  top: 50%;
+  left: 0;
+  margin: -5px;
+  border-radius: 50%;
+  background: #007595;
+}
+
+.centerCard {
+  position: relative;
+  z-index: 5;
+  width: min(290px, 85vw);
+  min-height: 260px;
+  padding: 18px;
+  border: 1px solid #cefafe;
+  border-radius: 25px;
+  background: #ffffff;
+  text-align: center;
+}
+
+/* One stacked layer per step (number+icon+title+text) — absolutely
+   overlapping so only the active one is ever visually in place; see the
+   component doc comment for why this replaces the reference's own
+   single-node `textContent` swap. */
+.centerContentStack {
+  position: relative;
+}
+
+.centerContentLayer {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.centerNumber {
+  color: #007595;
+  font-size: 9px;
+  font-weight: 900;
+  letter-spacing: 0.2em;
+}
+
+.centerIcon {
+  width: 60px;
+  height: 60px;
+  margin: 14px auto 12px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  font-size: 28px;
+}
+
+.centerCard h2 {
+  margin: 0 0 6px;
+  font-size: 18px;
+  font-weight: 800;
+}
+
+.centerCard p {
+  margin: 0 auto;
+  max-width: 280px;
+  color: #000;
+  line-height: 1.5;
+  font-size: 13.2px;
+}
+
+/* One step's highlight stats (`contentDetail.statistics`, up to 3) — a
+   compact row of value/label pairs between the description and the
+   meter. Empty (and so zero-height) when a step has no stats. */
+.centerStats {
+  display: flex;
+  justify-content: center;
+  gap: 14px;
+  margin-top: 10px;
+}
+
+.centerStat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 40px;
+}
+
+.centerStatValue {
+  font-size: 13px;
+  font-weight: 800;
+  color: #007595;
+  line-height: 1.1;
+}
+
+.centerStatLabel {
+  margin-top: 2px;
+  font-size: 8.5px;
+  color: #718096;
+  line-height: 1.3;
+  text-align: center;
+}
+
+.centerMeter {
+  width: 140px;
+  height: 4px;
+  margin: 16px auto 0;
+  border-radius: 99px;
+  background: #e7f2f8;
+  overflow: hidden;
+}
+
+.centerMeterFill {
+  display: block;
+  width: 0;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #007595, #cefafe);
+}
+
+.sideCard {
+  position: absolute;
+  width: 140px;
+  padding: 12px;
+  border: 1px solid #dceef8;
+  border-radius: 20px;
+  background: rgba(255, 255, 255, 0.84);
+  opacity: .9;
+  z-index: 3;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.35s ease;
+}
+
+.sideCard:hover {
+  opacity: 0.95;
+  transform: scale(1.04);
+  border-color: #cefafe;
+}
+
+/* The side card matching whatever step is currently shown large in the
+   centre (see `setSideSelected` in AboutApproach.tsx) — a distinct blue-
+   tinted background (not just "more opaque white") so it visibly reads
+   as the one "in focus", echoing `.centerIcon`'s own light-blue tint. */
+.sideCard.selected {
+  opacity: 1;
+  border-color: #cefafeb0;
+  background: #cefafeb0;
+  transform: scale(1.08);
+}
+
+.sideCard[data-position="one"] {
+  left: 3%;
+  top: 2%;
+}
+
+.sideCard[data-position="two"] {
+  right: 3%;
+  top: 2%;
+}
+
+.sideCard[data-position="three"] {
+  left: 5%;
+  bottom: 3%;
+}
+
+.sideCard[data-position="four"] {
+  right: 5%;
+  bottom: 3%;
+}
+
+.sideNumber {
+  font-size: 10px;
+  font-weight: 900;
+  color: #7caac2;
+  letter-spacing: 0.16em;
+}
+
+.sideCard h3 {
+  margin: 6px 0 3px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.sideCard p {
+  margin: 0;
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+.connector {
+  position: absolute;
+  z-index: 1;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #bde4f5, transparent);
+  transform-origin: left center;
+  opacity: 0.7;
+}
+
+.connectorLeftTop {
+  width: 140px;
+  left: 19%;
+  top: 27%;
+  transform: rotate(27deg);
+}
+
+.connectorRightTop {
+  width: 140px;
+  right: 19%;
+  top: 40%;
+  transform: rotate(-27deg);
+}
+
+.connectorLeftBottom {
+  width: 140px;
+  left: 19%;
+  bottom: 27%;
+  transform: rotate(-27deg);
+}
+
+.connectorRightBottom {
+  width: 140px;
+  right: 19%;
+  bottom: 27%;
+  transform: rotate(27deg);
+}
+
+.stepPips {
+  position: absolute;
+  bottom: -24px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 6px;
+  z-index: 10;
+}
+
+.stepPip {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #c8dfeb;
+  transition: width 0.3s ease, background 0.3s ease;
+}
+
+.stepPipActive {
+  width: 20px;
+  border-radius: 99px;
+  background: linear-gradient(90deg, #007595, #007595);
+}
+
+@media (min-width: 481px) {
+  .focusStage {
+    min-height: 640px;
+  }
+
+  .centerCard {
+    width: min(270px, 92vw);
+    min-height: 240px;
+  }
+
+  .sideCard {
+    width: 125px;
+  }
+
+  .sideCard[data-position="one"] {
+    left: 2%;
+    top: 1%;
+  }
+
+  .sideCard[data-position="two"] {
+    right: 2%;
+    top: 1%;
+  }
+
+  .sideCard[data-position="three"] {
+    left: 2%;
+    bottom: 2%;
+  }
+
+  .sideCard[data-position="four"] {
+    right: 2%;
+    bottom: 2%;
+  }
+
+  .stepPips {
+    bottom: -28px;
+    gap: 8px;
+  }
+
+  .stepPip {
+    width: 7px;
+    height: 7px;
+  }
+
+  .stepPipActive {
+    width: 24px;
+  }
+}
+
+@media (min-width: 769px) {
+  .focusStage {
+    min-height: 680px;
+  }
+
+  .halo {
+    width: 320px;
+    height: 320px;
+  }
+
+  .orbitPath {
+    width: 370px;
+    height: 370px;
+  }
+
+  .centerCard {
+    width: min(290px, 85vw);
+    min-height: 260px;
+    padding: 18px;
+  }
+
+  .centerNumber {
+    font-size: 9px;
+  }
+
+  .centerIcon {
+    width: 60px;
+    height: 60px;
+    font-size: 28px;
+    margin: 14px auto 12px;
+  }
+
+  .centerCard h2 {
+    font-size: 18px;
+    margin-bottom: 6px;
+  }
+
+  .centerCard p {
+    font-size: 12px;
+    line-height: 1.5;
+  }
+
+  .centerMeter {
+    position: absolute;
+    width: 140px;
+    height: 4px;
+    margin: 16px auto 0;
+    bottom: 20px;
+    left: 50%;
+  transform: translateX(-50%);
+  }
+
+  .sideCard {
+    width: 140px;
+    padding: 12px;
+  }
+
+  .sideCard h3 {
+    font-size: 12px;
+    margin: 6px 0 3px;
+  }
+
+  .sideCard p {
+    font-size: 10px;
+  }
+
+  .sideCard[data-position="one"] {
+    left: 3%;
+    top: 2%;
+  }
+
+  .sideCard[data-position="two"] {
+    right: 3%;
+    top: 2%;
+  }
+
+  .sideCard[data-position="three"] {
+    left: 5%;
+    bottom: 3%;
+  }
+
+  .sideCard[data-position="four"] {
+    right: 5%;
+    bottom: 3%;
+  }
+}
+
+@media (min-width: 851px) {
+  .focusStage {
+    min-height: 650px;
+  }
+
+  .halo {
+    width: 340px;
+    height: 340px;
+  }
+
+  .orbitPath {
+    width: 400px;
+    height: 400px;
+  }
+
+  .centerCard {
+    width: min(300px, 65vw);
+    min-height: 310px;
+    padding: 20px;
+  }
+
+  .centerIcon {
+    width: 68px;
+    height: 68px;
+    font-size: 32px;
+  }
+
+  .centerCard h2 {
+    font-size: 20px;
+    margin-bottom: 8px;
+  }
+
+  .sideCard {
+    width: 160px;
+    padding: 14px;
+  }
+
+  .sideCard[data-position="one"] {
+    left: 2%;
+    top: 5%;
+  }
+
+  .sideCard[data-position="two"] {
+    right: 2%;
+    top: 5%;
+  }
+
+  .sideCard[data-position="three"] {
+    left: 10%;
+    bottom: 8%;
+  }
+
+  .sideCard[data-position="four"] {
+    right: 10%;
+    bottom: 8%;
+  }
+
+  .connectorLeftTop,
+  .connectorRightTop {
+    width: 140px;
+  }
+}
+
+@media (min-width: 1025px) {
+  .focusStage {
+    min-height: 675px;
+  }
+
+  .halo {
+    width: 380px;
+    height: 380px;
+  }
+
+  .orbitPath {
+    width: 450px;
+    height: 450px;
+  }
+
+  .centerCard {
+    width: min(330px, 70vw);
+    min-height: 320px;
+    padding: 24px;
+  }
+
+  .centerIcon {
+    width: 70px;
+    height: 70px;
+    font-size: 32px;
+    margin: 14px auto 14px;
+  }
+
+  .centerCard h2 {
+    font-size: 20px;
+    margin-bottom: 6px;
+  }
+
+  .sideCard {
+    width: 190px;
+    padding: 16px;
+  }
+
+  .sideCard[data-position="one"],
+  .sideCard[data-position="two"] {
+    top: 20%;
+  }
+
+  .sideCard[data-position="three"],
+  .sideCard[data-position="four"] {
+    bottom: 5%;
+  }
+
+  .sideCard[data-position="one"] {
+    left: 3%;
+  }
+
+  .sideCard[data-position="two"] {
+    right: 3%;
+  }
+
+  .sideCard[data-position="three"] {
+    left: 15%;
+  }
+
+  .sideCard[data-position="four"] {
+    right: 15%;
+  }
+
+  .sideCard h3 {
+    font-size: 14px;
+    margin: 8px 0 4px;
+  }
+
+  .sideCard p {
+    font-size: 11px;
+  }
+}
+
+@media (min-width: 1281px) {
+  .focusStage {
+    min-height: 500px;
+  }
+
+  .halo {
+    width: 430px;
+    height: 430px;
+  }
+
+  .orbitPath {
+    width: 400px;
+    height: 400px;
+  }
+
+  .centerCard {
+    width: min(335px, 70vw);
+    min-height: 335px;
+    padding: 28px;
+  }
+
+  .centerNumber {
+    font-size: 10px;
+  }
+
+  .centerIcon {
+    width: 76px;
+    height: 76px;
+    margin: 16px auto 16px;
+    font-size: 36px;
+  }
+
+  .centerCard h2 {
+    font-size: 24px;
+    margin-bottom: 8px;
+  }
+
+  .centerCard p {
+    font-size: 13px;
+  }
+
+  .centerMeter {
+    width: 160px;
+    height: 5px;
+    margin: 20px auto 0;
+  }
+
+  .sideCard {
+    width: 210px;
+    padding: 18px;
+  }
+
+  .sideCard h3 {
+    font-size: 15px;
+    margin: 8px 0 5px;
+  }
+
+  .sideCard p {
+    font-size: 11px;
+    line-height: 1.5;
+  }
+}
+
+@media (min-width: 1520px) {
+  .connectorLeftTop,
+  .connectorRightTop {
+    width: 255px;
+  }
+  .connectorRightTop {
+    top: 53%;
+    right: 15%;
+  }
+  .connectorLeftBottom, .connectorRightBottom{
+    width: 255px;
+  }
+  .connectorRightBottom{
+    width: 200px;
+    bottom: 40%;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .centerContentLayer,
+  .sideCard {
+    opacity: 1;
+  }
+
+  .centerMeterFill {
+    width: 100%;
+  }
+
+  .orbitLight {
+    display: none;
+  }
+}
