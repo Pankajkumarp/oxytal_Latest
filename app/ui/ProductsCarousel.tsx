@@ -40,6 +40,13 @@ function isEntry(value: unknown): value is AnyEntry {
   );
 }
 
+const prefersReducedMotion = () =>
+  typeof window !== "undefined" &&
+  window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/** How long each slide stays up before autoplay advances to the next one (ms) — same order of magnitude as `TestimonialCarousel`'s own 6s delay, since this carousel's slides carry a comparable amount of content to read. */
+const AUTOPLAY_DELAY_MS = 4000;
+
 interface Metric {
   value: string;
   color?: string;
@@ -639,6 +646,16 @@ function SlideVisual({ visual }: { visual: Visual }) {
  *   onMouseEnter/onMouseLeave), so this section never hijacks the page's
  *   own scrolling or steals arrow-key focus from the rest of the page
  * - touch swipe is scoped to the stage element itself, not `document`
+ * - autoplay advances one slide every `AUTOPLAY_DELAY_MS`, looping from
+ *   the last slide back to the first (arrows/dots/pips, by contrast,
+ *   clamp at the ends rather than loop) — paused while the stage is
+ *   hovered (same `hoveredRef` the keyboard/wheel handling already
+ *   tracks) and skipped entirely under `prefers-reduced-motion`, same
+ *   pause-on-hover/skip-under-reduced-motion convention every other
+ *   autoplaying carousel in this codebase follows (CommonTrustedBy,
+ *   HomeCaseStudies, HomeServices, ...). Any navigation — arrows, dots,
+ *   pips, swipe, wheel, or keyboard — resets the countdown, so autoplay
+ *   never fights a slide the visitor just chose
  *
  * Slide transitions reuse the reference's own two-state trick: the
  * outgoing slide gets a transient `prev` class (fades out, drifts up)
@@ -706,21 +723,25 @@ export default function ProductsCarousel({ entry }: Props) {
 
   const total = SLIDES.length;
 
-  function goTo(index: number) {
-    const clamped = Math.max(0, Math.min(total - 1, index));
-    if (clamped === current || animatingRef.current) {
+  /** Shared transition trigger behind both `goTo` (clamped) and autoplay (looping) — bumps `prevIndex`/`current` and clears `animatingRef` again once the 650ms CSS transition finishes. No-ops mid-transition or when `index` is already current. */
+  function transitionTo(index: number) {
+    if (index === current || animatingRef.current) {
       return;
     }
 
     animatingRef.current = true;
     setPrevIndex(current);
-    setCurrent(clamped);
+    setCurrent(index);
 
     clearTimeout(prevTimeoutRef.current);
     prevTimeoutRef.current = setTimeout(() => {
       setPrevIndex(null);
       animatingRef.current = false;
     }, 650);
+  }
+
+  function goTo(index: number) {
+    transitionTo(Math.max(0, Math.min(total - 1, index)));
   }
 
   const navigate = (dir: 1 | -1) => goTo(current + dir);
@@ -749,6 +770,31 @@ export default function ProductsCarousel({ entry }: Props) {
     return () => window.removeEventListener("keydown", onKeyDown);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- `navigate` closes over `current`/`total` freshly each render; only the listener identity needs to stay stable across renders.
   }, [current]);
+
+  /* =========================================================
+     AUTOPLAY — advances one slide every AUTOPLAY_DELAY_MS, looping past
+     the last slide back to the first (unlike `goTo`, which clamps).
+     Paused while the stage is hovered, skipped entirely under
+     prefers-reduced-motion. Restarting this effect on every `current`
+     change (whether from autoplay's own tick or any manual navigation)
+     is what makes a manual jump reset the countdown, same as this
+     codebase's other autoplaying carousels.
+  ========================================================= */
+  useEffect(() => {
+    if (prefersReducedMotion() || total <= 1) {
+      return;
+    }
+
+    const id = setInterval(() => {
+      if (hoveredRef.current) {
+        return;
+      }
+      transitionTo((current + 1) % total);
+    }, AUTOPLAY_DELAY_MS);
+
+    return () => clearInterval(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- `transitionTo` closes over `current`/`total` freshly each render; only the timer identity needs to stay stable, and it's intentionally restarted on every `current` change (see above).
+  }, [current, total]);
 
   function handleWheel(event: React.WheelEvent<HTMLDivElement>) {
     const now = Date.now();

@@ -1,7 +1,7 @@
 import CommonTrustedBy from "@/app/ui/CommonTrustedBy";
 import HomeServices from "@/app/ui/HomeServices";
 import HomeAI from "@/app/ui/HomeAI";
-import HomeProducts from "@/app/ui/HomeProducts";
+import HomeProducts from "@/app/ui/ProductsCarousel";
 import HomeTalkToUs from "@/app/ui/HomeTalkToUs";
 import HomeAboutUs from "@/app/ui/HomeAboutUs";
 import HomeCaseStudies from "@/app/ui/HomeCaseStudies";
@@ -79,7 +79,7 @@ const subtypeComponents: Record<
   client: CommonTrustedBy,
   service: HomeServices,
   ai: HomeAI,
-  producthome: ProductsCarousel,
+  producthome: HomeProducts,
   talktous: HomeTalkToUs,
   aboutus: HomeAboutUs,
   casestudy: HomeCaseStudies,
