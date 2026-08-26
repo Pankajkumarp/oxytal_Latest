@@ -15,6 +15,16 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SplitText } from "gsap/SplitText";
 import useEmblaCarousel from "embla-carousel-react";
 import Autoplay from "embla-carousel-autoplay";
+import { Swiper, SwiperSlide } from "swiper/react";
+import {
+  Autoplay as SwiperAutoplay,
+  Navigation,
+  Pagination,
+  A11y,
+} from "swiper/modules";
+import "swiper/css";
+import "swiper/css/navigation";
+import "swiper/css/pagination";
 import { documentToReactComponents } from "@contentful/rich-text-react-renderer";
 import { Entry, EntrySkeletonType } from "contentful";
 import {
@@ -261,8 +271,6 @@ function testimonialToItem(
   };
 }
 
-/** Cycled by card index as a fallback when a case study's `category` has no matching icon (contentDetail's `icon` field isn't used for the category glyph — this just gives every card a bit of visual variety). */
-const FALLBACK_CATEGORY_ICONS: LucideIcon[] = [BarChart3, Boxes];
 
 /** Cycled by stat index as a fallback when a `statistic` entry has no `icon` image set. */
 const STAT_ICONS: LucideIcon[] = [Zap, TrendingUp, Users];
@@ -279,173 +287,115 @@ const DEFAULT_CASE_STUDIES: CaseStudyItem[] = [];
 const DEFAULT_TESTIMONIALS: TestimonialItem[] = [];
 
 /**
- * One case-study card — uniform chrome for both the featured study and the
- * regular ones (badge/category, client logo, title, description, inline
- * photo, 3 stats, CTA), so all cards sit as equal-width slides in the
- * carousel below. The only difference for the featured study is its badge,
- * which reads "Featured" (with a sparkle icon) instead of its category.
+ * One case-study slide — a two-column layout (copy on the left, the case
+ * study's inline photo on the right) matching the reference design
+ * (`Refrence/casestudy-slide.png`): a category/"Featured" badge, a
+ * "Case Study 0X / 0Y" counter, title, description, up to 3 stats, and a
+ * "View Case Study" CTA next to a large photo. Stacks to a single column
+ * (copy above photo) below `lg`. This is one full slide of the 1-per-view
+ * Swiper carousel below, not a grid card — so it takes the slide's own
+ * `total` count to render its counter.
  */
-function CaseStudyCard({
+const truncateText = (text: string, maxLength = 120) => {
+  if (text.length <= maxLength) return text;
+  return `${text.slice(0, maxLength).trimEnd()}...`;
+};
+function CaseStudySlide({
   study,
   index,
+  total,
   theme,
 }: {
   study: CaseStudyItem;
   index: number;
+  total: number;
   theme?: SectionTheme;
 }) {
-  const CategoryIcon =
-    FALLBACK_CATEGORY_ICONS[index % FALLBACK_CATEGORY_ICONS.length];
-
-  const cardRef = useRef<HTMLDivElement>(null);
-  const imageRef = useRef<HTMLImageElement>(null);
-
-  /* =========================================================
-     CARD HOVER — the whole card scales up slightly with a soft shadow,
-     while the inline photo *within* it zooms in further still (see
-     PHOTO HOVER below) — a layered "card grows, photo grows more"
-     effect rather than either alone. GSAP rather than CSS so both
-     tweens (and the photo's own, nested one) ease in lockstep. Skipped
-     under prefers-reduced-motion — the card just stays put.
-  ========================================================= */
-  const handleCardEnter = () => {
-    if (prefersReducedMotion() || !cardRef.current) {
-      return;
-    }
-
-    gsap.to(cardRef.current, {
-      scale: 1.03,
-      boxShadow: "0 14px 28px -16px rgba(16,24,40,0.06)",
-      duration: 0.4,
-      ease: "power2.out",
-    });
-  };
-
-  const handleCardLeave = () => {
-    if (prefersReducedMotion() || !cardRef.current) {
-      return;
-    }
-
-    gsap.to(cardRef.current, {
-      scale: 1,
-      duration: 0.4,
-      ease: "power2.out",
-      clearProps: "boxShadow",
-    });
-  };
-
-  /* =========================================================
-     PHOTO HOVER — the inline photo zooms in slightly while its
-     `overflow-hidden` wrapper crops the excess, a classic "card hover
-     reveals more of the photo" treatment. GSAP rather than a plain CSS
-     `hover:scale-*` so it eases out smoothly on the way back in too
-     (a CSS transition on `transform` would work as well, but every
-     other card/photo hover in this codebase is GSAP-driven for
-     consistency — see AboutApproach/AboutCulture/HomeTalkToUs).
-     Skipped under prefers-reduced-motion — the photo just stays put.
-  ========================================================= */
-  const handlePhotoEnter = () => {
-    if (prefersReducedMotion() || !imageRef.current) {
-      return;
-    }
-
-    gsap.to(imageRef.current, { scale: 1.08, duration: 0.6, ease: "power2.out" });
-  };
-
-  const handlePhotoLeave = () => {
-    if (prefersReducedMotion() || !imageRef.current) {
-      return;
-    }
-
-    gsap.to(imageRef.current, { scale: 1, duration: 0.5, ease: "power2.out" });
-  };
 
   return (
     <div
-      ref={cardRef}
-      onMouseEnter={handleCardEnter}
-      onMouseLeave={handleCardLeave}
-      className={cx(
-        "group relative z-2 flex h-full flex-col gap-4 rounded-2xl border p-7",
-        theme?.cardBorder ?? "border-gray-100 hover:border-emerald-100",
-        theme?.cardBg ?? "bg-white"
-      )}
-    >
-      <div className="flex items-start justify-between gap-3">
-        <span
-          className={cx(
-            "inline-flex items-center gap-2 text-[11px] font-bold tracking-wide uppercase",
-            theme?.accentText ?? "text-emerald-600"
-          )}
-        >
+     className={cx(
+            "grid items-center gap-10 lg:grid-cols-12 lg:gap-12 xl:gap-16 border",
+            theme?.cardBorder,
+            theme?.cardBg
+          )}>
+      {/* =================================================
+          COPY
+      ================================================= */}
+      <div className="flex flex-col items-center gap-5 text-center lg:col-span-4 lg:items-start lg:text-left px-3 pt-5 lg:pt-0 lg:pl-6 lg:pr-2">
+        <div className="flex flex-wrap items-center justify-center gap-3 lg:justify-start">
           <span
             className={cx(
-              "flex h-7 w-7 shrink-0 items-center justify-center rounded-lg",
-              theme?.eyebrowBg ?? "bg-emerald-50"
+              "inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-[11px] font-bold tracking-wide uppercase",
+              theme?.eyebrowBg ?? "bg-emerald-50",
+              theme?.accentText ?? "text-emerald-700"
             )}
           >
-            {study.featured ? (
-              <Sparkles size={14} aria-hidden />
-            ) : (
-              <CategoryIcon size={14} aria-hidden />
-            )}
+            {study.category}
           </span>
-          {study.featured ? "Featured" : study.category}
+        </div>
+
+        <span
+          className={cx(
+            "text-xs font-bold tracking-[0.15em] uppercase",
+             theme?.accentText ?? "text-emerald-700"
+          )}
+        >
+          Case Study {String(index + 1).padStart(2, "0")} /{" "}
+          {String(total).padStart(2, "0")}
         </span>
 
-        {study.clientLogoUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element -- matches the plain <img> convention already used for external/Contentful assets in this project
-          <img
-            src={study.clientLogoUrl}
-            alt={study.clientName ?? ""}
-            className="h-12 w-auto object-contain"
-          />
-        ) : (
-          study.clientName && (
-            <span
-              className={cx(
-                "text-xs font-bold",
-                theme?.muted ?? "text-gray-400"
-              )}
-            >
-              {study.clientName}
-            </span>
-          )
+        <h3
+          className={cx(
+            "text-[26px] leading-tight font-extrabold sm:text-[28px] md:text-[30px]",
+            theme?.heading ?? "text-gray-900"
+          )}
+        >
+          {study.title}
+        </h3>
+
+        {study.description && (
+          <p
+            className={cx(
+              "max-w-lg text-[15px] leading-relaxed",
+              theme?.body ?? "text-gray-500"
+            )}
+          >
+            {truncateText(study.description, 140)}
+          </p>
+        )}
+
+
+        {study.ctaLabel && (
+          <Link
+            href={study.ctaHref}
+            className={cx(
+              "group/link mt-1 inline-flex w-fit items-center gap-1.5 text-[15px] font-semibold",
+              theme?.accentText ?? "text-emerald-600"
+            )}
+          >
+            {study.ctaLabel}
+            <ArrowRight
+              size={15}
+              className="transition-transform group-hover/link:translate-x-1"
+              aria-hidden
+            />
+          </Link>
         )}
       </div>
 
-      <h3
-        className={cx(
-          "text-[17px] font-bold",
-          theme?.heading ?? "text-gray-900"
-        )}
-      >
-        {study.title}
-      </h3>
-
-      {study.description && (
-        <p
-          className={cx(
-            "text-[13.5px] leading-relaxed",
-            theme?.body ?? "text-gray-500"
-          )}
-        >
-          {study.description}
-        </p>
-      )}
-
-      {/* Inline photo, shown on every card that has one (not just the
-          featured one) — blank when `heroImage` isn't set, no placeholder
-          photo. */}
+      {/* =================================================
+          PHOTO — blank when `heroImage` isn't set, no placeholder photo.
+      ================================================= */}
       {study.imageUrl && (
         <div
-          onMouseEnter={handlePhotoEnter}
-          onMouseLeave={handlePhotoLeave}
-          className="relative mt-1 overflow-hidden rounded-1xl aspect-[1740/900]"
+          className={cx(
+            "relative overflow-hidden",
+            "aspect-[1672/941] lg:col-span-8",
+          )}
         >
           {/* eslint-disable-next-line @next/next/no-img-element -- matches the plain <img> convention already used for external/Contentful assets in this project */}
           <img
-            ref={imageRef}
             src={study.imageUrl}
             alt=""
             aria-hidden
@@ -453,77 +403,6 @@ function CaseStudyCard({
           />
         </div>
       )}
-
-      {study.stats.length > 0 && (
-        <div
-          className={cx(
-            "grid grid-cols-3 gap-2 border-t pt-4",
-            theme?.cardBorder ?? "border-gray-100"
-          )}
-        >
-          {study.stats.slice(0, 3).map((stat, statIndex) => {
-            const StatIcon = STAT_ICONS[statIndex % STAT_ICONS.length];
-
-            return (
-              <div key={stat.label} className="flex flex-col gap-1">
-                <span
-                  className={cx(
-                    "flex h-6 w-6 items-center justify-center rounded-md",
-                    theme?.eyebrowBg ?? "bg-emerald-50",
-                    theme?.accentText ?? "text-emerald-600"
-                  )}
-                >
-                  {stat.iconUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element -- matches the plain <img> convention already used for external/Contentful assets in this project
-                    <img
-                      src={stat.iconUrl}
-                      alt=""
-                      aria-hidden
-                      className="h-3.5 w-3.5 object-contain"
-                    />
-                  ) : (
-                    <StatIcon size={13} aria-hidden />
-                  )}
-                </span>
-                <span
-                  className={cx(
-                    "text-[13px] font-extrabold",
-                    theme?.heading ?? "text-gray-900"
-                  )}
-                >
-                  {stat.value}
-                </span>
-                <span
-                  className={cx(
-                    "text-[10.5px] leading-snug",
-                    theme?.body ?? "text-gray-500"
-                  )}
-                >
-                  {stat.label}
-                </span>
-              </div>
-            );
-          })}
-        </div>
-      )}
-
-      {study.ctaLabel && (
-        <Link
-          href={study.ctaHref}
-          className={cx(
-            "group/link mt-auto inline-flex w-fit items-center gap-1.5 pt-1 text-[13.5px] font-semibold",
-            theme?.accentText ?? "text-emerald-600"
-          )}
-        >
-          {study.ctaLabel}
-          <ArrowRight
-            size={13}
-            className="transition-transform group-hover/link:translate-x-1"
-            aria-hidden
-          />
-        </Link>
-      )}
-
     </div>
   );
 }
@@ -1068,50 +947,6 @@ export default function HomeCaseStudies({ entry }: Props) {
     };
   }, []);
 
-  /* =========================================================
-     CASE STUDY CARDS — Embla Carousel, same setup as CommonTrustedBy's
-     logo wall: loops, autoplays (paused on hover/interaction, skipped
-     under reduced-motion), 1 card per view on mobile / 2 on tablet / 3 on
-     desktop+ via each slide's own responsive flex-basis below.
-  ========================================================= */
-  const carouselPlugins = useMemo(
-    () =>
-      !prefersReducedMotion()
-        ? [
-            Autoplay({
-              delay: 5000,
-              stopOnMouseEnter: true,
-              stopOnInteraction: false,
-            }),
-          ]
-        : [],
-    []
-  );
-
-  const [emblaRef, emblaApi] = useEmblaCarousel(
-    { loop: true, align: "start" },
-    carouselPlugins
-  );
-
-  const [, rerenderCarousel] = useReducer((tick: number) => tick + 1, 0);
-
-  useEffect(() => {
-    if (!emblaApi) {
-      return;
-    }
-
-    emblaApi.on("select", rerenderCarousel);
-    emblaApi.on("reInit", rerenderCarousel);
-
-    return () => {
-      emblaApi.off("select", rerenderCarousel);
-      emblaApi.off("reInit", rerenderCarousel);
-    };
-  }, [emblaApi]);
-
-  const carouselSnaps = emblaApi?.scrollSnapList() ?? [];
-  const carouselSelectedIndex = emblaApi?.selectedScrollSnap() ?? 0;
-
   return (
     <section
       ref={sectionRef}
@@ -1177,85 +1012,69 @@ export default function HomeCaseStudies({ entry }: Props) {
         </div>
 
         {/* =================================================
-            CASE STUDY CARDS — Embla carousel, 1 slide per view on
-            mobile / 2 on tablet / 3 on desktop+ (each slide's flex-basis
-            below), looping. Works for any number of case studies.
+            CASE STUDY SLIDES — Swiper carousel, one case study per view
+            (loops, autoplays, swipeable on touch, paused on hover, skipped
+            under reduced-motion), with prev/next arrows floating at the
+            outer edges and dot pagination below (see `CaseStudySlide` for
+            the two-column layout of each slide). Works for any number of
+            case studies.
         ================================================= */}
-        <div className="relative mt-16 md:mt-20 z-2">
-          {/* `py-4 -my-4` gives the viewport's clip box a few extra
-              pixels of headroom above/below without changing the
-              carousel's own footprint in the page (the negative margin
-              cancels the padding's effect on layout) — otherwise
-              CaseStudyCard's hover scale-up got its top/bottom edges
-              cut off right at this `overflow-hidden` boundary, which
-              still has to stay in place (embla needs it to clip slides
-              horizontally). */}
-          <div className="overflow-hidden py-4 -my-4" ref={emblaRef}>
-            <div
-              className={cx(
-                "-ml-6 flex",
-                // Each breakpoint shows a fixed number of slides per view
-                // (1 / 2 / 3 — see each slide's own flex-basis below). When
-                // there are fewer case studies than that, the row doesn't
-                // fill the track and sits left-aligned by default; center
-                // it instead so a lone 1- or 2-card roster doesn't look
-                // stranded against the left edge. A full (3+) roster is
-                // unaffected — the row already fills the track, so
-                // `justify-center` there is a no-op.
-                caseStudies.length < 2 && "sm:justify-center",
-                caseStudies.length < 3 && "lg:justify-center"
-              )}
+        {caseStudies.length > 0 && (
+          <div className="relative z-2 mt-10">
+            <Swiper
+              modules={[Navigation, Pagination, SwiperAutoplay, A11y]}
+              loop={caseStudies.length > 1}
+              speed={prefersReducedMotion() ? 0 : 700}
+              autoplay={
+                !prefersReducedMotion()
+                  ? {
+                      delay: 6000,
+                      disableOnInteraction: false,
+                      pauseOnMouseEnter: true,
+                    }
+                  : false
+              }
+              navigation={{
+                prevEl: ".case-study-swiper-prev",
+                nextEl: ".case-study-swiper-next",
+              }}
+              pagination={{ clickable: true }}
+              a11y={{ prevSlideMessage: "Previous case study", nextSlideMessage: "Next case study" }}
+              className="case-study-swiper"
             >
               {caseStudies.map((study, index) => (
-                <div
-                  key={study.id}
-                  className="flex-[0_0_100%] pl-6 sm:flex-[0_0_50%] lg:flex-[0_0_33.333%]"
-                >
-                  <CaseStudyCard study={study} index={index} theme={theme} />
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {carouselSnaps.length > 1 && (
-            <>
-              <button
-                type="button"
-                onClick={() => emblaApi?.scrollPrev()}
-                aria-label="Previous case study"
-                className="absolute top-1/2 left-0 z-20 hidden -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-gray-100 bg-white p-2.5 text-gray-700 shadow-lg transition-colors hover:bg-gray-50 md:flex"
-              >
-                <ChevronLeft size={18} aria-hidden />
-              </button>
-
-              <button
-                type="button"
-                onClick={() => emblaApi?.scrollNext()}
-                aria-label="Next case study"
-                className="absolute top-1/2 right-0 z-20 hidden translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-gray-100 bg-white p-2.5 text-gray-700 shadow-lg transition-colors hover:bg-gray-50 md:flex"
-              >
-                <ChevronRight size={18} aria-hidden />
-              </button>
-
-              <div className="mt-6 flex items-center justify-center gap-2">
-                {carouselSnaps.map((_, dotIndex) => (
-                  <button
-                    key={dotIndex}
-                    type="button"
-                    onClick={() => emblaApi?.scrollTo(dotIndex)}
-                    aria-label={`Go to slide ${dotIndex + 1}`}
-                    className={cx(
-                      "h-2 rounded-full transition-all duration-300",
-                      dotIndex === carouselSelectedIndex
-                        ? cx("w-6", theme?.buttonBg ?? "bg-emerald-600")
-                        : "w-2 bg-gray-200 hover:bg-gray-300"
-                    )}
+                <SwiperSlide key={study.id}>
+                  <CaseStudySlide
+                    study={study}
+                    index={index}
+                    total={caseStudies.length}
+                    theme={theme}
                   />
-                ))}
-              </div>
-            </>
-          )}
-        </div>
+                </SwiperSlide>
+              ))}
+            </Swiper>
+
+            {caseStudies.length > 1 && (
+              <>
+                <button
+                  type="button"
+                  aria-label="Previous case study"
+                  className="case-study-swiper-prev absolute top-1/2 left-0 z-30 hidden -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-gray-100 bg-white p-2.5 text-gray-700 shadow-lg transition-colors hover:bg-gray-50 md:flex"
+                >
+                  <ChevronLeft size={18} aria-hidden />
+                </button>
+
+                <button
+                  type="button"
+                  aria-label="Next case study"
+                  className="case-study-swiper-next absolute top-1/2 right-0 z-30 hidden translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full border border-gray-100 bg-white p-2.5 text-gray-700 shadow-lg transition-colors hover:bg-gray-50 md:flex"
+                >
+                  <ChevronRight size={18} aria-hidden />
+                </button>
+              </>
+            )}
+          </div>
+        )}
 
         {/* =================================================
             TESTIMONIAL
@@ -1310,6 +1129,55 @@ export default function HomeCaseStudies({ entry }: Props) {
           </div>
         )}
       </div>
+
+      {/* =====================================================
+          SWIPER CSS — case-study slider only (dot pagination + arrow
+          hover, arrows hidden below `md` same as the old carousel arrows).
+      ===================================================== */}
+      <style jsx global>{`
+        .case-study-swiper {
+          padding: 8px 0px 52px;
+        }
+        .case-study-swiper .swiper-pagination {
+          position: absolute;
+          bottom: 8px !important;
+          left: 0 !important;
+          right: 0 !important;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 8px;
+        }
+        .case-study-swiper .swiper-pagination-bullet {
+          width: 8px;
+          height: 8px;
+          margin: 0 !important;
+          opacity: 1;
+          border-radius: 999px;
+          background: #d9dee5;
+          transition:
+            width 0.3s ease,
+            background 0.3s ease;
+        }
+        .case-study-swiper .swiper-pagination-bullet-active {
+          width: 24px;
+          background: #0092b8;
+        }
+        .case-study-swiper-prev,
+        .case-study-swiper-next {
+          transition: scale 0.25s ease;
+        }
+        .case-study-swiper-prev:hover,
+        .case-study-swiper-next:hover {
+          scale: 1.06;
+        }
+        @media (max-width: 767px) {
+          .case-study-swiper-prev,
+          .case-study-swiper-next {
+            display: none;
+          }
+        }
+      `}</style>
     </section>
   );
 }
