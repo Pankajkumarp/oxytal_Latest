@@ -55,6 +55,15 @@ import LandingExplore from "@/app/ui/LandingExplore";
 import LandingFaq from "@/app/ui/LandingFaq";
 import LandingInsights from "@/app/ui/LandingInsights";
 import ProductsCarousel from "./ProductsCarousel";
+import DigitalCommerceHero from "@/app/ui/DigitalCommerce/DigitalCommerceHero";
+import DigitalCommerceProblems from "@/app/ui/DigitalCommerce/DigitalCommerceProblems";
+import DigitalCommerceCapability from "@/app/ui/DigitalCommerce/DigitalCommerceCapability";
+import DigitalCommercePlatforms from "@/app/ui/DigitalCommerce/DigitalCommercePlatforms";
+import DigitalCommerceWhy from "@/app/ui/DigitalCommerce/DigitalCommerceWhy";
+import DigitalCommerceEvidence from "@/app/ui/DigitalCommerce/DigitalCommerceEvidence";
+import DigitalCommerceEngagement from "@/app/ui/DigitalCommerce/DigitalCommerceEngagement";
+import DigitalCommerceFaq from "@/app/ui/DigitalCommerce/DigitalCommerceFaq";
+import DigitalCommerceRelated from "@/app/ui/DigitalCommerce/DigitalCommerceRelated";
 import { Entry, EntrySkeletonType } from "contentful";
 import { ComposableElementSkeleton } from "../types/contentful";
 import { resolveNavContrast } from "../lib/navContrast";
@@ -133,6 +142,15 @@ const subtypeComponents: Record<
   landingExplore: LandingExplore,
   landingFaq: LandingFaq,
   landingInsights: LandingInsights,
+  DigitalCommerceHero: DigitalCommerceHero,
+  digitalCommerceProblems: DigitalCommerceProblems,
+  digitalCommerceCapability: DigitalCommerceCapability,
+  digitalCommercePlatforms: DigitalCommercePlatforms,
+  digitalCommerceWhy: DigitalCommerceWhy,
+  digitalCommerceEvidence: DigitalCommerceEvidence,
+  digitalCommerceEngagement: DigitalCommerceEngagement,
+  digitalCommerceFaq: DigitalCommerceFaq,
+  digitalCommerceRelated: DigitalCommerceRelated,
 };
 
 export default function ComposableElementRenderer({

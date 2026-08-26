@@ -456,8 +456,7 @@ export default function Footer({ entry }: Props) {
             <Link
               href="/"
               className={cx(
-                "inline-flex w-fit items-center text-[30px] font-extrabold tracking-tight pointer-events-none",
-                theme?.link ?? "text-gray-600",
+                "inline-flex w-fit items-center text-[30px] tracking-tight text-white"
               )}
             >
               {logoUrl ? (
@@ -465,12 +464,7 @@ export default function Footer({ entry }: Props) {
                 <img src={logoUrl} alt="Oxytal" className="h-8 w-auto object-contain" />
               ) : (
                 <>
-                  <ChevronRight
-                    size={18}
-                    className={theme?.accentText ?? "text-emerald-500"}
-                    aria-hidden
-                  />
-                  OXY<span className={theme?.accentText ?? "text-emerald-600"}>TAL</span>
+                  Oxytal
                 </>
               )}
             </Link>

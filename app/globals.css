@@ -294,3 +294,294 @@ body {
 .swiper-slide-active {
   z-index: 10;
 }
+
+/* ------------------- Theme digital Strategy Start ------------------ */
+.digitalStrategy {
+    background: linear-gradient(155deg,#FDF4F7 0%,#F8F5FE 55%,#FCFBFD 100%);
+  }
+.digitalStrategy .arrow-bg{
+  background: #fe7f52;
+}
+.digitalStrategy .theme-main{
+  color: #fe7f52;
+}
+.digitalStrategy .body-text-theme{
+  color: #5c6072;
+}
+.digitalStrategy .body-client-theme{
+  color: #95919F;
+}
+.digitalStrategy .primaryButton {
+    background-color: #fe7f52;
+    color: #FFFFFF;
+  }
+
+.digitalStrategy .primaryButton:hover {
+    background-color: #e65724;
+    color: #FFFFFF;
+  }
+
+.digitalStrategy .secondaryButton {
+    background-color: #FFFFFF;
+    color: #101C2E;
+    border: 1px solid #DCE2E8;
+  }
+
+.digitalStrategy .secondaryButton:hover {
+    background-color: #FAFAFA;
+    color: #101C2E;
+    border-color: #C8D0D9;
+  }
+  /* ------------------- Theme digital Strategy End ------------------ */
+/* ------------------- Theme digital Strategy Start ------------------ */
+.digitalCommerce {
+    background: linear-gradient(
+      155deg,
+      #FFFAF5 0%,
+      #FDF6FA 40%,
+      #F6F9FE 100%
+    );
+  }
+.digitalCommerce .arrow-bg{
+  background: #E8641A;
+}
+.digitalCommerce .theme-main{
+  color: #E8641A;
+}
+.digitalCommerce .body-text-theme{
+  color: #58708C;
+}
+.digitalCommerce .body-client-theme{
+  color: #8A9AB0;
+}
+.digitalCommerce .primaryButton {
+    background-color: #F26522;
+    color: #FFFFFF;
+  }
+
+.digitalCommerce .primaryButton:hover {
+    background-color: #D95416;
+    color: #FFFFFF;
+  }
+
+.digitalCommerce .secondaryButton {
+    background-color: #FFFFFF;
+    color: #101C2E;
+    border: 1px solid #DCE2E8;
+  }
+
+.digitalCommerce .secondaryButton:hover {
+    background-color: #FAFAFA;
+    color: #101C2E;
+    border-color: #C8D0D9;
+  }
+  /* ------------------- Theme digital Commerce End ------------------ */
+
+  /* ------------------- Theme Experience Design Start ------------------ */
+  .experienceDesign {
+    background: #F9F5FC;
+  }
+.experienceDesign .arrow-bg{
+  background: #B878D8;
+}
+.experienceDesign .theme-main{
+  color: #B878D8;
+}
+.experienceDesign .main-Heading{
+  color: #2D1A45;
+}
+.experienceDesign .body-text-theme{
+  color: #5D5080;
+}
+.experienceDesign .body-client-theme{
+  color: #485B7A;
+}
+.experienceDesign .primaryButton {
+    background-color: #B878D8;
+    color: #FFFFFF;
+  }
+
+.experienceDesign .primaryButton:hover {
+    background-color: #9D60BC;
+    color: #FFFFFF;
+  }
+
+.experienceDesign .secondaryButton {
+    background-color: #FFFFFF;
+    color: #2D1A45;
+    border: 1px solid #E5D5EF;
+  }
+
+.experienceDesign .secondaryButton:hover {
+    background-color: #F9F5FC;
+    color: #2D1A45;
+    border-color: #E5D5EF;
+  }
+  /* ------------------- Theme Experience Design End ------------------ */
+
+  /* ------------------- Theme software Development Start ------------------ */
+  .softwareDevelopment {
+    background: #F0F7FB;
+  }
+.softwareDevelopment .arrow-bg{
+  background: #2f63f5;
+}
+.softwareDevelopment .theme-main{
+  color: #2f63f5;
+}
+.softwareDevelopment .main-Heading{
+  color: #0D1B2A;
+}
+.softwareDevelopment .body-text-theme{
+  color: #55677f;
+}
+.softwareDevelopment .body-client-theme{
+  color: #55677f;
+}
+.softwareDevelopment .primaryButton {
+    background-color: #2f63f5;
+    color: #FFFFFF;
+  }
+
+.softwareDevelopment .primaryButton:hover {
+    background-color: #4374f6;
+    color: #FFFFFF;
+  }
+
+.softwareDevelopment .secondaryButton {
+    background-color: #FFFFFF;
+    color: #0D1B2A;
+    border: 1px solid #D1E5F0;
+  }
+
+.softwareDevelopment .secondaryButton:hover {
+    background-color: #D1E5F0;
+    color: #0D1B2A;
+    border-color: #D1E5F0;
+  }
+  /* ------------------- Theme software Development End ------------------ */
+
+  /* ------------------- Theme cloud Digital Start ------------------ */
+  .cloudDigital {
+    background: linear-gradient(155deg,#F2F8FE 0%,#F5F4FE 55%,#FAFCFE 100%);
+  }
+.cloudDigital .arrow-bg{
+  background: #2c87cc;
+}
+.cloudDigital .theme-main{
+  color: #2c87cc;
+}
+.cloudDigital .main-Heading{
+  color: #0D1B2A;
+}
+.cloudDigital .body-text-theme{
+  color: #55677f;
+}
+.cloudDigital .body-client-theme{
+  color: #66798F;
+}
+.cloudDigital .primaryButton {
+    background-color: #2c87cc;
+    color: #FFFFFF;
+  }
+
+.cloudDigital .primaryButton:hover {
+    background-color: #23719F;
+    color: #FFFFFF;
+  }
+
+.cloudDigital .secondaryButton {
+    background-color: #FFFFFF;
+    color: #0D1B2A;
+    border: 1px solid #D1E5F0;
+  }
+
+.cloudDigital .secondaryButton:hover {
+    background-color: #FFFFFF;
+    color: #0D1B2A;
+    border-color: #0D1B2A;
+  }
+  /* ------------------- Theme software Development End ------------------ */
+  /* ------------------- Theme enterprise Integration Start ------------------ */
+  .enterpriseIntegration {
+    background: linear-gradient(155deg,#F9F5FD 0%,#FDF4F9 52%,#FBFAFE 100%);
+  }
+.enterpriseIntegration .arrow-bg{
+  background: #8b3fc4;
+}
+.enterpriseIntegration .theme-main{
+  color: #8b3fc4;
+}
+.enterpriseIntegration .main-Heading{
+  color: #0D1B2A;
+}
+.enterpriseIntegration .body-text-theme{
+  color: #5a6379;
+}
+.enterpriseIntegration .body-client-theme{
+  color: #8F92A8;
+}
+.enterpriseIntegration .primaryButton {
+    background-color: #8b3fc4;
+    color: #FFFFFF;
+  }
+
+.enterpriseIntegration .primaryButton:hover {
+    background-color: #7735A9;
+    color: #FFFFFF;
+  }
+
+.enterpriseIntegration .secondaryButton {
+    background-color: #FFFFFF;
+    color: #0D1B2A;
+    border: 1px solid #D1E5F0;
+  }
+
+.enterpriseIntegration .secondaryButton:hover {
+    background-color: #FFFFFF;
+    color: #0D1B2A;
+    border-color: #0D1B2A;
+  }
+  /* ------------------- Theme enterprise Integration End ------------------ */
+
+  /* ------------------- Theme Agentic Engineering Start ------------------ */
+  .agenticEngineering {
+    background: linear-gradient(155deg,#F6F5FF 0%,#F3F6FE 48%,#FAFBFE 100%);
+  }
+.agenticEngineering .arrow-bg{
+  background: #5b4be0;
+}
+.agenticEngineering .theme-main{
+  color: #5b4be0;
+}
+.agenticEngineering .main-Heading{
+  color: #0D1B2A;
+}
+.agenticEngineering .body-text-theme{
+  color: #55677f;
+}
+.agenticEngineering .body-client-theme{
+  color: #93A2B8;
+}
+.agenticEngineering .primaryButton {
+    background-color: #5b4be0;
+    color: #FFFFFF;
+  }
+
+.agenticEngineering .primaryButton:hover {
+    background-color: #4B3CCC;
+    color: #FFFFFF;
+  }
+
+.agenticEngineering .secondaryButton {
+    background-color: #FFFFFF;
+    color: #0D1B2A;
+    border: 1px solid #D1E5F0;
+  }
+
+.agenticEngineering .secondaryButton:hover {
+    background-color: #FFFFFF;
+    color: #0D1B2A;
+    border-color: #0D1B2A;
+  }
+  /* ------------------- Theme enterprise Integration End ------------------ */

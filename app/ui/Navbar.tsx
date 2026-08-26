@@ -796,7 +796,7 @@ export default function Navbar({ entry }: Props) {
         <button
           type="button"
           className={cx(
-            "flex items-center justify-center rounded-lg p-2 hidden lg:block",
+            "flex items-center justify-center rounded-lg p-2 hidden lg:block cursor-pointer",
             navContrast === "dark" ? "text-white" : "text-gray-900"
           )}
           onClick={() => setNavOpen((v) => !v)}
@@ -809,7 +809,7 @@ export default function Navbar({ entry }: Props) {
           <Link
             href="/"
             className={cx(
-              "flex items-center gap-1 text-[30px] font-extrabold tracking-tight",
+              "flex items-center text-[30px]  tracking-tight",
               navOpen
                 ? (theme?.heading ?? "text-gray-900")
                 : navContrast === "dark"
@@ -817,7 +817,7 @@ export default function Navbar({ entry }: Props) {
                   : "lg:text-gray-900"
             )}
           >
-            OXY<span className={theme?.accentText ?? "text-emerald-600"}>TAL</span>
+            Oxytal
           </Link>
         </div>
 
@@ -1036,8 +1036,22 @@ export default function Navbar({ entry }: Props) {
                 )}
               </Link>
             ))}
+          
+
           </div>
         </div>
+        {navOpen ? (<button
+          type="button"
+          className={cx(
+            "flex items-center justify-center rounded-lg p-2 hidden lg:block cursor-pointer text-black absolute right-2 top-2"
+          )}
+          onClick={() => setNavOpen((v) => !v)}
+          aria-label={navOpen ? "Close menu" : "Open menu"}
+        >
+          {navOpen ? <X  size={18} /> : ''}
+        </button>):(
+        null
+        )}
       </div>
     </nav>
 

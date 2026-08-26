@@ -1,0 +1,17 @@
+{
+  "services": [
+    { "num": "05", "title": "Enterprise Integration", "text": "ERP, PIM and 3PL connected to the storefront.", "href": "/service/enterprise-system-integrations" },
+    { "num": "07", "title": "AI & Agentic Engineering", "text": "Automating the operational work behind each order.", "href": "/service/ai-and-intelligent-automation" },
+    { "num": "04", "title": "Cloud & Transformation", "text": "Infrastructure that holds through peak trading.", "href": "/service/cloud-digital-transformation" },
+    { "num": "02", "title": "Experience Design", "text": "The research behind why people don't convert.", "href": "/service/ui-ux-design" }
+  ],
+  "final": {
+    "title": "Start with the business problem.",
+    "text": "Sixty minutes. Bring the thing that's actually worrying you — the number that won't move, the process that needs three people, the platform nobody wants to touch. We'll tell you what we'd do, and whether we're the right people to do it.",
+    "ctaLabel": "Talk to our commerce team",
+    "ctaHref": "/contact-us",
+    "secondaryLabel": "Email info@oxytal.com",
+    "secondaryHref": "mailto:info@oxytal.com",
+    "fine": "Reply within one business day"
+  }
+}

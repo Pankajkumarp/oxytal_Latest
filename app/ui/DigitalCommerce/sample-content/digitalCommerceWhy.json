@@ -1,0 +1,44 @@
+[
+  {
+    "num": "01",
+    "title": "We're platform-neutral by construction",
+    "text": "Two established practices, not one plus a landing page. ",
+    "emphasis": "Our recommendation costs us money when it's the smaller project",
+    "after": " — which is exactly why you can trust it."
+  },
+  {
+    "num": "02",
+    "title": "We build products, not just projects",
+    "text": "Oxytal ships and supports applications in the Shopify ecosystem. ",
+    "emphasis": "We've been through app review, performance budgets and merchant support from the other side",
+    "after": " — so our advice comes from operating software, not just delivering it."
+  },
+  {
+    "num": "03",
+    "title": "Commerce isn't a silo here",
+    "text": "Integration, cloud, data and AI are in-house practices at Oxytal. ",
+    "emphasis": "Your ERP work doesn't get subcontracted to a partner you never meet",
+    "after": ", and the people doing it sit in the same standups."
+  },
+  {
+    "num": "04",
+    "title": "Agent-accelerated delivery",
+    "text": "Forge, our own agent platform, runs our delivery lifecycle — requirements, test generation, security scanning. ",
+    "emphasis": "You get enterprise rigour at a pace that doesn't match the price tag",
+    "after": ", with a human approving every release."
+  },
+  {
+    "num": "05",
+    "title": "We're still there after go-live",
+    "text": "Most agencies hand over the keys and move on. ",
+    "emphasis": "The engineers who built it run the support rota",
+    "after": ", with peak-season cover agreed in writing before the season starts."
+  },
+  {
+    "num": "06",
+    "title": "Dublin and Chandigarh, one team",
+    "text": "Senior accountability in your timezone, engineering depth and genuine overnight cover. ",
+    "emphasis": "Not an offshore handoff at 6pm",
+    "after": " — one team, two hubs, continuous coverage."
+  }
+]

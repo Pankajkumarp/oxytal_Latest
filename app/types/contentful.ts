@@ -389,6 +389,17 @@ export type ComposableElementSkeleton = EntrySkeletonType<
      * than not.
      */
     navType?: EntryFieldTypes.Symbol;
+    /**
+     * Freeform JSON payload for subtypes that render structured content
+     * directly from JSON rather than via linked `elements` entries —
+     * e.g. the `digitalCommerce*` subtypes (see `app/ui/DigitalCommerce`),
+     * each of which casts this to its own expected shape (an array or
+     * object, documented on that subtype's own component) and falls
+     * back to its hardcoded reference copy when unset. Not read by any
+     * `elements`-driven subtype — the two content models are
+     * alternatives, not layered.
+     */
+    content?: EntryFieldTypes.Object;
   },
   "composableElement"
 >;
