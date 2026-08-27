@@ -9,7 +9,7 @@ import { SplitText } from "gsap/SplitText";
 import { Globe } from "lucide-react";
 import { cx } from "@/app/lib/cx";
 import { getAssetUrl } from "../lib/contentfulAsset";
-import { resolveTheme } from "../lib/theme";
+import { resolveTheme, type SectionTheme } from "../lib/theme";
 import { resolveHeadingLevel } from "../lib/headingLevel";
 import DynamicHeading from "./DynamicHeading";
 import ThemePattern from "./ThemePattern";
@@ -121,13 +121,112 @@ function officeToRegion(entry: PlainEntry<OfficeSkeleton>): Region {
  * The heading gets the same GSAP split-text scroll-reveal every other
  * section's heading uses. The region cards get their own scroll-
  * triggered load animation too — a fade + rise, staggered one card
- * after another as the grid scrolls into view — plus a GSAP hover: a
- * soft "ripple pulse" emanates outward from the flag/globe icon once
- * per hover, distinct from every sibling section's lift/tilt/spotlight
- * treatment. All are skipped under `prefers-reduced-motion` (cards keep
- * their existing plain CSS `hover:-translate-y-1 hover:shadow-lg` in
- * that case).
+ * after another as the grid scrolls into view — plus a GSAP hover
+ * (`RegionCard`): the card lifts with a soft shadow while its flag
+ * photo zooms in slightly, both driven by one paused GSAP timeline
+ * played/reversed on `pointerenter`/`pointerleave` rather than a CSS
+ * `:hover` class, distinct from every sibling section's hover
+ * treatment. Skipped entirely under `prefers-reduced-motion`.
  */
+/**
+ * One region card. Its hover lives here rather than inline in the map
+ * callback because the GSAP timeline needs its own per-card refs — see
+ * the `AboutGlobal` doc comment above for what the hover actually does.
+ */
+function RegionCard({
+  region,
+  theme,
+}: {
+  region: Region;
+  theme?: SectionTheme;
+}) {
+  const cardRef = useRef<HTMLDivElement>(null);
+  const flagRef = useRef<HTMLImageElement>(null);
+
+  useLayoutEffect(() => {
+    const card = cardRef.current;
+    if (!card || prefersReducedMotion()) {
+      return;
+    }
+
+    // Explicit "rest" shadow first, in the same 4-value format as the
+    // hover target, so GSAP interpolates it smoothly instead of the
+    // shadow just popping in from nothing.
+    gsap.set(card, { boxShadow: "0 0px 0px 0px rgba(15,23,42,0)" });
+
+    const tl = gsap.timeline({ paused: true }).to(
+      card,
+      { y: -8, boxShadow: "0 24px 44px -20px rgba(15,23,42,.22)", duration: 0.5, ease: "power2.out" },
+      0
+    );
+    if (flagRef.current) {
+      tl.to(flagRef.current, { scale: 1.08, duration: 0.5, ease: "power2.out" }, 0);
+    }
+
+    const onEnter = () => tl.play();
+    const onLeave = () => tl.reverse();
+    card.addEventListener("pointerenter", onEnter);
+    card.addEventListener("pointerleave", onLeave);
+    return () => {
+      card.removeEventListener("pointerenter", onEnter);
+      card.removeEventListener("pointerleave", onLeave);
+      tl.kill();
+    };
+  }, []);
+
+  return (
+    <div
+      ref={cardRef}
+      className={cx(
+        "rounded-2xl z-1 border overflow-hidden",
+        theme?.cardBorder ?? "border-blue-100",
+        theme?.cardBg ?? "bg-gray-50"
+      )}
+    >
+      <div className="relative overflow-hidden">
+        {region.flagUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element -- matches the plain <img> convention already used for Contentful assets in this project
+          <img
+            ref={flagRef}
+            src={region.flagUrl}
+            alt=""
+            aria-hidden
+            className="aspect-[600/600] object-cover"
+          />
+        ) : null}
+      </div>
+      <div className="p-5 pt-3">
+        <p
+          className={cx(
+            "text-[21px] font-extrabold",
+            theme?.heading ?? "text-gray-900"
+          )}
+        >
+          {region.country}
+        </p>
+        {region.role && (
+          <p
+            className={cx(
+              "mt-1 text-[11px] font-semibold tracking-wide uppercase",
+              theme?.accentText ?? "text-blue-600"
+            )}
+          >
+            {region.role}
+          </p>
+        )}
+        <p
+          className={cx(
+            "mt-2 text-[13.5px] leading-relaxed",
+            theme?.body ?? "text-gray-500"
+          )}
+        >
+          {region.description}
+        </p>
+      </div>
+    </div>
+  );
+}
+
 interface Props {
   entry?: PlainEntry<ComposableElementSkeleton>;
 }
@@ -269,48 +368,6 @@ export default function AboutGlobal({ entry }: Props) {
     return () => ctx.revert();
   }, []);
 
-  /* =========================================================
-     HOVER — a "ripple pulse" instead of a lift/tilt: a soft circle
-     emanates outward from the flag/globe icon once per hover (scale 0 →
-     2.4, fading out as it grows) — a one-shot splash rather than a
-     toggled lift/tilt/spotlight state, distinct from every sibling
-     section's hover treatment. Re-entering the card kills any tween in
-     progress and restarts it cleanly. Skipped under
-     prefers-reduced-motion — the card keeps its plain CSS
-     `hover:-translate-y-1 hover:shadow-lg` in that case.
-  ========================================================= */
-  const handleCardEnter = (event: React.MouseEvent<HTMLDivElement>) => {
-    if (prefersReducedMotion()) {
-      return;
-    }
-
-    const card = event.currentTarget;
-    const ripple = card.querySelector<HTMLElement>("[data-region-ripple]");
-
-    if (ripple) {
-      gsap.killTweensOf(ripple);
-      gsap.fromTo(
-        ripple,
-        { scale: 0, opacity: 0.45 },
-        { scale: 2.4, opacity: 0, duration: 0.7, ease: "power2.out" }
-      );
-    }
-  };
-
-  const handleCardLeave = (event: React.MouseEvent<HTMLDivElement>) => {
-    if (prefersReducedMotion()) {
-      return;
-    }
-
-    const card = event.currentTarget;
-    const ripple = card.querySelector<HTMLElement>("[data-region-ripple]");
-
-    if (ripple) {
-      gsap.killTweensOf(ripple);
-      gsap.to(ripple, { scale: 0, opacity: 0, duration: 0.2, ease: "power2.out" });
-    }
-  };
-
   return (
     <section
       ref={sectionRef}
@@ -361,68 +418,7 @@ export default function AboutGlobal({ entry }: Props) {
         <div className="mt-12 grid gap-6">
           <div ref={cardsRef} className="grid gap-5 sm:grid-cols-3 lg:col-span-8">
             {regions.map((region) => (
-              <div
-                key={region.id}
-                onMouseEnter={handleCardEnter}
-                onMouseLeave={handleCardLeave}
-                className={cx(
-                  "rounded-2xl z-1 border p-7 hover:-translate-y-1 hover:shadow-lg",
-                  theme?.cardBorder ?? "border-blue-100",
-                  theme?.cardBg ?? "bg-gray-50"
-                )}
-              >
-                <div className="relative inline-flex">
-                  <span
-                    data-region-ripple
-                    aria-hidden
-                    className={cx(
-                      "pointer-events-none absolute inset-0 m-auto h-16 w-16 scale-0 rounded-full bg-current opacity-0",
-                      theme?.accentText ?? "text-blue-600"
-                    )}
-                  />
-                  {region.flagUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element -- matches the plain <img> convention already used for Contentful assets in this project
-                    <img
-                      src={region.flagUrl}
-                      alt=""
-                      aria-hidden
-                      className="h-16 w-16  object-cover"
-                    />
-                  ) : (
-                    <Globe
-                      aria-hidden
-                      size={28}
-                      className={theme?.accentText ?? "text-blue-600"}
-                    />
-                  )}
-                </div>
-                <p
-                  className={cx(
-                    "mt-2 text-[21px] font-extrabold",
-                    theme?.heading ?? "text-gray-900"
-                  )}
-                >
-                  {region.country}
-                </p>
-                {region.role && (
-                  <p
-                    className={cx(
-                      "mt-1 text-[11px] font-semibold tracking-wide uppercase",
-                      theme?.accentText ?? "text-blue-600"
-                    )}
-                  >
-                    {region.role}
-                  </p>
-                )}
-                <p
-                  className={cx(
-                    "mt-2 text-[13.5px] leading-relaxed",
-                    theme?.body ?? "text-gray-500"
-                  )}
-                >
-                  {region.description}
-                </p>
-              </div>
+              <RegionCard key={region.id} region={region} theme={theme} />
             ))}
           </div>
         </div>

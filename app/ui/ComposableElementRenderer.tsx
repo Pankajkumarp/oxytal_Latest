@@ -54,19 +54,17 @@ import LandingTestimonials from "@/app/ui/LandingTestimonials";
 import LandingExplore from "@/app/ui/LandingExplore";
 import LandingFaq from "@/app/ui/LandingFaq";
 import LandingInsights from "@/app/ui/LandingInsights";
-import ProductsCarousel from "./ProductsCarousel";
-import DigitalCommerceHero from "@/app/ui/DigitalCommerce/DigitalCommerceHero";
-import DigitalCommerceProblems from "@/app/ui/DigitalCommerce/DigitalCommerceProblems";
-import DigitalCommerceCapability from "@/app/ui/DigitalCommerce/DigitalCommerceCapability";
-import DigitalCommercePlatforms from "@/app/ui/DigitalCommerce/DigitalCommercePlatforms";
-import DigitalCommerceWhy from "@/app/ui/DigitalCommerce/DigitalCommerceWhy";
-import DigitalCommerceEvidence from "@/app/ui/DigitalCommerce/DigitalCommerceEvidence";
-import DigitalCommerceEngagement from "@/app/ui/DigitalCommerce/DigitalCommerceEngagement";
-import DigitalCommerceFaq from "@/app/ui/DigitalCommerce/DigitalCommerceFaq";
-import DigitalCommerceRelated from "@/app/ui/DigitalCommerce/DigitalCommerceRelated";
+import DigitalCommerce from "@/app/ui/DigitalCommerce/DigitalCommerce";
 import { Entry, EntrySkeletonType } from "contentful";
 import { ComposableElementSkeleton } from "../types/contentful";
 import { resolveNavContrast } from "../lib/navContrast";
+import DigitalStrategyPage from "./DigitalCommerce/DigitalStrategyPage";
+import UiExperiencePage from "./DigitalCommerce/UiExperiencePage";
+import SoftwareDevelopmentPage from "./DigitalCommerce/SoftwareDevelopmentPage";
+import CloudDigitaPage from "./DigitalCommerce/CloudDigitaPage";
+import EnterpriseSystemPage from "./DigitalCommerce/EnterpriseSystemPage";
+import DigitalCommercePage from "./DigitalCommerce/DigitalCommercePage";
+import AgenticEngineeringPage from "./DigitalCommerce/AgenticEngineeringPage";
 
 type PlainEntry<Skeleton extends EntrySkeletonType> = Entry<
   Skeleton,
@@ -142,15 +140,14 @@ const subtypeComponents: Record<
   landingExplore: LandingExplore,
   landingFaq: LandingFaq,
   landingInsights: LandingInsights,
-  DigitalCommerceHero: DigitalCommerceHero,
-  digitalCommerceProblems: DigitalCommerceProblems,
-  digitalCommerceCapability: DigitalCommerceCapability,
-  digitalCommercePlatforms: DigitalCommercePlatforms,
-  digitalCommerceWhy: DigitalCommerceWhy,
-  digitalCommerceEvidence: DigitalCommerceEvidence,
-  digitalCommerceEngagement: DigitalCommerceEngagement,
-  digitalCommerceFaq: DigitalCommerceFaq,
-  digitalCommerceRelated: DigitalCommerceRelated,
+  digitalStrategy: DigitalStrategyPage,
+  uiExperience: UiExperiencePage,
+  softwareDevelopment: SoftwareDevelopmentPage,
+  cloudDigital: CloudDigitaPage,
+  enterpriseSystem: EnterpriseSystemPage,
+  digitalCommerce: DigitalCommercePage,
+  agenticEngineering: AgenticEngineeringPage,
+  DigitalCommerceHero: DigitalCommerce,
 };
 
 export default function ComposableElementRenderer({
