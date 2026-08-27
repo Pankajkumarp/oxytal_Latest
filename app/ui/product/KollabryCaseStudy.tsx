@@ -264,11 +264,18 @@ function Hero() {
       return;
     }
 
-    let splitA: SplitText | undefined;
-    let splitB: SplitText | undefined;
+    let split: SplitText | undefined;
 
+    // Only the plain first line goes through SplitText — its
+    // `mask: "words"` wrapping restructures the text into new
+    // block-level elements, which would take `line2Ref`'s gradient text
+    // out of its own inline box and leave `background-clip: text` with
+    // nothing to clip against (the line would render invisible). The
+    // gradient second line instead animates as one simple fade/rise
+    // unit, same technique `ActionPulseCaseStudy`/`ForgePipelineCaseStudy`
+    // use for their own gradient hero text.
     const ctx = gsap.context(() => {
-      splitA = SplitText.create(line1Ref.current!, {
+      split = SplitText.create(line1Ref.current!, {
         type: "words",
         mask: "words",
         autoSplit: true,
@@ -276,19 +283,12 @@ function Hero() {
           gsap.from(self.words, { yPercent: 115, rotate: 3, opacity: 0, duration: 1, ease: "power4.out", stagger: 0.05 }),
       });
 
-      splitB = SplitText.create(line2Ref.current!, {
-        type: "words",
-        mask: "words",
-        autoSplit: true,
-        onSplit: (self) =>
-          gsap.from(self.words, { yPercent: 115, rotate: 3, opacity: 0, duration: 1, ease: "power4.out", stagger: 0.05, delay: 0.25 }),
-      });
+      gsap.from(line2Ref.current, { opacity: 0, y: 20, duration: 0.8, ease: "power2.out", delay: 0.4 });
     }, sectionRef);
 
     return () => {
       ctx.revert();
-      splitA?.revert();
-      splitB?.revert();
+      split?.revert();
     };
   }, []);
 
@@ -325,7 +325,7 @@ function Hero() {
 
           <h1 className="mt-4.5 text-[clamp(40px,6vw,68px)] leading-[1.08] font-bold tracking-[-0.02em] text-[#141127]">
             <span ref={line1Ref} className="block">
-              Track the work.
+              Track the work. 
             </span>
             <span ref={line2Ref} className="block bg-[linear-gradient(120deg,#4F46E5,#7C3AED)] bg-clip-text text-transparent">
               Capture the knowledge.
