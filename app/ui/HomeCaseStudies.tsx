@@ -315,9 +315,7 @@ function CaseStudySlide({
   return (
     <div
      className={cx(
-            "grid items-center gap-10 lg:grid-cols-12 lg:gap-12 xl:gap-16",
-            theme?.cardBorder,
-            theme?.cardBg
+            "grid items-center gap-10 lg:grid-cols-12 lg:gap-12 xl:gap-16"
           )}>
       {/* =================================================
           COPY
@@ -337,7 +335,7 @@ function CaseStudySlide({
 
         <h3
           className={cx(
-            "text-[26px] leading-tight font-extrabold sm:text-[28px] md:text-[30px]",
+            "text-[26px] leading-tight font-extrabold sm:text-[28px] md:text-[32px]",
             theme?.heading ?? "text-gray-900"
           )}
         >
