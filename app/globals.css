@@ -21,6 +21,28 @@
   /* AISolutionsHero's eyebrow small dot pulse — ported from
      Refrence/ai-solutions.html's own `pulse` keyframe. */
   --animate-dot-pulse: dot-pulse 1.8s ease-in-out infinite;
+  /* SamVaultCaseStudy's (app/ui/product) hero background and doc-card
+     grid — ported from Refrence/samvault_oxytal.html's own `gridDrift`
+     (the faint grid-line backdrop slowly panning), `floatUp` (small
+     code-snippet particles rising and fading behind the hero), and
+     `cardFloat` (each hero mockup doc card bobbing up and down, offset
+     per card via an inline `animation-delay`) keyframes. Purely
+     decorative, continuous motion — not scroll-triggered, so plain CSS
+     rather than GSAP, same reasoning as `float`/`glow-pulse` above. */
+  --animate-grid-drift: grid-drift 20s linear infinite;
+  --animate-float-up: float-up 15s linear infinite;
+  --animate-card-float: card-float 4s ease-in-out infinite;
+  /* ForgePipelineCaseStudy's (app/ui/product) hero heading and pipeline
+     demo mockup — ported from Refrence/forge-oxytal-casestudy.html's own
+     `textShimmer` (the gradient-text "SDLC" word sweeping through its
+     own gradient), `shimLine` (a light sweeping along the pipeline demo
+     card's bottom edge), and `stepGlow` (a soft box-shadow pulse on
+     whichever pipeline step is currently "running") keyframes. All
+     purely decorative continuous motion, same reasoning as `float`/
+     `glow-pulse` above. */
+  --animate-text-shimmer: text-shimmer 4s linear infinite;
+  --animate-shim-line: shim-line 3s linear infinite;
+  --animate-step-glow: step-glow 2s ease-in-out infinite;
 }
 
 @keyframes float {
@@ -61,6 +83,68 @@
   }
   50% {
     opacity: 0.25;
+  }
+}
+
+@keyframes grid-drift {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(60px);
+  }
+}
+
+@keyframes float-up {
+  from {
+    transform: translateY(100vh);
+    opacity: 0;
+  }
+  10%,
+  90% {
+    opacity: 1;
+  }
+  to {
+    transform: translateY(-100px);
+    opacity: 0;
+  }
+}
+
+@keyframes card-float {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+@keyframes text-shimmer {
+  from {
+    background-position: 0%;
+  }
+  to {
+    background-position: 200%;
+  }
+}
+
+@keyframes shim-line {
+  from {
+    background-position: 200%;
+  }
+  to {
+    background-position: -200%;
+  }
+}
+
+@keyframes step-glow {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(99, 102, 241, 0);
+  }
+  50% {
+    box-shadow: 0 0 12px rgba(99, 102, 241, 0.2);
   }
 }
 
@@ -277,6 +361,31 @@ body {
   font-weight: 600;
   font-size: 16.5px;
   line-height: 1.45;
+}
+
+/* ActionPulseCaseStudy's (app/ui/product) horizontal screenshot gallery
+   — the reference's own `.gallery-track` scrollbar styling
+   (`scrollbar-width`/`scrollbar-color` plus the `::-webkit-scrollbar*`
+   pseudo-elements) has no Tailwind utility equivalent, same reason
+   `.rich-text`/`.case-narrative` above exist as plain CSS. Colored to
+   that page's own indigo accent (`--indigo` `#4F46E5` in the reference)
+   rather than the site's default browser scrollbar. */
+.ap-gallery-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: #4f46e5 transparent;
+}
+.ap-gallery-scroll::-webkit-scrollbar {
+  height: 6px;
+}
+.ap-gallery-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.ap-gallery-scroll::-webkit-scrollbar-thumb {
+  background: #4f46e5;
+  border-radius: 3px;
+}
+.ap-gallery-scroll::-webkit-scrollbar-thumb:hover {
+  background: #6366f1;
 }
 
 .swiper-slide {

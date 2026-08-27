@@ -65,6 +65,10 @@ import CloudDigitaPage from "./DigitalCommerce/CloudDigitaPage";
 import EnterpriseSystemPage from "./DigitalCommerce/EnterpriseSystemPage";
 import DigitalCommercePage from "./DigitalCommerce/DigitalCommercePage";
 import AgenticEngineeringPage from "./DigitalCommerce/AgenticEngineeringPage";
+import SamVaultCaseStudy from "./product/SamVaultCaseStudy";
+import ActionPulseCaseStudy from "./product/ActionPulseCaseStudy";
+import ForgePipelineCaseStudy from "./product/ForgePipelineCaseStudy";
+import KollabryCaseStudy from "./product/KollabryCaseStudy";
 
 type PlainEntry<Skeleton extends EntrySkeletonType> = Entry<
   Skeleton,
@@ -147,6 +151,10 @@ const subtypeComponents: Record<
   enterpriseSystem: EnterpriseSystemPage,
   digitalCommerce: DigitalCommercePage,
   agenticEngineering: AgenticEngineeringPage,
+  samVaultProduct: SamVaultCaseStudy,
+  actionPulse: ActionPulseCaseStudy,
+  forgePipeline: ForgePipelineCaseStudy,
+  kollabry: KollabryCaseStudy,
   DigitalCommerceHero: DigitalCommerce,
 };
 
