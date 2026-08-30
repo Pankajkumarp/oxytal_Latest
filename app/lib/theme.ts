@@ -103,7 +103,7 @@ const THEMES: Record<ThemeName, SectionTheme> = {
   buttonHoverBg: "hover:bg-cyan-400",
   accentText: "text-cyan-400",
   cardBg: "bg-white/1 backdrop-blur-md",
-  cardBorder: "border-white/10 border",
+  cardBorder: "border-white/10",
   patternColor: "#00D4FF",
   showPattern: false,
 },

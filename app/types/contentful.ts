@@ -189,6 +189,16 @@ export type OfficeSkeleton = EntrySkeletonType<
     email?: EntryFieldTypes.Symbol;
     /** Optional flag/marker image shown next to this office in the footer's "Offices" list (see `Footer`) — falls back to a plain map-pin icon when unset. */
     flag?: EntryFieldTypes.EntryLink<DataImageSkeleton>;
+    /**
+     * Optional short tagline shown under this office's city/country (e.g.
+     * "Headquarters", "Client & growth", "Engineering & AI") — used by
+     * `HomeAboutUs`'s "hubs" panel. Doesn't exist as a field in Contentful
+     * yet; wired here so it works automatically the moment it's added (same
+     * "not in Contentful yet" convention as `dataVideo.aspectRatioMobile`).
+     * Renders nothing extra when unset — not read by any other consumer of
+     * `office` (`Footer`/`AboutHero`/`AboutGlobal` ignore it).
+     */
+    role?: EntryFieldTypes.Symbol;
   },
   "office"
 >;
@@ -202,7 +212,7 @@ export type CallToActionSkeleton = EntrySkeletonType<
     eyebrow?: EntryFieldTypes.Symbol;
     title: EntryFieldTypes.Symbol;
     highlightText?: EntryFieldTypes.Symbol;
-    description: EntryFieldTypes.Text;
+    description: EntryFieldTypes.RichText;
     backgroundImage?: EntryFieldTypes.EntryLink<DataImageSkeleton>;
     ctaButton?: EntryFieldTypes.Array<
       EntryFieldTypes.EntryLink<DataLinkSkeleton>

@@ -1,25 +1,22 @@
 "use client";
 
-import { useLayoutEffect, useRef, type ReactNode } from "react";
+import {
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import Link from "next/link";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SplitText } from "gsap/SplitText";
 import { documentToReactComponents } from "@contentful/rich-text-react-renderer";
 import { Entry, EntrySkeletonType } from "contentful";
-import {
-  BarChart3,
-  Bot,
-  Clock,
-  MessageCircle,
-  Send,
-  Share2,
-  Target,
-  type LucideIcon,
-} from "lucide-react";
+import { ArrowRight, Check } from "lucide-react";
 import { cx } from "@/app/lib/cx";
 import { getAssetUrl } from "../lib/contentfulAsset";
-import { resolveTheme } from "../lib/theme";
+import { resolveTheme, type SectionTheme } from "../lib/theme";
 import { resolveHeadingLevel } from "../lib/headingLevel";
 import DynamicHeading from "./DynamicHeading";
 import ThemePattern from "./ThemePattern";
@@ -29,6 +26,7 @@ import {
   DataImageSkeleton,
   DataLinkSkeleton,
   DataTextSkeleton,
+  OfficeSkeleton,
 } from "../types/contentful";
 
 if (typeof window !== "undefined") {
@@ -67,7 +65,7 @@ function isEntry(value: unknown): value is AnyEntry {
   );
 }
 
-/** Best-effort href from a `dataLink` entry: prefers an external URL, falls back to `/<linkedPage>`. Same resolution PageBody/HomeServices/HomeAI/HomeProducts use. */
+/** Best-effort href from a `dataLink` entry: prefers an external URL, falls back to `/<linkedPage>`. Same resolution PageBody/HomeServices/HomeAI/HomeProducts/HomeAboutUs use. */
 function resolveLinkHref(
   link: PlainEntry<DataLinkSkeleton>
 ): string | undefined {
@@ -78,106 +76,235 @@ function resolveLinkHref(
   return link.fields.linkedPage ? `/${link.fields.linkedPage}` : undefined;
 }
 
-type Align = "left" | "center" | "right";
-
-/** Cross-axis alignment for the flex columns (the left content column itself, and each feature card within it). */
-const ALIGN_ITEMS: Record<Align, string> = {
-  left: "items-start",
-  center: "items-center",
-  right: "items-end",
-};
-/** Text alignment for the heading/description/feature copy. */
-const TEXT_ALIGN: Record<Align, string> = {
-  left: "text-left",
-  center: "text-center",
-  right: "text-right",
-};
-/** Horizontal justification for the CTA + note row. */
-const JUSTIFY_CONTENT: Record<Align, string> = {
-  left: "justify-start",
-  center: "justify-center",
-  right: "justify-end",
-};
-
-/** Normalizes the composableElement's `textStart` field (free text in Contentful — case/whitespace can vary) to one of the three supported alignments. Defaults to "left" — today's layout — for an unset or unrecognized value. */
-function resolveAlign(value?: string): Align {
-  const normalized = value?.trim().toLowerCase();
-  return normalized === "center" || normalized === "right"
-    ? normalized
-    : "left";
-}
-
-interface FeatureItem {
-  name: string;
+interface StepItem {
+  id: string;
+  title: string;
   description?: string;
-  iconUrl?: string;
 }
 
-/** Cycled by item index as a fallback when a `contentDetail` entry has no `icon` image set. */
-const FALLBACK_ICONS: LucideIcon[] = [Target, Share2, Bot, BarChart3];
-
-/** Maps a resolved `contentDetail` entry to the plain `FeatureItem` shape this component renders — reusing `contentDetail` (title/shortDescription/icon) instead of a dedicated content type, same pattern as HomeProducts' `contentDetailToProductItem`. */
-function contentDetailToFeatureItem(
+/** Maps a resolved `contentDetail` entry (one with a `shortDescription` set) to one numbered "how it works" step — same pillar/sector split `HomeAboutUs` already uses on the same content type. */
+function contentDetailToStep(
   entry: PlainEntry<ContentDetailSkeleton>
-): FeatureItem {
-  const iconEntry = entry.fields.icon;
-  const iconUrl = isEntry(iconEntry)
-    ? getAssetUrl(
-      (iconEntry as unknown as PlainEntry<DataImageSkeleton>).fields.image
-    )
-    : undefined;
-
+): StepItem {
   return {
-    name: entry.fields.title ?? "",
+    id: entry.sys.id,
+    title: entry.fields.title ?? "",
     description: entry.fields.shortDescription,
-    iconUrl,
+  };
+}
+
+interface AssuranceItem {
+  id: string;
+  label: string;
+}
+
+/** Maps a resolved `contentDetail` entry (one with *no* `shortDescription` set — title only) to one checkmarked assurance line (e.g. "We reply within one business day"). */
+function contentDetailToAssurance(
+  entry: PlainEntry<ContentDetailSkeleton>
+): AssuranceItem {
+  return { id: entry.sys.id, label: entry.fields.title ?? "" };
+}
+
+interface OfficeLite {
+  id: string;
+  city: string;
+  country: string;
+}
+
+function officeToLite(entry: PlainEntry<OfficeSkeleton>): OfficeLite {
+  return {
+    id: entry.sys.id,
+    city: entry.fields.city ?? "",
+    country: entry.fields.country ?? "",
   };
 }
 
 /**
- * Placeholder roster, used only when the `composableElement`'s `elements`
- * has no `contentDetail` entries yet. Swap/add real features in Contentful
- * by adding `contentDetail` entries (title/shortDescription/icon) —
- * nothing here needs to change.
+ * IANA time zone by office `country` (case-insensitive) — purely a
+ * geographic lookup, not editorial copy, so it lives in code rather than
+ * as a Contentful field (same reasoning `resolveHeadingLevel`/
+ * `resolveAlign`-style helpers elsewhere in this project keep technical
+ * normalization out of the CMS). Offices whose `country` isn't in this
+ * table simply don't get a "local time" row below — extend this list as
+ * new office locations are added.
  */
-const DEFAULT_FEATURES: FeatureItem[] = [];
+const TIMEZONE_BY_COUNTRY: Record<string, string> = {
+  "united kingdom": "Europe/London",
+  uk: "Europe/London",
+  england: "Europe/London",
+  // Ireland shares the UK's civil clock (GMT/BST) year-round, so it's
+  // deliberately mapped to the *same* zone string as the UK rather than
+  // its own "Europe/Dublin" — that's what makes a London office and a
+  // Dublin office collapse into one combined "London & Dublin" row in
+  // `groupOfficesByTimeZone` below, matching the reference mockup.
+  // Mapping it to "Europe/Dublin" instead would show the identical time
+  // in two separate rows.
+  ireland: "Europe/London",
+  india: "Asia/Kolkata",
+};
+
+function resolveTimeZone(country: string): string | undefined {
+  return TIMEZONE_BY_COUNTRY[country.trim().toLowerCase()];
+}
+
+interface ClockGroup {
+  id: string;
+  label: string;
+  timeZone: string;
+}
+
+/** Groups `office` entries that share the same resolved time zone into one clock row (e.g. a London office + a Dublin office both resolve to "Europe/London" and collapse into one "London & Dublin" row) — same grouping the reference mockup's own hardcoded UK/India rows do, generalized to whatever offices are actually linked. */
+function groupOfficesByTimeZone(offices: OfficeLite[]): ClockGroup[] {
+  const order: string[] = [];
+  const citiesByZone = new Map<string, string[]>();
+
+  offices.forEach((office) => {
+    const timeZone = resolveTimeZone(office.country);
+    if (!timeZone || !office.city) {
+      return;
+    }
+    if (!citiesByZone.has(timeZone)) {
+      order.push(timeZone);
+      citiesByZone.set(timeZone, []);
+    }
+    citiesByZone.get(timeZone)!.push(office.city);
+  });
+
+  return order.map((timeZone) => ({
+    id: timeZone,
+    timeZone,
+    label: citiesByZone.get(timeZone)!.join(" & "),
+  }));
+}
+
+/** Mon–Fri 09:00–18:00 local, matching the reference mockup's own working-hours window. */
+function isWorkingHours(now: Date, timeZone: string): boolean {
+  try {
+    const parts = new Intl.DateTimeFormat("en-GB", {
+      timeZone,
+      hour: "numeric",
+      hour12: false,
+      weekday: "short",
+    }).formatToParts(now);
+    let hour = 0;
+    let day = "";
+    parts.forEach((part) => {
+      if (part.type === "hour") hour = parseInt(part.value, 10);
+      if (part.type === "weekday") day = part.value;
+    });
+    return ["Mon", "Tue", "Wed", "Thu", "Fri"].includes(day) && hour >= 9 && hour < 18;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * One "local time right now" row — ticks its own clock client-side every
+ * 30s (same interval the reference mockup's own vanilla-JS clock uses),
+ * independent of every other row. Renders "—" until the first tick so
+ * server and client markup match (no `Intl` call during render).
+ */
+function LiveClock({ group, theme }: { group: ClockGroup; theme?: SectionTheme }) {
+  const [time, setTime] = useState("—");
+  const [working, setWorking] = useState(false);
+
+  useEffect(() => {
+    const paint = () => {
+      const now = new Date();
+      try {
+        setTime(
+          new Intl.DateTimeFormat("en-GB", {
+            timeZone: group.timeZone,
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: false,
+          }).format(now)
+        );
+        setWorking(isWorkingHours(now, group.timeZone));
+      } catch {
+        setTime("—");
+      }
+    };
+
+    paint();
+    const interval = setInterval(paint, 30000);
+    return () => clearInterval(interval);
+  }, [group.timeZone]);
+
+  return (
+    <div className="flex items-baseline justify-between gap-3 py-1.5">
+      <span
+        className={cx(
+          "flex items-center gap-2 text-[13.5px]",
+          theme?.body ?? "text-[#9DB2C4]"
+        )}
+      >
+        <span
+          aria-hidden
+          className={cx(
+            "h-1.5 w-1.5 rounded-full",
+            working ? "bg-emerald-400" : "bg-white/30"
+          )}
+        />
+        {group.label}
+      </span>
+      <span className="font-mono text-[14px] tracking-wide text-white">
+        {time}
+      </span>
+    </div>
+  );
+}
 
 /**
  * "Talk to Us", rendered from a `composableElement` entry (`subType:
- * "talktous"` — see `ComposableElementRenderer`):
+ * "talktous"` — see `ComposableElementRenderer`). Ported from
+ * `Refrence/oxytal-cta-section.html` — a dark navy "action panel" card
+ * (offer + numbered steps on the left, a "book a call" action card on
+ * the right), rather than the section's previous full-bleed-photo
+ * layout.
  *
- * - the first `dataText` entry among `elements` supplies the eyebrow/
- *   heading/description intro copy
- * - a second `dataText` entry (if present) supplies the handwritten-style
- *   note next to the CTA button, via its `eyebrow` field (same "reuse a
- *   secondary dataText" pattern HomeAI's proof callout uses)
- * - every `contentDetail` entry among `elements` becomes one feature item
- *   (via `contentDetailToFeatureItem`) — `title`/`shortDescription` as the
- *   name/description, `icon` (falls back to a cycled Lucide icon, same
- *   pattern as HomeServices) as the glyph
- * - `dataLink` entries among `elements`: the one with `type: "primary"`
- *   becomes the CTA button
- * - the composableElement's own `backgroundImage` field (links to a
- *   `dataImage` entry, same as PageBody's default composableElement
- *   renderer) is an *optional* full-bleed section background image —
- *   like HomeAboutUs/HomeAI, there's no placeholder fallback, so when
- *   it's unset the section just shows its themed background color
- *   (`theme.sectionBg`, via `resolveTheme(entry.fields.themeColor)`)
- *   instead. The left-to-right mint scrim that keeps copy readable over
- *   a background photo only renders when there is one — otherwise it
- *   would sit on top of (and mask) the themed background color.
+ * Reads a mixed roster out of the composableElement's own `elements`:
  *
- * Every field above renders exactly what's in Contentful — an unset
- * eyebrow/heading/description/note/note-bottom/CTA label simply renders
- * nothing (no hardcoded placeholder copy), and an empty `contentDetail`
- * roster renders no feature cards.
+ * - the 1st `dataText` entry supplies the intro copy: `eyebrow`,
+ *   `heading`, and `text` (rich text) for the lede
+ * - a 2nd `dataText` entry drives the action card's own copy: `eyebrow`
+ *   is the "Get started" kicker above the buttons, `heading` is the
+ *   "Local time right now" kicker above the clocks, `text` (rich text)
+ *   is the short coverage note under the clocks
+ * - a 3rd `dataText` entry's `eyebrow` is the footnote's leading text
+ *   ("Looking for a role instead?")
+ * - every `contentDetail` entry becomes either a numbered step (via
+ *   `contentDetailToStep`) or an assurance checkmark line (via
+ *   `contentDetailToAssurance`) — split purely by whether the entry has
+ *   a `shortDescription` set, same convention `HomeAboutUs` uses for its
+ *   pillar/sector split on this same content type
+ * - `dataLink` entries: the one with `type: "primary"` is the "Book a
+ *   call" button; of the rest (in order), the 1st is the secondary
+ *   "Email us" button and the 2nd is the footnote's "See open
+ *   positions" link
+ * - every `office` entry becomes both a "local time" clock row (grouped
+ *   by time zone — see `groupOfficesByTimeZone`) and one name in the
+ *   footnote's location list (e.g. "London · Dublin · Chandigarh") —
+ *   the *same* `office` entries `Footer`/`AboutHero`/`AboutGlobal`/
+ *   `HomeAboutUs` already reuse
+ * - the composableElement's own `backgroundImage` (optional — links to
+ *   a `dataImage` entry) sits behind the whole section, same mechanism
+ *   every sibling section uses; the dark action panel itself renders on
+ *   top of it either way
+ *
+ * Every block above only renders when its own roster is non-empty.
+ *
+ * Background image + theme: same `backgroundImage`/`themeColor`/
+ * `pattern`/`patternColor` mechanism every sibling section uses —
+ * `resolveTheme` recolors the panel/card/buttons/steps; the accent glow
+ * behind the panel and the step-number badges reuse `theme.patternColor`
+ * (already a raw hex on every preset) as their own accent color,
+ * falling back to the reference mockup's own cyan (`#16B9E8`) when
+ * unthemed.
  *
  * Animation: the heading gets the same GSAP split-text reveal every
- * sibling section's own heading uses; the feature cards fade + rise in
- * with a stagger as the grid scrolls into view, and each card gets its
- * own GSAP hover (lift + shadow, with the icon box giving a bouncy
- * elastic "pop") — see the CARD LOAD REVEAL/CARD HOVER comments below
- * for how this differs from every sibling section's own hover treatment.
+ * sibling section's own heading uses; the steps list and the action
+ * card each fade + rise in as their own block scrolls into view.
  */
 interface Props {
   entry: PlainEntry<ComposableElementSkeleton>;
@@ -191,73 +318,90 @@ export default function HomeTalkToUs({ entry }: Props) {
       isEntry(element) && element.sys.contentType.sys.id === "dataText"
   );
   const copy = dataTextEntries[0];
-  const noteEntry = dataTextEntries[1];
+  const actionCopy = dataTextEntries[1];
+  const footnoteCopy = dataTextEntries[2];
 
-  const primaryLink = elements
-    .filter(
-      (element): element is PlainEntry<DataLinkSkeleton> =>
-        isEntry(element) && element.sys.contentType.sys.id === "dataLink"
-    )
-    .find((link) => link.fields.type === "primary");
+  const linkEntries = elements.filter(
+    (element): element is PlainEntry<DataLinkSkeleton> =>
+      isEntry(element) && element.sys.contentType.sys.id === "dataLink"
+  );
+  const primaryLink = linkEntries.find((link) => link.fields.type === "primary");
+  const secondaryLinks = linkEntries.filter((link) => link.fields.type !== "primary");
+  const emailLink = secondaryLinks[0];
+  const footnoteLink = secondaryLinks[1];
 
-  const contentDetailFeatures = elements
+  const contentDetailEntries = elements.filter(
+    (element): element is PlainEntry<ContentDetailSkeleton> =>
+      isEntry(element) && element.sys.contentType.sys.id === "contentDetail"
+  );
+  const steps = contentDetailEntries
+    .filter((element) => element.fields.shortDescription)
+    .map(contentDetailToStep);
+  const assurances = contentDetailEntries
+    .filter((element) => !element.fields.shortDescription)
+    .map(contentDetailToAssurance);
+
+  const offices = elements
     .filter(
-      (element): element is PlainEntry<ContentDetailSkeleton> =>
-        isEntry(element) && element.sys.contentType.sys.id === "contentDetail"
+      (element): element is PlainEntry<OfficeSkeleton> =>
+        isEntry(element) && element.sys.contentType.sys.id === "office"
     )
-    .map(contentDetailToFeatureItem);
+    .map(officeToLite);
+  const clockGroups = groupOfficesByTimeZone(offices);
+  const locationsLine = offices.map((office) => office.city).filter(Boolean).join(" · ");
 
   const eyebrow = copy?.fields.eyebrow;
   const heading = copy?.fields.heading;
   const description: ReactNode = copy?.fields.text
     ? documentToReactComponents(copy.fields.text)
     : undefined;
-  const features = contentDetailFeatures.length
-    ? contentDetailFeatures
-    : DEFAULT_FEATURES;
 
-  const note = noteEntry?.fields.heading;
-  const noteBottom = noteEntry?.fields.eyebrow;
-  const ctaHref =
-    (primaryLink && resolveLinkHref(primaryLink)) ??
-    "https://www.oxytal.com/contact";
+  const actionKicker = actionCopy?.fields.eyebrow;
+  const clocksKicker = actionCopy?.fields.heading;
+  const coverNote: ReactNode = actionCopy?.fields.text
+    ? documentToReactComponents(actionCopy.fields.text)
+    : undefined;
+
+  const footnoteLead = footnoteCopy?.fields.eyebrow;
+
+  const ctaHref = (primaryLink && resolveLinkHref(primaryLink)) ?? "";
   const ctaLabel = primaryLink?.fields.label;
+  const emailHref = emailLink ? resolveLinkHref(emailLink) : undefined;
+  const emailLabel = emailLink?.fields.label;
+  const footnoteHref = footnoteLink ? resolveLinkHref(footnoteLink) : undefined;
+  const footnoteLabel = footnoteLink?.fields.label;
 
   // `backgroundImage` links to a `dataImage` *entry*, not a raw asset —
   // resolve that entry's own `image` field for the actual asset URL (same
-  // pattern HomeAI/HomeAboutUs use). Optional here: no placeholder
-  // fallback, so it's simply absent until an editor sets one — in which
-  // case the section falls back to its themed background color instead
-  // (see `theme.sectionBg` below).
-  const illustrationEntry = entry.fields.backgroundImage;
-  const illustrationUrl = isEntry(illustrationEntry)
+  // pattern every sibling section uses). Optional here: no placeholder
+  // fallback, so the section just shows its plain/themed page background
+  // until an editor sets one — the dark action panel itself doesn't
+  // depend on it either way.
+  const backgroundImageEntry = entry.fields.backgroundImage;
+  const backgroundUrl = isEntry(backgroundImageEntry)
     ? getAssetUrl(
-      (illustrationEntry as unknown as PlainEntry<DataImageSkeleton>).fields
-        .image
-    )
+        (backgroundImageEntry as unknown as PlainEntry<DataImageSkeleton>)
+          .fields.image
+      )
     : undefined;
 
   // Resolves `themeColor` (e.g. "dark", "blue", "emerald" — see
-  // app/lib/theme.ts) to its text/button colors. `undefined` for an unset
-  // or unrecognized value, in which case every themed class below falls
-  // back to this section's existing default (today's plain mint look).
-  // The scrim/background photo itself stay unthemed either way.
+  // app/lib/theme.ts) to this panel's text/button/card colors. `undefined`
+  // for an unset or unrecognized value, in which case every themed class
+  // below falls back to this section's own default look — the reference
+  // mockup's dark-navy-and-cyan action panel.
   const theme = resolveTheme(entry.fields.themeColor);
-
-  // "left" (default), "center", or "right" — drives the left column's own
-  // cross-axis alignment, its text alignment, and the CTA row's
-  // justification below, so an editor-set `textStart` moves the eyebrow/
-  // heading/copy/features/CTA together rather than piecemeal.
-  const align = resolveAlign(entry.fields.textStart);
+  const accentHex = theme?.patternColor ?? "#16B9E8";
 
   const sectionRef = useRef<HTMLElement>(null);
   const headingRef = useRef<HTMLHeadingElement>(null);
-  const cardsRef = useRef<HTMLDivElement>(null);
+  const stepsRef = useRef<HTMLOListElement>(null);
+  const actionCardRef = useRef<HTMLDivElement>(null);
 
   /* =========================================================
      REVEAL ANIMATION — the heading splits into words on scroll-in (same
-     GSAP split-text treatment as HomeServices/HomeProducts/HomeAI).
-     Skipped entirely under prefers-reduced-motion.
+     GSAP split-text treatment as HomeServices/HomeProducts/HomeAI/
+     HomeAboutUs). Skipped entirely under prefers-reduced-motion.
   ========================================================= */
   useLayoutEffect(() => {
     if (!headingRef.current) {
@@ -300,342 +444,350 @@ export default function HomeTalkToUs({ entry }: Props) {
   }, []);
 
   /* =========================================================
-     CARD LOAD REVEAL — the feature cards fade + rise into place with a
-     stagger as the grid scrolls into view, same GSAP vocabulary
-     AISolutionsCapabilities/ContactFaq's own card grids use. Skipped
-     entirely under prefers-reduced-motion.
+     STEPS + ACTION CARD REVEAL — the numbered steps stagger in one
+     after another, and the action card fades + rises in as its own
+     block, both as they scroll into view. Skipped entirely under
+     prefers-reduced-motion.
   ========================================================= */
   useLayoutEffect(() => {
-    if (!cardsRef.current || !features.length) {
+    const blocks = [stepsRef.current, actionCardRef.current].filter(
+      (block): block is HTMLOListElement | HTMLDivElement => block !== null
+    );
+    if (!blocks.length) {
       return;
     }
 
     if (prefersReducedMotion()) {
-      gsap.set(cardsRef.current.children, { opacity: 1, y: 0 });
+      gsap.set(blocks, { opacity: 1, y: 0 });
+      if (stepsRef.current) {
+        gsap.set(stepsRef.current.children, { opacity: 1, y: 0 });
+      }
       return;
     }
 
     const ctx = gsap.context(() => {
-      gsap.from(cardsRef.current!.children, {
-        y: 28,
-        opacity: 0,
-        duration: 0.6,
-        ease: "power3.out",
-        stagger: 0.1,
-        scrollTrigger: {
-          trigger: cardsRef.current,
-          start: "top 88%",
-          once: true,
-        },
-      });
-    }, cardsRef);
+      if (stepsRef.current && steps.length) {
+        gsap.from(stepsRef.current.children, {
+          y: 20,
+          opacity: 0,
+          duration: 0.6,
+          ease: "power3.out",
+          stagger: 0.12,
+          scrollTrigger: {
+            trigger: stepsRef.current,
+            start: "top 85%",
+            once: true,
+          },
+        });
+      }
+
+      if (actionCardRef.current) {
+        gsap.from(actionCardRef.current, {
+          y: 28,
+          opacity: 0,
+          duration: 0.7,
+          delay: 0.1,
+          ease: "power3.out",
+          scrollTrigger: {
+            trigger: actionCardRef.current,
+            start: "top 85%",
+            once: true,
+          },
+        });
+      }
+    }, sectionRef);
 
     return () => ctx.revert();
-  }, [features.length]);
-
-  /* =========================================================
-     CARD HOVER — distinct from every sibling section's own lift/tilt/
-     pulse/spotlight/focus-bracket treatments: the card lifts with a
-     soft shadow while its icon box gives a quick elastic "pop" (a
-     bouncy scale + slight rotate), rather than either alone. GSAP
-     rather than CSS since the icon's elastic overshoot isn't
-     expressible as a single CSS easing. Skipped under
-     prefers-reduced-motion — the card keeps its plain border/background
-     with no hover motion in that case.
-  ========================================================= */
-  const handleCardEnter = (event: React.MouseEvent<HTMLDivElement>) => {
-    if (prefersReducedMotion()) {
-      return;
-    }
-
-    const card = event.currentTarget;
-    const icon = card.querySelector<HTMLElement>("[data-feature-icon]");
-
-    gsap.to(card, {
-      y: -6,
-      boxShadow: "0 20px 36px -14px rgba(16,24,40,0.18)",
-      duration: 0.35,
-      ease: "power2.out",
-    });
-
-    if (icon) {
-      gsap.fromTo(
-        icon,
-        { rotate: 0, scale: 1 },
-        { rotate: 8, scale: 1.15, duration: 0.5, ease: "elastic.out(1, 0.5)" }
-      );
-    }
-  };
-
-  const handleCardLeave = (event: React.MouseEvent<HTMLDivElement>) => {
-    if (prefersReducedMotion()) {
-      return;
-    }
-
-    const card = event.currentTarget;
-    const icon = card.querySelector<HTMLElement>("[data-feature-icon]");
-
-    // `clearProps: "boxShadow"` rather than animating back to an
-    // explicit value — the card always keeps its own static shadow
-    // (the `shadow-[...]` class below) at rest, so leaving just drops
-    // the inline override and lets that class-defined shadow show
-    // again, instead of animating all the way down to no shadow at all.
-    gsap.to(card, {
-      y: 0,
-      duration: 0.35,
-      ease: "power2.out",
-      clearProps: "boxShadow",
-    });
-
-    if (icon) {
-      gsap.to(icon, {
-        rotate: 0,
-        scale: 1,
-        duration: 0.35,
-        ease: "power2.out",
-      });
-    }
-  };
+  }, [steps.length]);
 
   return (
     <section
       ref={sectionRef}
       className={cx(
-        "relative overflow-hidden",
-        illustrationUrl
-          ? "bg-cover bg-center"
-          : (theme?.sectionBg ?? "bg-emerald-50/40")
+        "relative overflow-hidden bg-white"
       )}
-      style={
-        illustrationUrl
-          ? { backgroundImage: `url(${illustrationUrl})` }
-          : undefined
-      }
     >
-      {/* =================================================
-          DECORATIVE OVERLAY — mint scrim over the background image so
-          the left-hand copy stays readable regardless of what's behind
-          it; fades out toward the right so the image still reads there.
-          Only rendered when there's an actual photo to scrim — with no
-          `illustrationUrl`, this would otherwise sit on top of (and
-          mask) the themed background color above.
-      ================================================= */}
-      <ThemePattern theme={theme} pattern={entry?.fields.pattern} patternColor={entry?.fields.patternColor} />
-      <div
-        className={cx(
-          "container mx-auto grid gap-12 px-5 py-16 md:px-10 md:py-24 lg:items-center lg:gap-8 lg:py-28",
-          align === "center"
-            ? "justify-items-center max-w-4xl mx-auto"
-            : "lg:grid-cols-2 lg:items-center"
-        )}
-      >
+
+      <div className="container relative mx-auto px-5 py-12 md:px-10 md:py-16 lg:py-20">
         {/* =================================================
-            LEFT — badge, heading, copy, features, CTA + note.
+            PANEL — the dark action card itself. Always this fixed
+            navy-gradient look unless an editor sets `themeColor`.
         ================================================= */}
-        <div className={cx("flex flex-col gap-6", ALIGN_ITEMS[align])}>
-          {eyebrow && (
-            <span
-              className={cx(
-                "inline-flex w-fit items-center gap-2 rounded-full px-3 py-1.5 text-xs font-bold tracking-wide ring-1 z-2",
-                theme?.eyebrowBg ?? "bg-white/80",
-                theme?.eyebrowText ?? "text-emerald-700",
-                theme ? "ring-black/5" : "ring-emerald-100"
-              )}
-            >
-              <MessageCircle size={14} aria-hidden />
-              {eyebrow}
-            </span>
+        <div
+          className={cx(
+            "relative overflow-hidden rounded-[26px] p-8 shadow-[0_30px_70px_-30px_rgba(6,18,35,0.55)] md:p-12 lg:p-16",
+            theme?.sectionBg ?? "bg-gradient-to-br from-[#061223] to-[#0C2138]"
           )}
+        >
+                <ThemePattern
+        theme={theme}
+        pattern={entry?.fields.pattern}
+        patternColor={entry?.fields.patternColor}
+      />
 
-          <DynamicHeading level={resolveHeadingLevel(copy?.fields.headingLevel, "h2")}
-            ref={headingRef}
-            className={cx(
-              " text-[30px] leading-[1.15] font-extrabold tracking-tight sm:text-[36px] md:text-[42px] z-2",
-              TEXT_ALIGN[align],
-              align === "center" ? "max-w-3xl": "max-w-lg",
-              theme?.heading ?? "text-gray-900"
-            )}
-          >
-            {heading}
-          </DynamicHeading>
-
-          {description && (
-            <div
-              className={cx(
-                "rich-text max-w-2xl text-[15.5px] leading-relaxed md:text-[17px] z-2",
-                TEXT_ALIGN[align],
-                align === "center" ? "max-w-3xl": "max-w-md",
-                theme?.body ?? "text-gray-500"
-              )}
-            >
-              {description}
-            </div>
-          )}
-
-          {/* =================================================
-              FEATURES — one per contentDetail entry.
-          ================================================= */}
-          {features?.length > 0 && (
-          <div
-            ref={cardsRef}
-            className="mt-2 grid grid-cols-2 gap-x-6 gap-y-7 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-2"
-          >
-            {features.map((feature, index) => {
-              const FallbackIcon = FALLBACK_ICONS[index % FALLBACK_ICONS.length];
-
-              return (
-                <div
-                  key={feature.name}
-                  onMouseEnter={handleCardEnter}
-                  onMouseLeave={handleCardLeave}
+          <div className="relative grid gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:gap-16">
+            {/* =================================================
+                LEFT — offer copy + numbered steps.
+            ================================================= */}
+            <div>
+              {eyebrow && (
+                <span
                   className={cx(
-                "flex flex-col gap-3 z-2 border p-5 rounded-2xl shadow-[0_4px_14px_-8px_rgba(16,24,40,0.08)]",
-                ALIGN_ITEMS[align],
-                theme?.cardBorder ?? "border-gray-100",
-                theme?.cardBg ?? "bg-white"
-              )}
-                >
-                  <div
-                    data-feature-icon
-                    className={cx(
-                      "flex h-11 w-11 items-center justify-center rounded-xl",
-                      theme?.eyebrowBg ?? "bg-emerald-100",
-                      theme?.accentText ?? "text-emerald-700"
-                    )}
-                  >
-                    {feature.iconUrl ? (
-                      // eslint-disable-next-line @next/next/no-img-element -- matches the plain <img> convention already used for external/Contentful assets in this project
-                      <img
-                        src={feature.iconUrl}
-                        alt=""
-                        aria-hidden
-                        className="h-5 w-5 object-contain"
-                      />
-                    ) : (
-                      <FallbackIcon size={20} aria-hidden />
-                    )}
-                  </div>
-
-                  <div>
-                    <h3
-                      className={cx(
-                        "text-[14.5px] leading-snug font-bold",
-                        TEXT_ALIGN[align],
-                        theme?.heading ?? "text-gray-900"
-                      )}
-                    >
-                      {feature.name}
-                    </h3>
-                    {feature.description && (
-                      <p
-                        className={cx(
-                          "mt-1 text-[13px] leading-relaxed",
-                          TEXT_ALIGN[align],
-                          theme?.body ?? "text-gray-500"
-                        )}
-                      >
-                        {feature.description}
-                      </p>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-          )}
-
-          {/* =================================================
-              CTA + handwritten-style note.
-          ================================================= */}
-          {(ctaLabel || note) && (
-            <div
-              className={cx(
-                "mt-4 flex flex-wrap items-center gap-4",
-                JUSTIFY_CONTENT[align]
-              )}
-            >
-              {ctaLabel && (
-                <Link
-                  href={ctaHref}
-                  className={cx(
-                    "inline-flex w-fit items-center gap-2 z-2 rounded-full px-7 py-3.5 text-[15px] font-semibold shadow-lg transition-all duration-300 hover:-translate-y-0.5",
-                    theme?.buttonBg ?? "bg-emerald-600",
-                    theme?.buttonText ?? "text-white",
-                    theme?.buttonHoverBg ?? "hover:bg-emerald-500"
+                    "mb-4 flex items-center gap-2.5 text-[12px] font-semibold tracking-[0.16em] uppercase",
+                    theme?.accentText ?? "text-[#16B9E8]"
                   )}
                 >
-                  <Send size={16} aria-hidden />
+                  <span
+                    aria-hidden
+                    className={cx("h-0.5 w-[22px] rounded-sm", theme?.buttonBg ?? "bg-[#16B9E8]")}
+                  />
+                  {eyebrow}
+                </span>
+              )}
+
+              <DynamicHeading
+                level={resolveHeadingLevel(copy?.fields.headingLevel, "h2")}
+                ref={headingRef}
+                className={cx(
+                  "max-w-[17ch] text-[30px] leading-[1.08] font-extrabold tracking-tight sm:text-[36px] md:text-[42px]",
+                  theme?.heading ?? "text-white"
+                )}
+              >
+                {heading}
+              </DynamicHeading>
+
+              {description && (
+                <div
+                  className={cx(
+                    "rich-text mt-4 max-w-[50ch] text-[15.5px] leading-relaxed",
+                    theme?.body ?? "text-[#9DB2C4]"
+                  )}
+                >
+                  {description}
+                </div>
+              )}
+
+              {steps.length > 0 && (
+                <ol ref={stepsRef} className="mt-8 list-none">
+                  {steps.map((step, index) => (
+                    <li
+                      key={step.id}
+                      className={cx(
+                        "grid grid-cols-[36px_1fr] items-start gap-4 py-4",
+                        index > 0 && (theme?.cardBorder ?? "border-t border-white/[0.06]")
+                      )}
+                    >
+                      <span
+                        aria-hidden
+                        className={cx(
+                          "flex h-8 w-8 items-center justify-center rounded-full font-mono text-[11px]",
+                          theme?.accentText ?? "text-[#16B9E8]"
+                        )}
+                        style={{
+                          borderWidth: 1,
+                          borderStyle: "solid",
+                          // The translucent circular wash itself is purely
+                          // decorative (like `ThemePattern`'s own use of
+                          // `patternColor`), so it's fine for it to lean on
+                          // the raw accent hex even though the number text
+                          // above uses `theme.accentText` instead.
+                          borderColor: `color-mix(in srgb, ${accentHex} 42%, transparent)`,
+                          backgroundColor: `color-mix(in srgb, ${accentHex} 12%, transparent)`,
+                        }}
+                      >
+                        {String(index + 1).padStart(2, "0")}
+                      </span>
+                      <div>
+                        <h3
+                          className={cx(
+                            "mt-[3px] mb-1 text-[15.5px] font-semibold",
+                            theme?.heading ?? "text-white"
+                          )}
+                        >
+                          {step.title}
+                        </h3>
+                        {step.description && (
+                          <p
+                            className={cx(
+                              "text-[14px] leading-relaxed",
+                              theme?.body ?? "text-[#9DB2C4]"
+                            )}
+                          >
+                            {step.description}
+                          </p>
+                        )}
+                      </div>
+                    </li>
+                  ))}
+                </ol>
+              )}
+            </div>
+
+            {/* =================================================
+                RIGHT — action card: buttons, assurances, clocks.
+            ================================================= */}
+            <div
+              ref={actionCardRef}
+              className={cx(
+                "flex flex-col rounded-[20px] border p-6 md:p-8",
+                theme?.cardBorder ?? "border-white/10",
+                theme?.cardBg ?? "bg-white/[0.045]"
+              )}
+            >
+              {actionKicker && (
+                <p
+                  className={cx(
+                    "mb-4 font-mono text-[12px] tracking-[0.15em] uppercase",
+                    theme?.accentText ?? "text-[#16B9E8]"
+                  )}
+                >
+                  {actionKicker}
+                </p>
+              )}
+
+              {ctaLabel && (
+                <Link
+                  href={ctaHref || ""}
+                  className={cx(
+                    "group flex w-full items-center justify-center gap-2.5 rounded-xl px-6 py-4 text-[15px] font-semibold transition-transform duration-200 hover:-translate-y-0.5",
+                    theme?.buttonBg ?? "bg-[#16B9E8]",
+                    theme?.buttonText ?? "text-[#04121D]",
+                    theme?.buttonHoverBg ?? "hover:brightness-110"
+                  )}
+                >
                   {ctaLabel}
+                  <ArrowRight
+                    size={16}
+                    aria-hidden
+                    className="transition-transform duration-200 group-hover:translate-x-1"
+                  />
                 </Link>
               )}
 
-              {note && (
-                <>
-                  <span
-                    aria-hidden
-                    className={cx(
-                      "hidden items-center gap-1.5 sm:inline-flex z-2",
-                      theme?.accentText ?? "text-emerald-600"
-                    )}
-                  >
-                    <svg
-                      width="34"
-                      height="20"
-                      viewBox="0 0 34 20"
-                      fill="none"
-                      className="-scale-x-100"
-                    >
-                      <path
-                        d="M1 2c8 0 12 14 20 14"
-                        stroke="currentColor"
-                        strokeWidth="1.5"
-                        strokeLinecap="round"
-                        strokeDasharray="3 4"
-                      />
-                      <path
-                        d="M17 12l4 4-4.5 2"
-                        stroke="currentColor"
-                        strokeWidth="1.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        fill="none"
-                      />
-                    </svg>
-                  </span>
+              {emailLabel && (
+                <a
+                  href={emailHref || `mailto:${emailLabel}`}
+                  className={cx(
+                    "mt-2.5 flex w-full items-center justify-center gap-2.5 rounded-xl border px-6 py-4 text-[15px] font-medium transition-transform duration-200 hover:-translate-y-0.5",
+                    theme?.cardBorder ?? "border-white/10",
+                    theme?.heading ?? "text-[#EAF2F8]"
+                  )}
+                >
+                  {emailLabel}
+                </a>
+              )}
 
-                  <span
-                    className={cx(
-                      "text-[13.5px] font-medium italic z-2",
-                      theme?.accentText ?? "text-emerald-600"
-                    )}
-                  >
-                    {note}
-                  </span>
-                </>
+              {assurances.length > 0 && (
+                <ul
+                  className={cx(
+                    "mt-6 list-none border-t pt-6",
+                    theme?.cardBorder ?? "border-white/[0.06]"
+                  )}
+                >
+                  {assurances.map((item) => (
+                    <li
+                      key={item.id}
+                      className={cx(
+                        "mb-3 flex items-start gap-2.5 text-[13.5px] leading-relaxed last:mb-0",
+                        theme?.body ?? "text-[#9DB2C4]"
+                      )}
+                    >
+                      <Check
+                        size={15}
+                        aria-hidden
+                        className={cx(
+                          "mt-0.5 flex-shrink-0",
+                          theme?.accentText ?? "text-[#16B9E8]"
+                        )}
+                      />
+                      {item.label}
+                    </li>
+                  ))}
+                </ul>
+              )}
+
+              {clockGroups.length > 0 && (
+                <div
+                  className={cx(
+                    "mt-auto border-t pt-5",
+                    clockGroups.length && (assurances.length ? "" : "mt-6"),
+                    theme?.cardBorder ?? "border-white/[0.06]"
+                  )}
+                >
+                  {clocksKicker && (
+                    <p
+                      className={cx(
+                        "mb-3.5 font-mono text-[10px] tracking-[0.15em] uppercase",
+                        theme?.muted ?? "text-[#7690A6]"
+                      )}
+                    >
+                      {clocksKicker}
+                    </p>
+                  )}
+                  {clockGroups.map((group) => (
+                    <LiveClock key={group.id} group={group} theme={theme} />
+                  ))}
+                  {coverNote && (
+                    <div
+                      className={cx(
+                        "rich-text mt-3.5 text-[12.5px] leading-relaxed",
+                        theme?.muted ?? "text-[#7690A6]"
+                      )}
+                    >
+                      {coverNote}
+                    </div>
+                  )}
+                </div>
               )}
             </div>
-          )}
 
-          {noteBottom && (
-            <p
-              className={cx(
-                "mt-1 inline-flex items-center gap-1.5 text-[13px] z-2",
-                theme?.muted ?? "text-gray-500"
-              )}
-            >
-              <Clock size={14} aria-hidden />
-              {noteBottom}
-            </p>
-          )}
+            {/* =================================================
+                FOOTNOTE — leading text + link, and the office roster.
+            ================================================= */}
+            {(footnoteLead || locationsLine) && (
+              <div
+                className={cx(
+                  "flex flex-wrap items-center justify-between gap-3 border-t pt-6 lg:col-span-2",
+                  theme?.cardBorder ?? "border-white/10"
+                )}
+              >
+                {footnoteLead && (
+                  <p className={cx("text-[13.5px]", theme?.body ?? "text-[#9DB2C4]")}>
+                    {footnoteLead}{" "}
+                    {footnoteLabel && footnoteHref && (
+                      <Link
+                        href={footnoteHref}
+                        className={cx(
+                          "border-b pb-0.5 transition-colors duration-200",
+                          theme?.heading ?? "text-white",
+                          theme?.cardBorder ?? "border-white/10"
+                        )}
+                        onMouseEnter={(event) => {
+                          event.currentTarget.style.borderColor = accentHex;
+                        }}
+                        onMouseLeave={(event) => {
+                          event.currentTarget.style.borderColor = "";
+                        }}
+                      >
+                        {footnoteLabel}
+                      </Link>
+                    )}
+                  </p>
+                )}
+                {locationsLine && (
+                  <p
+                    className={cx(
+                      "font-mono text-[10.5px] tracking-[0.12em] uppercase",
+                      theme?.heading ?? "text-white"
+                    )}
+                  >
+                    {locationsLine}
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
         </div>
-
-        {/* =================================================
-            RIGHT — empty spacer. The illustration itself is now the
-            whole section's background (see the `<section>` above), so
-            this column just reserves space on large screens, keeping
-            the copy to the left half where the scrim is strongest.
-        ================================================= */}
-        <div aria-hidden className="hidden lg:block" />
       </div>
     </section>
   );

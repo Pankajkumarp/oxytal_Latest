@@ -521,7 +521,12 @@ export default function CareersPage({ entry }: Props) {
   }, [activeFilter]);
 
   const ctaTitle = ctaEntry?.fields.title;
-  const ctaDescription = ctaEntry?.fields.description;
+  // `description` is a `RichText` field on `callToAction` (see
+  // app/types/contentful.ts) — same `documentToReactComponents` treatment
+  // every other `callToAction.description` consumer in this project uses.
+  const ctaDescription = ctaEntry?.fields.description
+    ? documentToReactComponents(ctaEntry.fields.description)
+    : undefined;
   const ctaLink = ctaEntry?.fields.ctaButton?.find(isEntry) as
     | PlainEntry<DataLinkSkeleton>
     | undefined;
@@ -721,9 +726,9 @@ export default function CareersPage({ entry }: Props) {
                 </h2>
               )}
               {ctaDescription && (
-                <p className={cx("mt-2 max-w-[360px] text-[13.5px]", theme?.body ?? "text-[#6B5E4A]")}>
+                <div className={cx("rich-text mt-2 max-w-[360px] text-[13.5px]", theme?.body ?? "text-[#6B5E4A]")}>
                   {ctaDescription}
-                </p>
+                </div>
               )}
             </div>
             {ctaLink && ctaHref && (

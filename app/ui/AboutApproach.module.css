@@ -224,12 +224,12 @@
   top: 2%;
 }
 
-.sideCard[data-position="three"] {
+.sideCard[data-position="four"] {
   left: 5%;
   bottom: 3%;
 }
 
-.sideCard[data-position="four"] {
+.sideCard[data-position="three"] {
   right: 5%;
   bottom: 3%;
 }
@@ -338,12 +338,12 @@
     top: 1%;
   }
 
-  .sideCard[data-position="three"] {
+  .sideCard[data-position="four"] {
     left: 2%;
     bottom: 2%;
   }
 
-  .sideCard[data-position="four"] {
+  .sideCard[data-position="three"] {
     right: 2%;
     bottom: 2%;
   }
@@ -439,12 +439,12 @@
     top: 2%;
   }
 
-  .sideCard[data-position="three"] {
+  .sideCard[data-position="four"] {
     left: 5%;
     bottom: 3%;
   }
 
-  .sideCard[data-position="four"] {
+  .sideCard[data-position="three"] {
     right: 5%;
     bottom: 3%;
   }
@@ -497,12 +497,12 @@
     top: 5%;
   }
 
-  .sideCard[data-position="three"] {
+  .sideCard[data-position="four"] {
     left: 10%;
     bottom: 8%;
   }
 
-  .sideCard[data-position="four"] {
+  .sideCard[data-position="three"] {
     right: 10%;
     bottom: 8%;
   }
@@ -569,11 +569,11 @@
     right: 3%;
   }
 
-  .sideCard[data-position="three"] {
+  .sideCard[data-position="four"] {
     left: 15%;
   }
 
-  .sideCard[data-position="four"] {
+  .sideCard[data-position="three"] {
     right: 15%;
   }
 

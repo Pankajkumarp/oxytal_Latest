@@ -366,14 +366,16 @@ function renderBlock(
               )}
             </h2>
 
-            <p
-              className={cx(
-                "text-[15.5px] leading-relaxed md:text-[17px]",
-                theme.body
-              )}
-            >
-              {entry.fields.description}
-            </p>
+            {entry.fields.description && (
+              <div
+                className={cx(
+                  "text-[15.5px] leading-relaxed md:text-[17px]",
+                  theme.body
+                )}
+              >
+                {documentToReactComponents(entry.fields.description)}
+              </div>
+            )}
 
             {href && link && (
               <a
