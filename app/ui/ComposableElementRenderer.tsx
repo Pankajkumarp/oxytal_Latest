@@ -69,6 +69,11 @@ import SamVaultCaseStudy from "./product/SamVaultCaseStudy";
 import ActionPulseCaseStudy from "./product/ActionPulseCaseStudy";
 import ForgePipelineCaseStudy from "./product/ForgePipelineCaseStudy";
 import KollabryCaseStudy from "./product/KollabryCaseStudy";
+import DiageoBrandPromoterCaseStudy from "./product/DiageoBrandPromoterCaseStudy";
+import TaffersCaseStudy from "./product/TaffersCaseStudy";
+import KaneffCaseStudy from "./product/KaneffCaseStudy";
+import CasaFamosaCaseStudy from "./product/CasaFamosaCaseStudy";
+import StoopDayzCaseStudy from "./product/StoopDayzCaseStudy";
 
 type PlainEntry<Skeleton extends EntrySkeletonType> = Entry<
   Skeleton,
@@ -155,6 +160,11 @@ const subtypeComponents: Record<
   actionPulse: ActionPulseCaseStudy,
   forgePipeline: ForgePipelineCaseStudy,
   kollabry: KollabryCaseStudy,
+  diageoBrandPromoter: DiageoBrandPromoterCaseStudy,
+  taffers: TaffersCaseStudy,
+  kaneffSharepoint: KaneffCaseStudy,
+  casaFamosa: CasaFamosaCaseStudy,
+  stoopDayz: StoopDayzCaseStudy,
   DigitalCommerceHero: DigitalCommerce,
 };
 
