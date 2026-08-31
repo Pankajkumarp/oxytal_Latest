@@ -328,14 +328,14 @@ function CaseStudySlide({
           </span>
         </div>
 
-        <h3
+        <span
           className={cx(
-            "text-[26px] leading-tight font-extrabold sm:text-[28px] md:text-[32px]",
+            "text-[26px] leading-tight font-extrabold sm:text-[28px] md:text-[32px] block",
             theme?.heading ?? "text-gray-900"
           )}
         >
           {study.title}
-        </h3>
+        </span>
 
         {study.description && (
           <p
@@ -683,9 +683,9 @@ function TestimonialsModal({
         className="relative flex max-h-[85vh] w-full max-w-2xl flex-col overflow-hidden rounded-3xl bg-white shadow-2xl"
       >
         <div className="flex items-center justify-between border-b border-gray-100 px-6 py-5 md:px-8">
-          <h3 className="text-lg font-bold text-gray-900">
+          <span className="text-lg font-bold text-gray-900 block">
             All Testimonials
-          </h3>
+          </span>
 
           <button
             type="button"

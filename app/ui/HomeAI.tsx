@@ -446,14 +446,14 @@ export default function HomeAI({ entry }: Props) {
                 <ul className="flex flex-col gap-5">
                   {group.items.map((item) => (
                     <li key={item.name} data-group-item>
-                      <h3
+                      <span
                         className={cx(
-                          "text-[16px] font-bold",
+                          "text-[16px] font-bold block",
                           theme?.heading ?? "text-gray-900"
                         )}
                       >
                         {item.name}
-                      </h3>
+                      </span>
                       <p
                         className={cx(
                           "mt-1 text-[14px] leading-relaxed",

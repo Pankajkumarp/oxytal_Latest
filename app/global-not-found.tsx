@@ -9,6 +9,7 @@ import Navbar from "@/app/ui/Navbar";
 import PageBody from "@/app/ui/PageBody";
 import Footer from "@/app/ui/Footer";
 import Home404 from "@/app/ui/Home404";
+import SkipToContent from "@/app/ui/SkipToContent";
 import { ComposableElementSkeleton } from "@/app/types/contentful";
 
 /**
@@ -131,11 +132,12 @@ export default async function GlobalNotFound(): Promise<ReactElement<any>> {
   return (
     <html lang="en" className={`${poppins.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col">
-        <main>
-          <Navbar entry={navigation} />
+        <SkipToContent />
+        <Navbar entry={navigation} />
+        <main id="main-content">
           {page ? <PageBody blocks={page.fields.body} /> : <Home404 entry={NOT_FOUND_FALLBACK_ENTRY} />}
-          <Footer entry={footer} />
         </main>
+        <Footer entry={footer} />
       </body>
     </html>
   );

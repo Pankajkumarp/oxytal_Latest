@@ -385,14 +385,14 @@ function MegaPanel({ menu, theme }: { menu: MegaMenu; theme?: SectionTheme }) {
                 theme ? "hover:opacity-70" : "hover:bg-gray-50"
               )}
             >
-              <h4
+              <span
                 className={cx(
-                  "text-[18px]",
+                  "text-[18px] block",
                   theme?.link ?? "text-gray-900"
                 )}
               >
                 {entry.title}
-              </h4>
+              </span>
 
               <p
                 className={cx(
@@ -427,9 +427,9 @@ function MegaPanel({ menu, theme }: { menu: MegaMenu; theme?: SectionTheme }) {
             {menu.cta.tag}
           </div>
 
-          <h3 className="mb-3 text-xl tracking-tight">
+          <span className="mb-3 text-xl tracking-tight block">
             {menu.cta.title}
-          </h3>
+          </span>
 
           <p
             className={cx(
@@ -761,6 +761,7 @@ export default function Navbar({ entry }: Props) {
   return (
     <>
       <nav
+        aria-label="Main navigation"
         ref={navRef}
         className={cx(
           "top-0 z-50 w-full px-5 py-4 transition-transform duration-300 md:px-10 fixed",
@@ -805,7 +806,7 @@ export default function Navbar({ entry }: Props) {
                 {navOpen ? '' : <Menu size={24} />}
               </button>
             )}
-
+            <h1>
             <Link
               href="/"
               className={cx(
@@ -819,6 +820,7 @@ export default function Navbar({ entry }: Props) {
             >
               Oxytal
             </Link>
+            </h1>
           </div>
 
           {/* =================================================
@@ -1071,7 +1073,8 @@ export default function Navbar({ entry }: Props) {
         entirely, regardless of whatever transform/translate classes
         <nav> itself ends up with.
     ================================================= */}
-      <div
+      <nav 
+      aria-label="Bottom navigation"
         className={cx(
           "fixed inset-x-0 top-[65px] bottom-0 z-40 overflow-y-auto transition-transform duration-200 lg:hidden",
           theme?.sectionBg ?? "bg-white",
@@ -1111,13 +1114,19 @@ export default function Navbar({ entry }: Props) {
                 key={menu.key}
                 className={cx("border-b", theme?.cardBorder ?? "border-gray-100")}
               >
-                <button
-                  type="button"
+                <div
                   className={cx(
                     "flex w-full items-center justify-between py-3.5 text-[15px] font-semibold",
                     theme?.heading ?? "text-gray-900"
                   )}
-                  onClick={() => {
+                >
+                  <Link href={menu.href || ""}>
+                  {menu.label}
+                  </Link>
+
+                  {hasContent && (
+                    <ChevronDown
+                       onClick={() => {
                     if (!hasContent) {
                       return;
                     }
@@ -1128,11 +1137,6 @@ export default function Navbar({ entry }: Props) {
                         : menu.key
                     );
                   }}
-                >
-                  {menu.label}
-
-                  {hasContent && (
-                    <ChevronDown
                       size={16}
                       className={`transition-transform ${mobileExpanded === menu.key
                           ? "rotate-180"
@@ -1140,7 +1144,7 @@ export default function Navbar({ entry }: Props) {
                         }`}
                     />
                   )}
-                </button>
+                </div>
 
                 {hasContent && mobileExpanded === menu.key && (
                   <div className="pb-5 pl-1">
@@ -1157,7 +1161,7 @@ export default function Navbar({ entry }: Props) {
                           >
                             <div
                               className={cx(
-                                "text-[14.5px] font-bold",
+                                "text-[14.5px] font-medium leading-[1.8]",
                                 theme?.link ?? "text-gray-900"
                               )}
                             >
@@ -1268,7 +1272,7 @@ export default function Navbar({ entry }: Props) {
             </div>
           </div>
         </div>
-      </div>
+      </nav>
     </>
   );
 }

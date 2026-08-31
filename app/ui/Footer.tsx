@@ -225,14 +225,14 @@ function FooterColumn({
 }) {
   return (
     <div>
-      <h3
+      <span
         className={cx(
-          "text-xs font-bold tracking-wide uppercase",
+          "text-xs font-bold tracking-wide uppercase block",
           theme?.accentText ?? "text-emerald-700"
         )}
       >
         {title}
-      </h3>
+      </span>
 
       <ul className="mt-4 flex flex-col gap-3">
         {links.map((link) => (
@@ -514,14 +514,14 @@ export default function Footer({ entry }: Props) {
             <div className="min-w-[170px] basis-[170px] flex-1 flex flex-col gap-6">
               {contactLinks.length > 0 && (
                 <div>
-                  <h3
+                  <span
                     className={cx(
-                      "text-xs font-bold tracking-wide uppercase",
+                      "text-xs font-bold tracking-wide uppercase block",
                       theme?.accentText ?? "text-emerald-700"
                     )}
                   >
                     {contactTitle}
-                  </h3>
+                  </span>
 
                   <ul className="mt-4 flex flex-col gap-3">
                     {contactLinks.map((contact, index) => {
@@ -563,14 +563,14 @@ export default function Footer({ entry }: Props) {
                       : ""
                   }
                 >
-                  <h3
+                  <span
                     className={cx(
-                      "text-xs font-bold tracking-wide uppercase",
+                      "text-xs font-bold tracking-wide uppercase block",
                       theme?.accentText ?? "text-emerald-700"
                     )}
                   >
                     {officesTitle}
-                  </h3>
+                  </span>
 
                   <ul className="mt-4 flex flex-col gap-4">
                     {offices.map((office) => (

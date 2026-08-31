@@ -266,7 +266,7 @@ const SLIDES: ProductSlide[] = [
     dotColor: "#38BDF8",
     namePlain: "Kollab",
     nameAccent: "ry",
-    accentColor: "#0EA5E9",
+    accentColor: "#0A7DB2",
     tagline:
       "Issues, sprints, and retros with a built-in knowledge base and collaborative whiteboards. Plans and the decisions behind them — together, in one workspace.",
     metrics: [
@@ -875,12 +875,12 @@ export default function ProductsCarousel({ entry }: Props) {
             </div>
           )}
             </div>
-            <span className={cx(
+            <h3 className={cx(
               "text-[20px] leading-[1.15] font-extrabold tracking-tight sm:text-[26px] md:text-[30px] z-2",
               theme?.heading ?? "text-gray-900"
             )}>
               {String(current + 1).padStart(2, "0")} / {String(total).padStart(2, "0")}
-            </span>
+            </h3>
           </div>
 
           <div className={styles.dots}>
@@ -912,10 +912,10 @@ export default function ProductsCarousel({ entry }: Props) {
                   <div className="inline-block w-fit text-xs font-bold tracking-wide z-2 mb-2 uppercase">
                     <span style={{ color: slide.eyebrowColor }}>{slide.eyebrow}</span>
                   </div>
-                  <h3 className="text-[28px] leading-[1.15] font-extrabold tracking-tight sm:text-[34px] md:text-[40px] mb-3">
+                  <span className="block text-[28px] leading-[1.15] font-extrabold tracking-tight sm:text-[34px] md:text-[40px] mb-3">
                     {slide.namePlain}
                     <span style={{ color: slide.accentColor }}>{slide.nameAccent}</span>
-                  </h3>
+                  </span>
                   <p className="text-[15.5px] leading-relaxed mb-5 font-normal">{slide.tagline}</p>
 
                   <div className={styles.metrics}>

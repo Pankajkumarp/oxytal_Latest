@@ -11,6 +11,7 @@ import Navbar from "@/app/ui/Navbar";
 import PageBody from "@/app/ui/PageBody";
 import Footer from "@/app/ui/Footer";
 import CaseStudyDetail from "@/app/ui/CaseStudyDetail";
+import SkipToContent from "@/app/ui/SkipToContent";
 
 type Props = {
   params: Promise<{
@@ -153,11 +154,14 @@ export default async function Page({ params }: Props) {
 
   if (page) {
     return (
-      <main>
+      <>
+        <SkipToContent />
         <Navbar entry={navigation} />
-        <PageBody blocks={page.fields.body} />
+        <main id="main-content">
+          <PageBody blocks={page.fields.body} />
+        </main>
         <Footer entry={footer} />
-      </main>
+      </>
     );
   }
 
@@ -169,10 +173,13 @@ export default async function Page({ params }: Props) {
   }
 
   return (
-    <main>
+    <>
+      <SkipToContent />
       <Navbar entry={navigation} />
-      <CaseStudyDetail entry={study} />
+      <main id="main-content">
+        <CaseStudyDetail entry={study} />
+      </main>
       <Footer entry={footer} />
-    </main>
+    </>
   );
 }

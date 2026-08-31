@@ -7,6 +7,7 @@ import Navbar from "@/app/ui/Navbar";
 import PageBody from "@/app/ui/PageBody";
 import Footer from "@/app/ui/Footer";
 import Home404 from "@/app/ui/Home404";
+import SkipToContent from "@/app/ui/SkipToContent";
 import { ComposableElementSkeleton } from "@/app/types/contentful";
 
 /**
@@ -127,10 +128,13 @@ export default async function Page(): Promise<ReactElement<any>> {
   ]);
 
   return (
-    <main>
+    <>
+      <SkipToContent />
       <Navbar entry={navigation} />
-      {page ? <PageBody blocks={page.fields.body} /> : <Home404 entry={NOT_FOUND_FALLBACK_ENTRY} />}
+      <main id="main-content">
+        {page ? <PageBody blocks={page.fields.body} /> : <Home404 entry={NOT_FOUND_FALLBACK_ENTRY} />}
+      </main>
       <Footer entry={footer} />
-    </main>
+    </>
   );
 }

@@ -352,15 +352,15 @@ function ServiceCardView({
             />
           )}
 
-          <h3
+          <span
             className={cx(
-              "pt-1.5 text-[20px] font-bold leading-snug uppercase",
+              "pt-1.5 text-[20px] font-bold leading-snug uppercase block",
               theme?.heading ??
               "text-gray-900"
             )}
           >
             {service.name}
-          </h3>
+          </span>
         </div>
 
         {service.description && (

@@ -827,14 +827,14 @@ export default function HomeAboutUs({ entry }: Props) {
                       <FallbackIcon size={19} aria-hidden />
                     )}
                   </div>
-                  <h3
+                  <span
                     className={cx(
-                      "text-[18px] font-bold tracking-tight",
+                      "text-[18px] font-bold tracking-tight block",
                       theme?.heading ?? "text-[#0B1B2B]"
                     )}
                   >
                     {pillar.name}
-                  </h3>
+                  </span>
                   {pillar.description && (
                     <p
                       className={cx(

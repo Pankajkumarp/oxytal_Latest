@@ -19,14 +19,14 @@
 .demo {
   --ink: #0f1b2d;
   --body: #5a6b85;
-  --muted: #8595ae;
+  --muted: #627193;
   --panel: #ffffff;
   --line: #e1e9f2;
   --line2: #eef3f8;
-  --agent: #0e9fbf; /* machine work */
-  --agentSoft: #e3f6fa;
-  --human: #f0801f; /* your decision */
-  --humanSoft: #fef0e2;
+  --agent: #0A7B94; /* machine work */
+  --agentSoft: #EDF8FD;
+  --human: #B55B0D; /* your decision */
+  --humanSoft: #FEF7F0;
   --ok: #12a67c;
   --fd: var(--font-bricolage), system-ui, sans-serif;
   --fb: var(--font-plex-sans), system-ui, sans-serif;
@@ -161,7 +161,7 @@
   padding: 15px 18px;
   border-radius: 12px;
   margin: 2px 8px;
-  opacity: 0.4;
+  opacity: 1;
   transition: opacity 0.4s, background-color 0.4s;
 }
 .stage.stageOn,
