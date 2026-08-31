@@ -760,68 +760,68 @@ export default function Navbar({ entry }: Props) {
 
   return (
     <>
-    <nav
-      ref={navRef}
-      className={cx(
-        "top-0 z-50 w-full px-5 py-4 transition-transform duration-300 md:px-10 lg:fixed",
-        navOpen && (theme?.sectionBg ?? "bg-white"),
-        navHidden ? "-translate-y-full" : "translate-y-0"
-      )}
-    >
-      <div
+      <nav
+        ref={navRef}
         className={cx(
-          "container mx-auto flex items-center justify-between",
-          // Desktop 3-column layout — logo (left), nav links (center,
-          // truly centered via the `1fr` middle track rather than just
-          // whatever space is left after the logo/socials), socials
-          // (right). Below lg this stays the plain 2-item flex row
-          // (logo left, hamburger right) it always was — the grid only
-          // ever applies at the `lg` breakpoint. Any column with no
-          // visible content (nav/socials are both `hidden` outside the
-          // `navOpen` reveal) just collapses to empty space, so the
-          // closed state still renders as logo-only, left-aligned.
-          "lg:grid lg:grid-cols-[auto_1fr_auto] lg:items-center lg:gap-6"
+          "top-0 z-50 w-full px-5 py-4 transition-transform duration-300 md:px-10 fixed",
+          navOpen && (theme?.sectionBg ?? "bg-white"),
+          navHidden ? "-translate-y-full" : "translate-y-0"
         )}
       >
-        {/* =================================================
+        <div
+          className={cx(
+            "container mx-auto flex items-center justify-between",
+            // Desktop 3-column layout — logo (left), nav links (center,
+            // truly centered via the `1fr` middle track rather than just
+            // whatever space is left after the logo/socials), socials
+            // (right). Below lg this stays the plain 2-item flex row
+            // (logo left, hamburger right) it always was — the grid only
+            // ever applies at the `lg` breakpoint. Any column with no
+            // visible content (nav/socials are both `hidden` outside the
+            // `navOpen` reveal) just collapses to empty space, so the
+            // closed state still renders as logo-only, left-aligned.
+            "lg:grid lg:grid-cols-[auto_1fr_auto] lg:items-center lg:gap-6"
+          )}
+        >
+          {/* =================================================
             LOGO
         ================================================= */}
-        <div className="flex items-center gap-4">
-                  {/* =================================================
+          <div className="flex items-center gap-4">
+            {/* =================================================
             NAV TOGGLE — visible at every breakpoint. Below lg it opens the
             full-screen mobile menu; on lg+ it reveals the inline desktop
             nav/actions above instead.
         ================================================= */}
-        {navOpen ? (null):(
-        <button
-          type="button"
-          className={cx(
-            "flex items-center justify-center rounded-lg p-2 hidden lg:block cursor-pointer",
-            navContrast === "dark" ? "text-white" : "text-gray-900"
-          )}
-          onClick={() => setNavOpen((v) => !v)}
-          aria-label={navOpen ? "Close menu" : "Open menu"}
-        >
-          {navOpen ? '' : <Menu size={24} />}
-        </button>
-        )}
-
-          <Link
-            href="/"
-            className={cx(
-              "flex items-center text-[30px]  tracking-tight",
-              navOpen
-                ? (theme?.heading ?? "text-gray-900")
-                : navContrast === "dark"
-                  ? "lg:text-white"
-                  : "lg:text-gray-900"
+            {navOpen ? (null) : (
+              <button
+                type="button"
+                className={cx(
+                  "flex items-center justify-center rounded-lg p-2 hidden lg:block cursor-pointer",
+                  navContrast === "dark" ? "text-white" : "text-gray-900"
+                )}
+                onClick={() => setNavOpen((v) => !v)}
+                aria-label={navOpen ? "Close menu" : "Open menu"}
+              >
+                {navOpen ? '' : <Menu size={24} />}
+              </button>
             )}
-          >
-            Oxytal
-          </Link>
-        </div>
 
-        {/* =================================================
+            <Link
+              href="/"
+              className={cx(
+                "flex items-center text-[30px]  tracking-tight",
+                navOpen
+                  ? (theme?.heading ?? "text-gray-900")
+                  : navContrast === "dark"
+                    ? "text-white"
+                    : "text-gray-900"
+              )}
+            >
+              Oxytal
+            </Link>
+          </div>
+
+          {/* =================================================
             DESKTOP NAV — hidden by default; the hamburger button
             (visible at every breakpoint) toggles `navOpen`, which
             reveals this exact markup on lg+ via the GSAP effect above.
@@ -831,9 +831,8 @@ export default function Navbar({ entry }: Props) {
         ================================================= */}
           <ul
             ref={desktopNavRef}
-            className={`hidden items-center justify-center gap-1.5 ${
-              navOpen ? "lg:flex" : "lg:hidden"
-            }`}
+            className={`hidden items-center justify-center gap-1.5 ${navOpen ? "lg:flex" : "lg:hidden"
+              }`}
           >
             {menus.map((menu) => {
               /*
@@ -903,9 +902,8 @@ export default function Navbar({ entry }: Props) {
                         >
                           <ChevronDown
                             size={13}
-                            className={`transition-transform duration-200 ${
-                              activeMenu === menu.key ? "rotate-180" : ""
-                            }`}
+                            className={`transition-transform duration-200 ${activeMenu === menu.key ? "rotate-180" : ""
+                              }`}
                           />
                         </button>
                       )}
@@ -934,9 +932,8 @@ export default function Navbar({ entry }: Props) {
                       {hasContent && (
                         <ChevronDown
                           size={13}
-                          className={`transition-transform duration-200 ${
-                            activeMenu === menu.key ? "rotate-180" : ""
-                          }`}
+                          className={`transition-transform duration-200 ${activeMenu === menu.key ? "rotate-180" : ""
+                            }`}
                         />
                       )}
                     </button>
@@ -949,11 +946,10 @@ export default function Navbar({ entry }: Props) {
                   ================================================= */}
                   {hasContent && (
                     <div
-                      className={`absolute left-1/2  -translate-x-1/2 pt-0 transition-all duration-150 ${menu.menuType === "megaMenu" ? "w-[100%] top-full" : "top-[142%]"} ${
-                        activeMenu === menu.key
+                      className={`absolute left-1/2  -translate-x-1/2 pt-0 transition-all duration-150 ${menu.menuType === "megaMenu" ? "w-[100%] top-full" : "top-[142%]"} ${activeMenu === menu.key
                           ? "pointer-events-auto translate-y-0 opacity-100"
                           : "pointer-events-none -translate-y-1.5 opacity-0"
-                      }`}
+                        }`}
                     >
                       {/* MEGA MENU — the outer wrapper (`w-[100%]` above)
                           already spans <nav>'s full width, so this just
@@ -986,76 +982,82 @@ export default function Navbar({ entry }: Props) {
             })}
           </ul>
 
-        {/* =================================================
+          {/* =================================================
             DESKTOP RIGHT — same hidden-by-default / navOpen-reveals pattern
             as the desktop nav above. Its own grid column (the trailing
             `auto` track) pins it to the right edge.
         ================================================= */}
 
-        <button
-          type="button"
-          className="flex items-center justify-center rounded-lg p-2 block lg:hidden"
-          onClick={() => setNavOpen((v) => !v)}
-          aria-label={navOpen ? "Close menu" : "Open menu"}
-        >
-          {navOpen ? <X size={24} /> : <Menu size={24} />}
-        </button>
-        <div
-          ref={desktopActionsRef}
-          className={`hidden items-center justify-end gap-3.5 ${
-            navOpen ? "lg:flex" : "lg:hidden"
-          }`}
-        >
-          {/* Social icons — from the `headerNavigation` entry's own
+          <button
+            type="button"
+            className={cx(
+              "flex items-center justify-center rounded-lg p-2 block lg:hidden",
+              navOpen
+                ? (theme?.heading ?? "text-gray-900")
+                : navContrast === "dark"
+                  ? "text-white"
+                  : "text-gray-900"
+            )}
+            onClick={() => setNavOpen((v) => !v)}
+            aria-label={navOpen ? "Close menu" : "Open menu"}
+          >
+            {navOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
+          <div
+            ref={desktopActionsRef}
+            className={`hidden items-center justify-end gap-3.5 ${navOpen ? "lg:flex" : "lg:hidden"
+              }`}
+          >
+            {/* Social icons — from the `headerNavigation` entry's own
               `socialLinks` field, same icon/href resolution `Footer`'s own
               social row uses. */}
-          <div className="flex items-center gap-1">
-            {socialLinks.map((social) => (
-              <Link
-                key={social.id}
-                href={social.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={social.label}
-                className={cx(
-                  "flex h-8 w-8 items-center justify-center text-[10px] font-bold transition-colors",
-                  theme?.link ?? "text-gray-900",
-                  theme ? "hover:opacity-70" : "hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700"
-                )}
-              >
-                {social.iconUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element -- matches the plain <img> convention already used for Contentful assets in this project
-                  <img
-                    src={social.iconUrl}
-                    alt=""
-                    aria-hidden
-                    className="h-5 w-5 object-contain"
-                  />
-                ) : (
-                  social.label.slice(0, 2)
-                )}
-              </Link>
-            ))}
-          
+            <div className="flex items-center gap-1">
+              {socialLinks.map((social) => (
+                <Link
+                  key={social.id}
+                  href={social.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={social.label}
+                  className={cx(
+                    "flex h-8 w-8 items-center justify-center text-[10px] font-bold transition-colors",
+                    theme?.link ?? "text-gray-900",
+                    theme ? "hover:opacity-70" : "hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700"
+                  )}
+                >
+                  {social.iconUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element -- matches the plain <img> convention already used for Contentful assets in this project
+                    <img
+                      src={social.iconUrl}
+                      alt=""
+                      aria-hidden
+                      className="h-5 w-5 object-contain"
+                    />
+                  ) : (
+                    social.label.slice(0, 2)
+                  )}
+                </Link>
+              ))}
 
+
+            </div>
           </div>
-        </div>
-        {navOpen ? (<button
-          type="button"
-          className={cx(
-            "flex items-center justify-center rounded-lg p-2 hidden lg:block cursor-pointer text-black absolute right-2 top-2"
+          {navOpen ? (<button
+            type="button"
+            className={cx(
+              "flex items-center justify-center rounded-lg p-2 hidden lg:block cursor-pointer text-black absolute right-2 top-2"
+            )}
+            onClick={() => setNavOpen((v) => !v)}
+            aria-label={navOpen ? "Close menu" : "Open menu"}
+          >
+            {navOpen ? <X size={18} /> : ''}
+          </button>) : (
+            null
           )}
-          onClick={() => setNavOpen((v) => !v)}
-          aria-label={navOpen ? "Close menu" : "Open menu"}
-        >
-          {navOpen ? <X  size={18} /> : ''}
-        </button>):(
-        null
-        )}
-      </div>
-    </nav>
+        </div>
+      </nav>
 
-    {/* =================================================
+      {/* =================================================
         MOBILE MENU — rendered as a sibling of <nav>, not a descendant.
         <nav> always has an active `translate` (from `translate-y-0`/
         `-translate-y-full`), and per spec any non-"none"
@@ -1069,205 +1071,204 @@ export default function Navbar({ entry }: Props) {
         entirely, regardless of whatever transform/translate classes
         <nav> itself ends up with.
     ================================================= */}
-    <div
-      className={cx(
-        "fixed inset-x-0 top-[65px] bottom-0 z-40 overflow-y-auto transition-transform duration-200 lg:hidden",
-        theme?.sectionBg ?? "bg-white",
-        navOpen ? "translate-x-0" : "translate-x-full"
-      )}
-    >
-      <div className="flex flex-col gap-1 px-5 py-4">
-        {menus.map((menu) => {
-          /*
-           * SimpleLink on mobile
-           */
-          if (menu.menuType === "SimpleLink") {
+      <div
+        className={cx(
+          "fixed inset-x-0 top-[65px] bottom-0 z-40 overflow-y-auto transition-transform duration-200 lg:hidden",
+          theme?.sectionBg ?? "bg-white",
+          navOpen ? "translate-x-0" : "translate-x-full"
+        )}
+      >
+        <div className="flex flex-col gap-1 px-5 py-4">
+          {menus.map((menu) => {
+            /*
+             * SimpleLink on mobile
+             */
+            if (menu.menuType === "SimpleLink") {
+              return (
+                <Link
+                  key={menu.key}
+                  href={menu.href ?? "/"}
+                  className={cx(
+                    "border-b py-3.5 text-[15px] font-semibold",
+                    theme?.cardBorder ?? "border-gray-100",
+                    theme?.heading ?? "text-gray-900"
+                  )}
+                >
+                  {menu.label}
+                </Link>
+              );
+            }
+
+            /*
+             * MegaMenu / Dropdown on mobile
+             */
+            // Same emptiness check as the desktop nav above — no items
+            // linked yet means nothing to expand into.
+            const hasContent = hasMenuContent(menu);
+
             return (
-              <Link
+              <div
                 key={menu.key}
-                href={menu.href ?? "/"}
-                className={cx(
-                  "border-b py-3.5 text-[15px] font-semibold",
-                  theme?.cardBorder ?? "border-gray-100",
-                  theme?.heading ?? "text-gray-900"
-                )}
+                className={cx("border-b", theme?.cardBorder ?? "border-gray-100")}
               >
-                {menu.label}
-              </Link>
-            );
-          }
+                <button
+                  type="button"
+                  className={cx(
+                    "flex w-full items-center justify-between py-3.5 text-[15px] font-semibold",
+                    theme?.heading ?? "text-gray-900"
+                  )}
+                  onClick={() => {
+                    if (!hasContent) {
+                      return;
+                    }
 
-          /*
-           * MegaMenu / Dropdown on mobile
-           */
-          // Same emptiness check as the desktop nav above — no items
-          // linked yet means nothing to expand into.
-          const hasContent = hasMenuContent(menu);
+                    setMobileExpanded((current) =>
+                      current === menu.key
+                        ? null
+                        : menu.key
+                    );
+                  }}
+                >
+                  {menu.label}
 
-          return (
-            <div
-              key={menu.key}
-              className={cx("border-b", theme?.cardBorder ?? "border-gray-100")}
-            >
-              <button
-                type="button"
-                className={cx(
-                  "flex w-full items-center justify-between py-3.5 text-[15px] font-semibold",
-                  theme?.heading ?? "text-gray-900"
-                )}
-                onClick={() => {
-                  if (!hasContent) {
-                    return;
-                  }
+                  {hasContent && (
+                    <ChevronDown
+                      size={16}
+                      className={`transition-transform ${mobileExpanded === menu.key
+                          ? "rotate-180"
+                          : ""
+                        }`}
+                    />
+                  )}
+                </button>
 
-                  setMobileExpanded((current) =>
-                    current === menu.key
-                      ? null
-                      : menu.key
-                  );
-                }}
-              >
-                {menu.label}
-
-                {hasContent && (
-                  <ChevronDown
-                    size={16}
-                    className={`transition-transform ${
-                      mobileExpanded === menu.key
-                        ? "rotate-180"
-                        : ""
-                    }`}
-                  />
-                )}
-              </button>
-
-              {hasContent && mobileExpanded === menu.key && (
-                <div className="pb-5 pl-1">
-                  {/* =========================================
+                {hasContent && mobileExpanded === menu.key && (
+                  <div className="pb-5 pl-1">
+                    {/* =========================================
                       MOBILE MEGA MENU
                   ========================================= */}
-                  {menu.menuType === "megaMenu" && (
-                    <div className="flex flex-col gap-4">
-                      {menu.columns.flat().map((entry) => (
-                        <Link
-                          key={entry.title}
-                          href={entry.href ?? "#"}
-                          className="block"
-                        >
-                          <div
+                    {menu.menuType === "megaMenu" && (
+                      <div className="flex flex-col gap-4">
+                        {menu.columns.flat().map((entry) => (
+                          <Link
+                            key={entry.title}
+                            href={entry.href ?? "#"}
+                            className="block"
+                          >
+                            <div
+                              className={cx(
+                                "text-[14.5px] font-bold",
+                                theme?.link ?? "text-gray-900"
+                              )}
+                            >
+                              {entry.title}
+                            </div>
+
+                            <div
+                              className={cx(
+                                "text-[13px]",
+                                theme?.body ?? "text-gray-500"
+                              )}
+                            >
+                              {entry.desc}
+                            </div>
+                          </Link>
+                        ))}
+
+                        {hasCtaContent(menu.cta) && (
+                          <Link
+                            href={menu.cta.href ?? "#"}
                             className={cx(
-                              "text-[14.5px] font-bold",
-                              theme?.link ?? "text-gray-900"
+                              "mt-1 inline-flex items-center gap-1.5 text-[14px] font-bold",
+                              theme?.accentText ?? "text-emerald-600"
                             )}
                           >
-                            {entry.title}
-                          </div>
+                            {menu.cta.linkLabel}
 
-                          <div
-                            className={cx(
-                              "text-[13px]",
-                              theme?.body ?? "text-gray-500"
-                            )}
-                          >
-                            {entry.desc}
-                          </div>
-                        </Link>
-                      ))}
+                            <ArrowRight size={14} />
+                          </Link>
+                        )}
+                      </div>
+                    )}
 
-                      {hasCtaContent(menu.cta) && (
-                        <Link
-                          href={menu.cta.href ?? "#"}
-                          className={cx(
-                            "mt-1 inline-flex items-center gap-1.5 text-[14px] font-bold",
-                            theme?.accentText ?? "text-emerald-600"
-                          )}
-                        >
-                          {menu.cta.linkLabel}
-
-                          <ArrowRight size={14} />
-                        </Link>
-                      )}
-                    </div>
-                  )}
-
-                  {/* =========================================
+                    {/* =========================================
                       MOBILE DROPDOWN
                   ========================================= */}
-                  {menu.menuType === "dropdown" && (
-                    <div className="flex flex-col gap-3">
-                      {menu.columns.flat().map((entry) => (
-                        <Link
-                          key={entry.title}
-                          href={entry.href ?? "#"}
-                          className={cx(
-                            "block rounded-lg px-2 py-2",
-                            theme ? "hover:opacity-70" : "hover:bg-gray-50"
-                          )}
-                        >
-                          <div
+                    {menu.menuType === "dropdown" && (
+                      <div className="flex flex-col gap-3">
+                        {menu.columns.flat().map((entry) => (
+                          <Link
+                            key={entry.title}
+                            href={entry.href ?? "#"}
                             className={cx(
-                              "text-[14px] font-semibold",
-                              theme?.heading ?? "text-gray-900"
+                              "block rounded-lg px-2 py-2",
+                              theme ? "hover:opacity-70" : "hover:bg-gray-50"
                             )}
                           >
-                            {entry.title}
-                          </div>
+                            <div
+                              className={cx(
+                                "text-[14px] font-semibold",
+                                theme?.heading ?? "text-gray-900"
+                              )}
+                            >
+                              {entry.title}
+                            </div>
 
-                          <div
-                            className={cx(
-                              "mt-0.5 text-[12.5px]",
-                              theme?.body ?? "text-gray-500"
-                            )}
-                          >
-                            {entry.desc}
-                          </div>
-                        </Link>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          );
-        })}
+                            <div
+                              className={cx(
+                                "mt-0.5 text-[12.5px]",
+                                theme?.body ?? "text-gray-500"
+                              )}
+                            >
+                              {entry.desc}
+                            </div>
+                          </Link>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            );
+          })}
 
-        {/* =================================================
+          {/* =================================================
             MOBILE ACTIONS
         ================================================= */}
-        <div className="mt-5 flex flex-col gap-4">
-          {/* Social icons — same roster/resolution as the desktop row
+          <div className="mt-5 flex flex-col gap-4">
+            {/* Social icons — same roster/resolution as the desktop row
               above, sized up slightly for touch on the mobile panel. */}
-          <div className="flex items-center justify-center gap-2">
-            {socialLinks.map((social) => (
-              <Link
-                key={social.id}
-                href={social.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label={social.label}
-                className={cx(
-                  "flex h-8 w-8 items-center justify-center rounded-full text-[11px] font-bold transition-colors",
-                  theme?.link ?? "text-gray-900",
-                  theme ? "hover:opacity-70" : "hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700"
-                )}
-              >
-                {social.iconUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element -- matches the plain <img> convention already used for Contentful assets in this project
-                  <img
-                    src={social.iconUrl}
-                    alt=""
-                    aria-hidden
-                    className="h-6 w-6 object-contain"
-                  />
-                ) : (
-                  social.label.slice(0, 2)
-                )}
-              </Link>
-            ))}
+            <div className="flex items-center justify-center gap-2">
+              {socialLinks.map((social) => (
+                <Link
+                  key={social.id}
+                  href={social.href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  aria-label={social.label}
+                  className={cx(
+                    "flex h-8 w-8 items-center justify-center rounded-full text-[11px] font-bold transition-colors",
+                    theme?.link ?? "text-gray-900",
+                    theme ? "hover:opacity-70" : "hover:border-emerald-200 hover:bg-emerald-50 hover:text-emerald-700"
+                  )}
+                >
+                  {social.iconUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element -- matches the plain <img> convention already used for Contentful assets in this project
+                    <img
+                      src={social.iconUrl}
+                      alt=""
+                      aria-hidden
+                      className="h-6 w-6 object-contain"
+                    />
+                  ) : (
+                    social.label.slice(0, 2)
+                  )}
+                </Link>
+              ))}
+            </div>
           </div>
         </div>
       </div>
-    </div>
     </>
   );
 }
