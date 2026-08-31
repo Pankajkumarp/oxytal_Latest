@@ -1,22 +1,15 @@
 "use client";
 
-import {
-  useEffect,
-  useLayoutEffect,
-  useRef,
-  useState,
-  type ReactNode,
-} from "react";
+import { ReactNode, useLayoutEffect, useRef } from "react";
 import Link from "next/link";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SplitText } from "gsap/SplitText";
-import { documentToReactComponents } from "@contentful/rich-text-react-renderer";
 import { Entry, EntrySkeletonType } from "contentful";
-import { ArrowRight, Check } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { cx } from "@/app/lib/cx";
 import { getAssetUrl } from "../lib/contentfulAsset";
-import { resolveTheme, type SectionTheme } from "../lib/theme";
+import { resolveTheme } from "../lib/theme";
 import { resolveHeadingLevel } from "../lib/headingLevel";
 import DynamicHeading from "./DynamicHeading";
 import ThemePattern from "./ThemePattern";
@@ -26,8 +19,8 @@ import {
   DataImageSkeleton,
   DataLinkSkeleton,
   DataTextSkeleton,
-  OfficeSkeleton,
 } from "../types/contentful";
+import { documentToReactComponents } from "@contentful/rich-text-react-renderer";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger, SplitText);
@@ -76,235 +69,48 @@ function resolveLinkHref(
   return link.fields.linkedPage ? `/${link.fields.linkedPage}` : undefined;
 }
 
-interface StepItem {
-  id: string;
-  title: string;
-  description?: string;
-}
-
-/** Maps a resolved `contentDetail` entry (one with a `shortDescription` set) to one numbered "how it works" step — same pillar/sector split `HomeAboutUs` already uses on the same content type. */
-function contentDetailToStep(
-  entry: PlainEntry<ContentDetailSkeleton>
-): StepItem {
-  return {
-    id: entry.sys.id,
-    title: entry.fields.title ?? "",
-    description: entry.fields.shortDescription,
-  };
-}
-
-interface AssuranceItem {
-  id: string;
-  label: string;
-}
-
-/** Maps a resolved `contentDetail` entry (one with *no* `shortDescription` set — title only) to one checkmarked assurance line (e.g. "We reply within one business day"). */
-function contentDetailToAssurance(
-  entry: PlainEntry<ContentDetailSkeleton>
-): AssuranceItem {
-  return { id: entry.sys.id, label: entry.fields.title ?? "" };
-}
-
-interface OfficeLite {
-  id: string;
-  city: string;
-  country: string;
-}
-
-function officeToLite(entry: PlainEntry<OfficeSkeleton>): OfficeLite {
-  return {
-    id: entry.sys.id,
-    city: entry.fields.city ?? "",
-    country: entry.fields.country ?? "",
-  };
-}
-
-/**
- * IANA time zone by office `country` (case-insensitive) — purely a
- * geographic lookup, not editorial copy, so it lives in code rather than
- * as a Contentful field (same reasoning `resolveHeadingLevel`/
- * `resolveAlign`-style helpers elsewhere in this project keep technical
- * normalization out of the CMS). Offices whose `country` isn't in this
- * table simply don't get a "local time" row below — extend this list as
- * new office locations are added.
- */
-const TIMEZONE_BY_COUNTRY: Record<string, string> = {
-  "united kingdom": "Europe/London",
-  uk: "Europe/London",
-  england: "Europe/London",
-  // Ireland shares the UK's civil clock (GMT/BST) year-round, so it's
-  // deliberately mapped to the *same* zone string as the UK rather than
-  // its own "Europe/Dublin" — that's what makes a London office and a
-  // Dublin office collapse into one combined "London & Dublin" row in
-  // `groupOfficesByTimeZone` below, matching the reference mockup.
-  // Mapping it to "Europe/Dublin" instead would show the identical time
-  // in two separate rows.
-  ireland: "Europe/London",
-  india: "Asia/Kolkata",
-};
-
-function resolveTimeZone(country: string): string | undefined {
-  return TIMEZONE_BY_COUNTRY[country.trim().toLowerCase()];
-}
-
-interface ClockGroup {
-  id: string;
-  label: string;
-  timeZone: string;
-}
-
-/** Groups `office` entries that share the same resolved time zone into one clock row (e.g. a London office + a Dublin office both resolve to "Europe/London" and collapse into one "London & Dublin" row) — same grouping the reference mockup's own hardcoded UK/India rows do, generalized to whatever offices are actually linked. */
-function groupOfficesByTimeZone(offices: OfficeLite[]): ClockGroup[] {
-  const order: string[] = [];
-  const citiesByZone = new Map<string, string[]>();
-
-  offices.forEach((office) => {
-    const timeZone = resolveTimeZone(office.country);
-    if (!timeZone || !office.city) {
-      return;
-    }
-    if (!citiesByZone.has(timeZone)) {
-      order.push(timeZone);
-      citiesByZone.set(timeZone, []);
-    }
-    citiesByZone.get(timeZone)!.push(office.city);
-  });
-
-  return order.map((timeZone) => ({
-    id: timeZone,
-    timeZone,
-    label: citiesByZone.get(timeZone)!.join(" & "),
-  }));
-}
-
-/** Mon–Fri 09:00–18:00 local, matching the reference mockup's own working-hours window. */
-function isWorkingHours(now: Date, timeZone: string): boolean {
-  try {
-    const parts = new Intl.DateTimeFormat("en-GB", {
-      timeZone,
-      hour: "numeric",
-      hour12: false,
-      weekday: "short",
-    }).formatToParts(now);
-    let hour = 0;
-    let day = "";
-    parts.forEach((part) => {
-      if (part.type === "hour") hour = parseInt(part.value, 10);
-      if (part.type === "weekday") day = part.value;
-    });
-    return ["Mon", "Tue", "Wed", "Thu", "Fri"].includes(day) && hour >= 9 && hour < 18;
-  } catch {
-    return false;
-  }
-}
-
-/**
- * One "local time right now" row — ticks its own clock client-side every
- * 30s (same interval the reference mockup's own vanilla-JS clock uses),
- * independent of every other row. Renders "—" until the first tick so
- * server and client markup match (no `Intl` call during render).
- */
-function LiveClock({ group, theme }: { group: ClockGroup; theme?: SectionTheme }) {
-  const [time, setTime] = useState("—");
-  const [working, setWorking] = useState(false);
-
-  useEffect(() => {
-    const paint = () => {
-      const now = new Date();
-      try {
-        setTime(
-          new Intl.DateTimeFormat("en-GB", {
-            timeZone: group.timeZone,
-            hour: "2-digit",
-            minute: "2-digit",
-            hour12: false,
-          }).format(now)
-        );
-        setWorking(isWorkingHours(now, group.timeZone));
-      } catch {
-        setTime("—");
-      }
-    };
-
-    paint();
-    const interval = setInterval(paint, 30000);
-    return () => clearInterval(interval);
-  }, [group.timeZone]);
-
-  return (
-    <div className="flex items-baseline justify-between gap-3 py-1.5">
-      <span
-        className={cx(
-          "flex items-center gap-2 text-[13.5px]",
-          theme?.body ?? "text-[#9DB2C4]"
-        )}
-      >
-        <span
-          aria-hidden
-          className={cx(
-            "h-1.5 w-1.5 rounded-full",
-            working ? "bg-emerald-400" : "bg-white/30"
-          )}
-        />
-        {group.label}
-      </span>
-      <span className="font-mono text-[14px] tracking-wide text-white">
-        {time}
-      </span>
-    </div>
-  );
-}
-
 /**
  * "Talk to Us", rendered from a `composableElement` entry (`subType:
  * "talktous"` — see `ComposableElementRenderer`). Ported from
- * `Refrence/oxytal-cta-section.html` — a dark navy "action panel" card
- * (offer + numbered steps on the left, a "book a call" action card on
- * the right), rather than the section's previous full-bleed-photo
- * layout.
+ * `Refrence/oxytal-cta-section_1.html` — a minimal, site-wide "let's
+ * connect" panel (eyebrow, heading, one circular CTA "orb", and a quiet
+ * "or email us" line), replacing this section's previous dark
+ * action-panel-with-steps layout.
  *
- * Reads a mixed roster out of the composableElement's own `elements`:
+ * Reads a small roster out of the composableElement's own `elements`:
  *
- * - the 1st `dataText` entry supplies the intro copy: `eyebrow`,
- *   `heading`, and `text` (rich text) for the lede
- * - a 2nd `dataText` entry drives the action card's own copy: `eyebrow`
- *   is the "Get started" kicker above the buttons, `heading` is the
- *   "Local time right now" kicker above the clocks, `text` (rich text)
- *   is the short coverage note under the clocks
- * - a 3rd `dataText` entry's `eyebrow` is the footnote's leading text
- *   ("Looking for a role instead?")
- * - every `contentDetail` entry becomes either a numbered step (via
- *   `contentDetailToStep`) or an assurance checkmark line (via
- *   `contentDetailToAssurance`) — split purely by whether the entry has
- *   a `shortDescription` set, same convention `HomeAboutUs` uses for its
- *   pillar/sector split on this same content type
- * - `dataLink` entries: the one with `type: "primary"` is the "Book a
- *   call" button; of the rest (in order), the 1st is the secondary
- *   "Email us" button and the 2nd is the footnote's "See open
- *   positions" link
- * - every `office` entry becomes both a "local time" clock row (grouped
- *   by time zone — see `groupOfficesByTimeZone`) and one name in the
- *   footnote's location list (e.g. "London · Dublin · Chandigarh") —
- *   the *same* `office` entries `Footer`/`AboutHero`/`AboutGlobal`/
- *   `HomeAboutUs` already reuse
- * - the composableElement's own `backgroundImage` (optional — links to
- *   a `dataImage` entry) sits behind the whole section, same mechanism
- *   every sibling section uses; the dark action panel itself renders on
- *   top of it either way
+ * - the 1st `dataText` entry supplies `eyebrow` ("Work with us"),
+ *   `heading`, and its trailing `highlightText` — rendered in the
+ *   section's own accent/muted tone, same "title + highlightText" idiom
+ *   `CareersBannerHorizon` already uses (e.g. heading "Let's discuss what
+ *   you're building —" + highlightText "and what's getting in the way.")
+ * - `dataLink` entries: the one with `type: "primary"` is the circular
+ *   "Let's connect" CTA; the first of the rest is the "Or email …" link
+ * - the first `contentDetail` entry with *no* `shortDescription` set
+ *   supplies the trailing reassurance note ("We reply within one
+ *   business day") next to the email link — same title-only convention
+ *   `HomeAboutUs`/the previous version of this component used for
+ *   assurance lines on this content type
+ * - the composableElement's own `backgroundImage` (optional — links to a
+ *   `dataImage` entry) is a full-bleed photo behind the whole section,
+ *   same mechanism every sibling section uses; a dark scrim keeps the
+ *   centered copy legible over it
  *
  * Every block above only renders when its own roster is non-empty.
  *
  * Background image + theme: same `backgroundImage`/`themeColor`/
  * `pattern`/`patternColor` mechanism every sibling section uses —
- * `resolveTheme` recolors the panel/card/buttons/steps; the accent glow
- * behind the panel and the step-number badges reuse `theme.patternColor`
- * (already a raw hex on every preset) as their own accent color,
- * falling back to the reference mockup's own cyan (`#16B9E8`) when
- * unthemed.
+ * `resolveTheme` recolors the heading/muted text/CTA hover-fill; the
+ * accent glow behind the CTA and the CTA's dashed halo/ring reuse
+ * `theme.patternColor` (already a raw hex on every preset) as their own
+ * accent color via a `--accent` CSS variable, falling back to the
+ * reference mockup's own cyan (`#16B9E8`) when unthemed. `ThemePattern`
+ * layers its own decorative grid on top, like every other section.
  *
  * Animation: the heading gets the same GSAP split-text reveal every
- * sibling section's own heading uses; the steps list and the action
- * card each fade + rise in as their own block scrolls into view.
+ * sibling section's own heading uses; the CTA + email line fade and rise
+ * in together as their own block scrolls into view. Both are skipped
+ * under `prefers-reduced-motion`.
  */
 interface Props {
   entry: PlainEntry<ComposableElementSkeleton>;
@@ -313,95 +119,70 @@ interface Props {
 export default function HomeTalkToUs({ entry }: Props) {
   const elements = entry.fields.elements ?? [];
 
-  const dataTextEntries = elements.filter(
+  const copy = elements.find(
     (element): element is PlainEntry<DataTextSkeleton> =>
       isEntry(element) && element.sys.contentType.sys.id === "dataText"
   );
-  const copy = dataTextEntries[0];
-  const actionCopy = dataTextEntries[1];
-  const footnoteCopy = dataTextEntries[2];
 
   const linkEntries = elements.filter(
     (element): element is PlainEntry<DataLinkSkeleton> =>
       isEntry(element) && element.sys.contentType.sys.id === "dataLink"
   );
   const primaryLink = linkEntries.find((link) => link.fields.type === "primary");
-  const secondaryLinks = linkEntries.filter((link) => link.fields.type !== "primary");
-  const emailLink = secondaryLinks[0];
-  const footnoteLink = secondaryLinks[1];
+  const emailLink = linkEntries.find((link) => link.fields.type !== "primary");
 
+  // First title-only `contentDetail` (no `shortDescription`) becomes the
+  // reassurance note — same title-only convention this section's assurance
+  // lines used before, narrowed here to just the first one.
   const contentDetailEntries = elements.filter(
     (element): element is PlainEntry<ContentDetailSkeleton> =>
       isEntry(element) && element.sys.contentType.sys.id === "contentDetail"
   );
-  const steps = contentDetailEntries
-    .filter((element) => element.fields.shortDescription)
-    .map(contentDetailToStep);
-  const assurances = contentDetailEntries
-    .filter((element) => !element.fields.shortDescription)
-    .map(contentDetailToAssurance);
-
-  const offices = elements
-    .filter(
-      (element): element is PlainEntry<OfficeSkeleton> =>
-        isEntry(element) && element.sys.contentType.sys.id === "office"
-    )
-    .map(officeToLite);
-  const clockGroups = groupOfficesByTimeZone(offices);
-  const locationsLine = offices.map((office) => office.city).filter(Boolean).join(" · ");
+  const noteText = contentDetailEntries.find(
+    (element) => !element.fields.shortDescription
+  )?.fields.title;
 
   const eyebrow = copy?.fields.eyebrow;
   const heading = copy?.fields.heading;
-  const description: ReactNode = copy?.fields.text
+  const highlightText = copy?.fields.highlightText;
+    const footerText: ReactNode = copy?.fields.text
     ? documentToReactComponents(copy.fields.text)
     : undefined;
 
-  const actionKicker = actionCopy?.fields.eyebrow;
-  const clocksKicker = actionCopy?.fields.heading;
-  const coverNote: ReactNode = actionCopy?.fields.text
-    ? documentToReactComponents(actionCopy.fields.text)
-    : undefined;
-
-  const footnoteLead = footnoteCopy?.fields.eyebrow;
-
-  const ctaHref = (primaryLink && resolveLinkHref(primaryLink)) ?? "";
+  const ctaHref = primaryLink ? resolveLinkHref(primaryLink) : undefined;
   const ctaLabel = primaryLink?.fields.label;
   const emailHref = emailLink ? resolveLinkHref(emailLink) : undefined;
   const emailLabel = emailLink?.fields.label;
-  const footnoteHref = footnoteLink ? resolveLinkHref(footnoteLink) : undefined;
-  const footnoteLabel = footnoteLink?.fields.label;
 
   // `backgroundImage` links to a `dataImage` *entry*, not a raw asset —
   // resolve that entry's own `image` field for the actual asset URL (same
   // pattern every sibling section uses). Optional here: no placeholder
-  // fallback, so the section just shows its plain/themed page background
-  // until an editor sets one — the dark action panel itself doesn't
-  // depend on it either way.
+  // fallback, so the section just shows its plain/themed ground color
+  // until an editor sets one.
   const backgroundImageEntry = entry.fields.backgroundImage;
   const backgroundUrl = isEntry(backgroundImageEntry)
     ? getAssetUrl(
-        (backgroundImageEntry as unknown as PlainEntry<DataImageSkeleton>)
-          .fields.image
-      )
+      (backgroundImageEntry as unknown as PlainEntry<DataImageSkeleton>)
+        .fields.image
+    )
     : undefined;
 
   // Resolves `themeColor` (e.g. "dark", "blue", "emerald" — see
-  // app/lib/theme.ts) to this panel's text/button/card colors. `undefined`
-  // for an unset or unrecognized value, in which case every themed class
+  // app/lib/theme.ts) to this section's text/CTA colors. `undefined` for
+  // an unset or unrecognized value, in which case every themed class
   // below falls back to this section's own default look — the reference
-  // mockup's dark-navy-and-cyan action panel.
+  // mockup's near-black ground and cyan accent.
   const theme = resolveTheme(entry.fields.themeColor);
   const accentHex = theme?.patternColor ?? "#16B9E8";
 
   const sectionRef = useRef<HTMLElement>(null);
   const headingRef = useRef<HTMLHeadingElement>(null);
-  const stepsRef = useRef<HTMLOListElement>(null);
-  const actionCardRef = useRef<HTMLDivElement>(null);
+  const ctaBlockRef = useRef<HTMLDivElement>(null);
 
   /* =========================================================
-     REVEAL ANIMATION — the heading splits into words on scroll-in (same
-     GSAP split-text treatment as HomeServices/HomeProducts/HomeAI/
-     HomeAboutUs). Skipped entirely under prefers-reduced-motion.
+     HEADING REVEAL — splits into words on scroll-in (same GSAP
+     split-text treatment as HomeServices/HomeProducts/HomeAI/
+     HomeAboutUs/CommonTrustedBy). Skipped under prefers-reduced-motion.
   ========================================================= */
   useLayoutEffect(() => {
     if (!headingRef.current) {
@@ -444,349 +225,146 @@ export default function HomeTalkToUs({ entry }: Props) {
   }, []);
 
   /* =========================================================
-     STEPS + ACTION CARD REVEAL — the numbered steps stagger in one
-     after another, and the action card fades + rises in as its own
-     block, both as they scroll into view. Skipped entirely under
+     CTA REVEAL — the CTA orb + email line fade and rise in together
+     as their own block scrolls into view. Skipped under
      prefers-reduced-motion.
   ========================================================= */
   useLayoutEffect(() => {
-    const blocks = [stepsRef.current, actionCardRef.current].filter(
-      (block): block is HTMLOListElement | HTMLDivElement => block !== null
-    );
-    if (!blocks.length) {
+    if (!ctaBlockRef.current) {
       return;
     }
 
     if (prefersReducedMotion()) {
-      gsap.set(blocks, { opacity: 1, y: 0 });
-      if (stepsRef.current) {
-        gsap.set(stepsRef.current.children, { opacity: 1, y: 0 });
-      }
+      gsap.set(ctaBlockRef.current, { opacity: 1, y: 0 });
       return;
     }
 
     const ctx = gsap.context(() => {
-      if (stepsRef.current && steps.length) {
-        gsap.from(stepsRef.current.children, {
-          y: 20,
-          opacity: 0,
-          duration: 0.6,
-          ease: "power3.out",
-          stagger: 0.12,
-          scrollTrigger: {
-            trigger: stepsRef.current,
-            start: "top 85%",
-            once: true,
-          },
-        });
-      }
-
-      if (actionCardRef.current) {
-        gsap.from(actionCardRef.current, {
-          y: 28,
-          opacity: 0,
-          duration: 0.7,
-          delay: 0.1,
-          ease: "power3.out",
-          scrollTrigger: {
-            trigger: actionCardRef.current,
-            start: "top 85%",
-            once: true,
-          },
-        });
-      }
+      gsap.from(ctaBlockRef.current, {
+        y: 24,
+        opacity: 0,
+        duration: 0.7,
+        delay: 0.15,
+        ease: "power3.out",
+        scrollTrigger: {
+          trigger: ctaBlockRef.current,
+          start: "top 85%",
+          once: true,
+        },
+      });
     }, sectionRef);
 
     return () => ctx.revert();
-  }, [steps.length]);
+  }, []);
 
   return (
     <section
       ref={sectionRef}
       className={cx(
-        "relative overflow-hidden bg-white"
+        "relative isolate overflow-hidden text-center",
+        !backgroundUrl && (theme?.sectionBg ?? "bg-[#0A0F14]")
       )}
+      style={{
+        ...(backgroundUrl
+          ? {
+            backgroundImage: `url(${backgroundUrl})`,
+            backgroundSize: "cover",
+            backgroundRepeat: "no-repeat",
+            backgroundPosition: "center",
+          }
+          : {}),
+        // Exposed as a CSS variable so the CTA's ring/halo/focus states
+        // (defined with Tailwind arbitrary values below) can read it too,
+        // same "one accent variable per section" idiom the reference
+        // mockup's own `--acc` uses.
+        ["--accent" as string]: accentHex,
+      }}
     >
-
-      <div className="container relative mx-auto px-5 py-12 md:px-10 md:py-16 lg:py-20">
-        {/* =================================================
-            PANEL — the dark action card itself. Always this fixed
-            navy-gradient look unless an editor sets `themeColor`.
-        ================================================= */}
-        <div
-          className={cx(
-            "relative overflow-hidden rounded-[26px] p-8 shadow-[0_30px_70px_-30px_rgba(6,18,35,0.55)] md:p-12 lg:p-16",
-            theme?.sectionBg ?? "bg-gradient-to-br from-[#061223] to-[#0C2138]"
-          )}
-        >
-                <ThemePattern
+      <ThemePattern
         theme={theme}
         pattern={entry?.fields.pattern}
         patternColor={entry?.fields.patternColor}
       />
 
-          <div className="relative grid gap-10 lg:grid-cols-[1.15fr_0.85fr] lg:gap-16">
-            {/* =================================================
-                LEFT — offer copy + numbered steps.
-            ================================================= */}
-            <div>
-              {eyebrow && (
-                <span
-                  className={cx(
-                    "mb-4 flex items-center gap-2.5 text-[12px] font-semibold tracking-[0.16em] uppercase",
-                    theme?.accentText ?? "text-[#16B9E8]"
-                  )}
-                >
-                  <span
-                    aria-hidden
-                    className={cx("h-0.5 w-[22px] rounded-sm", theme?.buttonBg ?? "bg-[#16B9E8]")}
-                  />
-                  {eyebrow}
-                </span>
-              )}
+      <div className="container relative z-2 mx-auto flex flex-col items-center px-5 py-20 sm:px-10">
+        {eyebrow && (
+          <p
+            className={cx(
+              " text-xs font-bold tracking-wide uppercase",
+              theme?.accentText
+            )}
+            style={theme?.accentText ? undefined : { color: "var(--accent)" }}
+          >
+            {eyebrow}
+          </p>
+        )}
 
-              <DynamicHeading
-                level={resolveHeadingLevel(copy?.fields.headingLevel, "h2")}
-                ref={headingRef}
-                className={cx(
-                  "max-w-[17ch] text-[30px] leading-[1.08] font-extrabold tracking-tight sm:text-[36px] md:text-[42px]",
-                  theme?.heading ?? "text-white"
-                )}
-              >
-                {heading}
-              </DynamicHeading>
+        {heading && (
+          <DynamicHeading
+            level={resolveHeadingLevel(copy?.fields.headingLevel, "h2")}
+            ref={headingRef}
+            className={cx(
+              "mt-6 mx-auto max-w-2xl text-[28px] leading-[1.2] font-extrabold tracking-tight sm:text-[34px] md:text-[40px] mb-10",
+              theme?.heading ?? "text-white"
+            )}
+          >
+            {heading}{" "}
+            {highlightText && (
+              <span className={theme?.muted ?? "text-[#A9B6C0]"}>
+                {highlightText}
+              </span>
+            )}
+          </DynamicHeading>
+        )}
 
-              {description && (
-                <div
-                  className={cx(
-                    "rich-text mt-4 max-w-[50ch] text-[15.5px] leading-relaxed",
-                    theme?.body ?? "text-[#9DB2C4]"
-                  )}
-                >
-                  {description}
-                </div>
-              )}
-
-              {steps.length > 0 && (
-                <ol ref={stepsRef} className="mt-8 list-none">
-                  {steps.map((step, index) => (
-                    <li
-                      key={step.id}
-                      className={cx(
-                        "grid grid-cols-[36px_1fr] items-start gap-4 py-4",
-                        index > 0 && (theme?.cardBorder ?? "border-t border-white/[0.06]")
-                      )}
-                    >
-                      <span
-                        aria-hidden
-                        className={cx(
-                          "flex h-8 w-8 items-center justify-center rounded-full font-mono text-[11px]",
-                          theme?.accentText ?? "text-[#16B9E8]"
-                        )}
-                        style={{
-                          borderWidth: 1,
-                          borderStyle: "solid",
-                          // The translucent circular wash itself is purely
-                          // decorative (like `ThemePattern`'s own use of
-                          // `patternColor`), so it's fine for it to lean on
-                          // the raw accent hex even though the number text
-                          // above uses `theme.accentText` instead.
-                          borderColor: `color-mix(in srgb, ${accentHex} 42%, transparent)`,
-                          backgroundColor: `color-mix(in srgb, ${accentHex} 12%, transparent)`,
-                        }}
-                      >
-                        {String(index + 1).padStart(2, "0")}
-                      </span>
-                      <div>
-                        <h3
-                          className={cx(
-                            "mt-[3px] mb-1 text-[15.5px] font-semibold",
-                            theme?.heading ?? "text-white"
-                          )}
-                        >
-                          {step.title}
-                        </h3>
-                        {step.description && (
-                          <p
-                            className={cx(
-                              "text-[14px] leading-relaxed",
-                              theme?.body ?? "text-[#9DB2C4]"
-                            )}
-                          >
-                            {step.description}
-                          </p>
-                        )}
-                      </div>
-                    </li>
-                  ))}
-                </ol>
-              )}
-            </div>
-
-            {/* =================================================
-                RIGHT — action card: buttons, assurances, clocks.
-            ================================================= */}
-            <div
-              ref={actionCardRef}
+        <div
+          ref={ctaBlockRef}
+          className="flex flex-col items-center"
+        >
+          {ctaLabel && (
+            <Link
+              href={ctaHref || ""}
               className={cx(
-                "flex flex-col rounded-[20px] border p-6 md:p-8",
-                theme?.cardBorder ?? "border-white/10",
-                theme?.cardBg ?? "bg-white/[0.045]"
+                "min-w-[200px] inline-flex relative z-2 w-fit items-center justify-center gap-2 rounded-full px-7 py-3.5 text-[15px] font-semibold shadow-lg transition-all duration-300 hover:-translate-y-0.5",
+                theme?.buttonBg ?? "bg-[#0B1B2B]",
+                theme?.buttonText ?? "text-white",
+                theme?.buttonHoverBg ?? "hover:bg-[#16324B]"
               )}
             >
-              {actionKicker && (
-                <p
-                  className={cx(
-                    "mb-4 font-mono text-[12px] tracking-[0.15em] uppercase",
-                    theme?.accentText ?? "text-[#16B9E8]"
-                  )}
-                >
-                  {actionKicker}
-                </p>
-              )}
+              {ctaLabel} <ArrowRight size={16} aria-hidden />
+            </Link>
+          )}
 
-              {ctaLabel && (
-                <Link
-                  href={ctaHref || ""}
-                  className={cx(
-                    "group flex w-full items-center justify-center gap-2.5 rounded-xl px-6 py-4 text-[15px] font-semibold transition-transform duration-200 hover:-translate-y-0.5",
-                    theme?.buttonBg ?? "bg-[#16B9E8]",
-                    theme?.buttonText ?? "text-[#04121D]",
-                    theme?.buttonHoverBg ?? "hover:brightness-110"
-                  )}
-                >
-                  {ctaLabel}
-                  <ArrowRight
-                    size={16}
-                    aria-hidden
-                    className="transition-transform duration-200 group-hover:translate-x-1"
-                  />
-                </Link>
+          {(emailLabel || noteText) && (
+            <div
+              className={cx(
+                "mt-8 max-w-2xl text-[15px] leading-[1.7] flex",
+                theme?.muted ?? "text-[#6E7C87]"
               )}
-
+            >
               {emailLabel && (
-                <a
-                  href={emailHref || `mailto:${emailLabel}`}
-                  className={cx(
-                    "mt-2.5 flex w-full items-center justify-center gap-2.5 rounded-xl border px-6 py-4 text-[15px] font-medium transition-transform duration-200 hover:-translate-y-0.5",
-                    theme?.cardBorder ?? "border-white/10",
-                    theme?.heading ?? "text-[#EAF2F8]"
-                  )}
-                >
-                  {emailLabel}
-                </a>
-              )}
-
-              {assurances.length > 0 && (
-                <ul
-                  className={cx(
-                    "mt-6 list-none border-t pt-6",
-                    theme?.cardBorder ?? "border-white/[0.06]"
-                  )}
-                >
-                  {assurances.map((item) => (
-                    <li
-                      key={item.id}
-                      className={cx(
-                        "mb-3 flex items-start gap-2.5 text-[13.5px] leading-relaxed last:mb-0",
-                        theme?.body ?? "text-[#9DB2C4]"
-                      )}
-                    >
-                      <Check
-                        size={15}
-                        aria-hidden
-                        className={cx(
-                          "mt-0.5 flex-shrink-0",
-                          theme?.accentText ?? "text-[#16B9E8]"
-                        )}
-                      />
-                      {item.label}
-                    </li>
-                  ))}
-                </ul>
-              )}
-
-              {clockGroups.length > 0 && (
-                <div
-                  className={cx(
-                    "mt-auto border-t pt-5",
-                    clockGroups.length && (assurances.length ? "" : "mt-6"),
-                    theme?.cardBorder ?? "border-white/[0.06]"
-                  )}
-                >
-                  {clocksKicker && (
-                    <p
-                      className={cx(
-                        "mb-3.5 font-mono text-[10px] tracking-[0.15em] uppercase",
-                        theme?.muted ?? "text-[#7690A6]"
-                      )}
-                    >
-                      {clocksKicker}
-                    </p>
-                  )}
-                  {clockGroups.map((group) => (
-                    <LiveClock key={group.id} group={group} theme={theme} />
-                  ))}
-                  {coverNote && (
-                    <div
-                      className={cx(
-                        "rich-text mt-3.5 text-[12.5px] leading-relaxed",
-                        theme?.muted ?? "text-[#7690A6]"
-                      )}
-                    >
-                      {coverNote}
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-
-            {/* =================================================
-                FOOTNOTE — leading text + link, and the office roster.
-            ================================================= */}
-            {(footnoteLead || locationsLine) && (
-              <div
-                className={cx(
-                  "flex flex-wrap items-center justify-between gap-3 border-t pt-6 lg:col-span-2",
-                  theme?.cardBorder ?? "border-white/10"
-                )}
-              >
-                {footnoteLead && (
-                  <p className={cx("text-[13.5px]", theme?.body ?? "text-[#9DB2C4]")}>
-                    {footnoteLead}{" "}
-                    {footnoteLabel && footnoteHref && (
-                      <Link
-                        href={footnoteHref}
-                        className={cx(
-                          "border-b pb-0.5 transition-colors duration-200",
-                          theme?.heading ?? "text-white",
-                          theme?.cardBorder ?? "border-white/10"
-                        )}
-                        onMouseEnter={(event) => {
-                          event.currentTarget.style.borderColor = accentHex;
-                        }}
-                        onMouseLeave={(event) => {
-                          event.currentTarget.style.borderColor = "";
-                        }}
-                      >
-                        {footnoteLabel}
-                      </Link>
-                    )}
-                  </p>
-                )}
-                {locationsLine && (
-                  <p
+                <>
+                  Or email {" "}
+                  <a
+                    href={emailHref || `mailto:${emailLabel}`}
                     className={cx(
-                      "font-mono text-[10.5px] tracking-[0.12em] uppercase",
-                      theme?.heading ?? "text-white"
+                      "border-b border-white/20 pb-[2px] no-underline transition-colors duration-200 pl-2",
+                      theme?.body ?? "text-[#A9B6C0]",
+                      "hover:border-[var(--accent)] hover:text-white"
                     )}
                   >
-                    {locationsLine}
-                  </p>
-                )}
-              </div>
-            )}
-          </div>
+                    {emailLabel}
+                  </a>
+                </>
+              )}
+              {emailLabel && footerText && (
+                <span className="mx-3 inline-block opacity-40 sm:mx-3" aria-hidden>
+                  ·
+                </span>
+              )}
+              {footerText}
+            </div>
+          )}
         </div>
       </div>
     </section>

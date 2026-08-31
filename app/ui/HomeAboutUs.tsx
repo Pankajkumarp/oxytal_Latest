@@ -669,7 +669,7 @@ export default function HomeAboutUs({ entry }: Props) {
               <Link
                 href={ctaHref || ""}
                 className={cx(
-                  "mt-2 inline-flex w-fit items-center gap-2 rounded-lg px-6 py-3.5 text-[15px] font-medium shadow-lg transition-all duration-300 hover:-translate-y-0.5",
+                  "mt-2 inline-flex relative z-2 w-fit items-center justify-center gap-2 rounded-full px-7 py-3.5 text-[15px] font-semibold shadow-lg transition-all duration-300 hover:-translate-y-0.5",
                   theme?.buttonBg ?? "bg-[#0B1B2B]",
                   theme?.buttonText ?? "text-white",
                   theme?.buttonHoverBg ?? "hover:bg-[#16324B]"
