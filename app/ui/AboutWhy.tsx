@@ -7,14 +7,6 @@ import { Archivo, IBM_Plex_Mono, IBM_Plex_Sans } from "next/font/google";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SplitText } from "gsap/SplitText";
-import {
-  Handshake,
-  Laptop,
-  Network,
-  Package,
-  Palette,
-  type LucideIcon,
-} from "lucide-react";
 import { cx } from "@/app/lib/cx";
 import { getAssetUrl } from "../lib/contentfulAsset";
 import { resolveTheme } from "../lib/theme";
@@ -72,9 +64,6 @@ interface WhyItem {
   iconUrl?: string;
 }
 
-/** Cycled by item index as a fallback when a `contentDetail` entry has no `icon` image set — same pattern every sibling About section uses. */
-const FALLBACK_ICONS: LucideIcon[] = [Package, Laptop, Palette, Network, Handshake];
-
 /** Placeholder roster, used only when `elements` has no `contentDetail` entries yet — the original mockup's 5-point list. */
 const DEFAULT_WHY: WhyItem[] = [];
 
@@ -94,10 +83,6 @@ function contentDetailToWhyItem(entry: PlainEntry<ContentDetailSkeleton>): WhyIt
     iconUrl,
   };
 }
-
-/** The mockup's own dark navy gradient — used as the un-themed default background, same identity `AboutHero`/`AboutApproach`/`AboutCulture` use. */
-const NAVY_GRADIENT = "linear-gradient(160deg, #050e2d, #0a2885 55%, #081a5a)";
-
 /*
  * ── "AI & Agentic Engineering" band ──────────────────────────────────
  * The closing `.band.band--rule` block from `Refrence/oxytal-about.html`,
@@ -141,12 +126,7 @@ const aiLabPlexSans = IBM_Plex_Sans({
   variable: "--font-plex-sans",
 });
 
-/** The reference's own original copy — used whenever the 3rd `dataText` entry (`aiLabCopy`) isn't set yet. */
-const AI_LAB_DEFAULT_EYEBROW = "Oxytal AI Lab";
 const AI_LAB_DEFAULT_HEADING = "AI & Agentic Engineering";
-const AI_LAB_DEFAULT_LEAD =
-  "In 2024 we formalised what had been growing quietly inside Oxytal into a dedicated practice: the AI Lab. It builds agentic platforms, autonomous pipelines, and intelligent products — for clients and as our own shipped software.";
-
 /** The 6 ForgePipeline stages, verbatim from the reference's own `#pipeDemo` markup — stays static; it's a decorative auto-cycling demo, not editorial copy. */
 const AI_LAB_PIPELINE_STEPS = [
   "Requirements Agent",
@@ -243,7 +223,6 @@ export default function AboutWhy({ entry }: Props) {
     .map(contentDetailToWhyItem);
 
   const eyebrow = copy?.fields.eyebrow;
-  const heading = copy?.fields.heading;
   const description = copy?.fields.text
     ? documentToReactComponents(copy.fields.text)
     : null;
@@ -277,11 +256,6 @@ export default function AboutWhy({ entry }: Props) {
     )
     : undefined;
 
-  const backgroundStyle = backgroundUrl
-    ? { backgroundImage: `url(${backgroundUrl})` }
-    : theme
-      ? undefined
-      : { background: NAVY_GRADIENT };
 
   const aiLabBackgroundStyle = backgroundUrl
     ? { backgroundImage: `url(${backgroundUrl})` }
@@ -450,40 +424,6 @@ export default function AboutWhy({ entry }: Props) {
 
     return () => ctx.revert();
   }, []);
-
-  /* =========================================================
-     LIST ITEM HOVER — the icon pops with a bouncy rotate + scale while
-     the row nudges slightly to the right. GSAP rather than CSS because
-     the icon and row animate on two different eases from one trigger.
-     Skipped under prefers-reduced-motion.
-  ========================================================= */
-  const handleItemEnter = (event: React.MouseEvent<HTMLLIElement>) => {
-    if (prefersReducedMotion()) {
-      return;
-    }
-
-    const row = event.currentTarget;
-    const icon = row.querySelector<HTMLElement>("[data-why-icon]");
-
-    gsap.to(row, { x: 6, duration: 0.3, ease: "power2.out" });
-    if (icon) {
-      gsap.to(icon, { rotate: -12, scale: 1.2, duration: 0.35, ease: "back.out(2)" });
-    }
-  };
-
-  const handleItemLeave = (event: React.MouseEvent<HTMLLIElement>) => {
-    if (prefersReducedMotion()) {
-      return;
-    }
-
-    const row = event.currentTarget;
-    const icon = row.querySelector<HTMLElement>("[data-why-icon]");
-
-    gsap.to(row, { x: 0, duration: 0.35, ease: "power2.out" });
-    if (icon) {
-      gsap.to(icon, { rotate: 0, scale: 1, duration: 0.35, ease: "power2.out" });
-    }
-  };
 
   /* =========================================================
      BUILD CARD HOVER — the "what the AI Lab builds" cards lift with a

@@ -3,7 +3,6 @@ import { Entry, EntrySkeletonType } from "contentful";
 import {
   BadgeCheck,
   CalendarClock,
-  ChevronRight,
   Mail,
   MapPin,
   Send,

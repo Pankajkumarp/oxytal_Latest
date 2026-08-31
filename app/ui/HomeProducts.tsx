@@ -7,7 +7,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SplitText } from "gsap/SplitText";
 import { documentToReactComponents } from "@contentful/rich-text-react-renderer";
 import { Entry, EntrySkeletonType } from "contentful";
-import { ArrowRight, Sparkles } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { cx } from "@/app/lib/cx";
 import { getAssetUrl } from "../lib/contentfulAsset";
 import { resolveTheme } from "../lib/theme";

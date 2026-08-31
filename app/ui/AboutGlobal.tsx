@@ -6,7 +6,6 @@ import { documentToReactComponents } from "@contentful/rich-text-react-renderer"
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SplitText } from "gsap/SplitText";
-import { Globe } from "lucide-react";
 import { cx } from "@/app/lib/cx";
 import { getAssetUrl } from "../lib/contentfulAsset";
 import { resolveTheme, type SectionTheme } from "../lib/theme";
@@ -239,12 +238,6 @@ export default function AboutGlobal({ entry }: Props) {
       isEntry(element) && element.sys.contentType.sys.id === "dataText"
   );
   const copy = dataTextEntries[0];
-  const asideEntry = dataTextEntries[1];
-  // A 3rd `dataText` entry (if present) supplies the "Countries &
-  // Growing" stat label via its own `eyebrow` field — same "reuse a
-  // secondary dataText" pattern AboutHero's "// Company Overview" / "//
-  // Office Locations" labels use.
-  const statLabelEntry = dataTextEntries[2];
 
   const officeRegions = elements
     .filter(
@@ -258,10 +251,6 @@ export default function AboutGlobal({ entry }: Props) {
   const description = copy?.fields.text
     ? documentToReactComponents(copy.fields.text)
     : null;
-  const aside = asideEntry?.fields.text
-    ? documentToReactComponents(asideEntry.fields.text)
-    : null;
-  const statLabel = statLabelEntry?.fields.eyebrow;
 
   const regions = officeRegions.length ? officeRegions : DEFAULT_REGIONS;
 

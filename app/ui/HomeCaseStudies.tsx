@@ -29,12 +29,9 @@ import { documentToReactComponents } from "@contentful/rich-text-react-renderer"
 import { Entry, EntrySkeletonType } from "contentful";
 import {
   ArrowRight,
-  BarChart3,
-  Boxes,
   ChevronLeft,
   ChevronRight,
   Quote,
-  Sparkles,
   TrendingUp,
   Users,
   X,
@@ -302,8 +299,6 @@ const truncateText = (text: string, maxLength = 120) => {
 };
 function CaseStudySlide({
   study,
-  index,
-  total,
   theme,
 }: {
   study: CaseStudyItem;

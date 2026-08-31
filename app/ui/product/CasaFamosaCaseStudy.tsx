@@ -881,69 +881,6 @@ function RelatedSection() {
 }
 
 /* =========================================================
-   SITE-WIDE CTA
-========================================================= */
-
-function ConnectSection() {
-  const titleRef = useSplitReveal<HTMLHeadingElement>();
-
-  return (
-    <section
-      aria-labelledby="connect-h"
-      className="relative overflow-hidden bg-[#120810] px-5 py-19 text-center sm:px-8 sm:py-24 lg:py-[150px]"
-    >
-      <div
-        aria-hidden
-        className="pointer-events-none absolute bottom-[-14%] left-1/2 h-[520px] w-[min(760px,90vw)] -translate-x-1/2 rounded-full"
-        style={{ background: "radial-gradient(circle, rgba(255,143,184,.18), transparent 66%)" }}
-      />
-
-      <div className="relative">
-        <span className="mb-0 inline-flex items-center gap-2.5 text-[11.5px] font-bold tracking-[0.22em] text-[#FF8FB8] uppercase">
-          Work with us
-        </span>
-
-        <h2
-          id="connect-h"
-          ref={titleRef}
-          className="mx-auto mt-4 mb-10 max-w-[19ch] text-[clamp(2rem,5.4vw,4.1rem)] leading-[1.04] font-extrabold tracking-[-0.035em] text-balance text-white sm:mb-16"
-        >
-          Let&apos;s discuss what you&apos;re building — <em className="text-[#BCA3B2] not-italic">and what&apos;s getting in the way.</em>
-        </h2>
-
-        <Link
-          href="/contact-us"
-          className="group relative inline-grid aspect-square w-[clamp(168px,17vw,208px)] place-items-center rounded-full text-white transition-transform duration-350 ease-[cubic-bezier(.22,1,.36,1)] hover:scale-[1.04]"
-        >
-          <span
-            aria-hidden
-            className="absolute -inset-3.5 animate-[spin_26s_linear_infinite] rounded-full border border-dashed border-white/14 transition-[border-color,opacity] duration-350 group-hover:border-[#FF8FB8] group-hover:opacity-70"
-          />
-          <span
-            aria-hidden
-            className="absolute inset-0 rounded-full border border-white/30 transition-colors duration-350 group-hover:border-white group-hover:bg-white"
-          />
-          <span className="relative flex flex-col items-center gap-2.5 text-[16px] font-medium transition-colors duration-300 group-hover:text-[#120810]">
-            Let&apos;s connect
-            <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
-              <path d="M12 5v14M5 12l7 7 7-7" />
-            </svg>
-          </span>
-        </Link>
-
-        <p className="mt-8.5 text-[14.5px] text-[#8C7182] sm:mt-12.5">
-          Or email{" "}
-          <a href="mailto:info@oxytal.com" className="border-b border-white/18 pb-0.5 text-[#BCA3B2] transition-colors duration-150 hover:border-[#FF8FB8] hover:text-white">
-            info@oxytal.com
-          </a>{" "}
-          · We reply within one business day
-        </p>
-      </div>
-    </section>
-  );
-}
-
-/* =========================================================
    PAGE
 ========================================================= */
 

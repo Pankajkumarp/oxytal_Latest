@@ -10,7 +10,6 @@ import {
   DataImageSkeleton,
 } from "../../types/contentful";
 import { useFadeUp, useSplitReveal } from "./useReveal";
-import DigitalStrategyPage from "./DigitalStrategyPage";
 
 type PlainEntry<Skeleton extends EntrySkeletonType> =
   Entry<Skeleton, undefined>;

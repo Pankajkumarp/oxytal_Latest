@@ -6,7 +6,6 @@ import { Entry, EntrySkeletonType } from "contentful";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SplitText } from "gsap/SplitText";
-import { Rocket, Users, type LucideIcon } from "lucide-react";
 import { cx } from "@/app/lib/cx";
 import { getAssetUrl } from "../lib/contentfulAsset";
 import { resolveTheme } from "../lib/theme";
@@ -64,8 +63,6 @@ interface MissionVisionCard {
   iconUrl?: string;
 }
 
-/** Cycled by card position as a fallback when a `contentDetail` entry has no `icon` image set — Mission first, Vision second. */
-const FALLBACK_ICONS: LucideIcon[] = [Rocket, Users];
 
 /** Placeholder roster, used only when `elements` has no `contentDetail` entries yet — the original mockup's 2-card Mission/Vision pair. */
 const DEFAULT_CARDS: MissionVisionCard[] = [];
