@@ -625,7 +625,7 @@ function ProblemSolutionSection() {
                   {item.icon}
                 </div>
                 <div>
-                  <h4 className="mb-1 text-[16px] font-semibold text-white">{item.title}</h4>
+                  <span className="mb-1 text-[16px] font-semibold text-white block">{item.title}</span>
                   <p className="text-[14px] leading-[1.6] text-[#A8A4CC]">{item.text}</p>
                 </div>
               </li>
@@ -636,7 +636,7 @@ function ProblemSolutionSection() {
         <div ref={cardRef} className="relative overflow-hidden rounded-[20px] border border-[rgba(255,255,255,0.13)] bg-[rgba(255,255,255,0.04)] p-10">
           <span aria-hidden className="absolute inset-x-0 top-0 h-px bg-[linear-gradient(90deg,transparent,#4F46E5,transparent)]" />
           <p className="mb-4 text-[11px] font-medium tracking-[0.18em] text-[#818CF8] uppercase">Our solution</p>
-          <h3 className="mb-4 text-[28px] font-bold text-white">One platform. Every layer.</h3>
+          <span className="mb-4 text-[28px] font-bold text-white block">One platform. Every layer.</span>
           <p className="mb-6 leading-[1.7] text-[#A8A4CC]">
             ActionPulse unifies action tracking, proposal management, content reuse, and CRM
             pipeline into a single multi-tenant application — with enterprise-grade auth and
@@ -983,9 +983,9 @@ function FeatureText({ panel }: { panel: (typeof FEATURE_PANELS)[TabKey] }) {
   return (
     <div>
       <p className="text-[11px] font-medium tracking-[0.18em] text-[#818CF8] uppercase">{panel.module}</p>
-      <h3 ref={titleRef} className="my-4 text-[clamp(26px,3vw,38px)] leading-[1.15] font-bold text-white">
+      <h2 ref={titleRef} className="my-4 text-[clamp(26px,3vw,38px)] leading-[1.15] font-bold text-white">
         {panel.title}
-      </h3>
+      </h2>
       <p className="mb-7 text-[17px] leading-[1.75] text-[#A8A4CC]">{panel.desc}</p>
       <ul className="flex flex-col gap-3.5">
         {panel.bullets.map((bullet) => (
@@ -1061,7 +1061,7 @@ function ApproachSection() {
                 className="absolute inset-x-0 bottom-0 h-0.5 origin-left scale-x-0 bg-[linear-gradient(90deg,transparent,#4F46E5,transparent)] transition-transform duration-300 group-hover:scale-x-100"
               />
               <div className="mb-5 text-[48px] leading-none font-extrabold text-[rgba(79,70,229,0.15)]">{card.num}</div>
-              <h4 className="mb-2.5 text-[18px] font-bold text-white">{card.title}</h4>
+              <span className="mb-2.5 text-[18px] font-bold text-white block">{card.title}</span>
               <p className="text-[14px] leading-[1.65] text-[#A8A4CC]">{card.desc}</p>
             </div>
           ))}
@@ -1095,7 +1095,7 @@ function OutcomesSection() {
               <div className={cx("mb-5 flex h-[52px] w-[52px] items-center justify-center rounded-[14px] text-[22px]", outcome.iconBg)}>
                 {outcome.icon}
               </div>
-              <h3 className="mb-3 text-[20px] font-bold text-white">{outcome.title}</h3>
+              <span className="mb-3 text-[20px] font-bold text-white block">{outcome.title}</span>
               <p className="text-[14px] leading-[1.65] text-[#A8A4CC]">{outcome.desc}</p>
               <div className="mt-5 border-t border-[rgba(255,255,255,0.07)] pt-5">
                 <div className={cx("bg-clip-text text-[36px] leading-none font-extrabold text-transparent", outcome.metricGradient)}>

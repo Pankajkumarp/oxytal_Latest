@@ -575,9 +575,9 @@ function WhyItWasHardSection() {
           {HARD_CARDS.map((card) => (
             <div key={card.n} className="bg-white p-7">
               <span className="mb-3.5 block font-mono text-[12px] tracking-[0.1em] text-[#D9502B]">{card.n}</span>
-              <h3 className="mb-2.5 text-[19px] leading-[1.5] font-extrabold tracking-[-0.02em] text-[#15171C]">
+              <span className="mb-2.5 text-[19px] leading-[1.5] font-extrabold tracking-[-0.02em] text-[#15171C] block">
                 {card.title}
-              </h3>
+              </span>
               <p className="text-[14px] leading-[1.65] text-[#5C6270]">{card.text}</p>
             </div>
           ))}
@@ -624,9 +624,9 @@ function BuiltRow({ row }: { row: (typeof BUILT_ROWS)[number] }) {
     <div className="grid grid-cols-1 items-center gap-8 lg:grid-cols-2 lg:gap-14">
       <div ref={textRef}>
         <span className="mb-3.5 block font-mono text-[12px] tracking-[0.11em] text-[#D9502B]">{row.n}</span>
-        <h3 className="mb-3.5 text-[24px] leading-[1.4] font-extrabold tracking-[-0.02em] text-[#15171C]">
+        <span className="mb-3.5 text-[24px] leading-[1.4] font-extrabold tracking-[-0.02em] text-[#15171C] block">
           {row.title}
-        </h3>
+        </span>
         <p className="mb-1 text-[16px] leading-[1.8] text-[#5C6270]">{row.desc}</p>
         <ul className="mt-5 list-none">
           {row.bullets.map((bullet, index) => (
@@ -652,7 +652,7 @@ function BuiltRow({ row }: { row: (typeof BUILT_ROWS)[number] }) {
               >
                 <div aria-hidden className="h-[5px]" style={{ backgroundColor: flavour.color }} />
                 <div className="p-5.5">
-                  <h4 className="mb-2 text-[17px] font-bold tracking-[-0.02em] text-[#15171C]">{flavour.name}</h4>
+                  <span className="mb-2 text-[17px] font-bold tracking-[-0.02em] text-[#15171C] block">{flavour.name}</span>
                   <p className="mb-3 text-[14px] leading-[1.6] text-[#5C6270]">{flavour.text}</p>
                   <span className="font-mono text-[10px] tracking-[0.1em] text-[#8D93A1]">{flavour.abv}</span>
                 </div>
@@ -719,9 +719,9 @@ function DetailThatMatteredSection() {
         >
           {CARE_CARDS.map((card) => (
             <div key={card.title} className="bg-[#0F1114] p-6.5">
-              <h3 className="mb-2.5 text-[18px] leading-[1.4] font-extrabold tracking-[-0.02em] text-white">
+              <span className="mb-2.5 text-[18px] leading-[1.4] font-extrabold tracking-[-0.02em] text-white block">
                 {card.title}
-              </h3>
+              </span>
               <p className="text-[14.6px] leading-[1.65] text-[#A8AEBB]">{card.text}</p>
             </div>
           ))}
@@ -762,9 +762,9 @@ function HowWeWorkedSection() {
             >
               <span className="pt-1 font-mono text-[12px] tracking-[0.1em] text-[#D9502B]">{phase.n}</span>
               <div>
-                <h3 className="mb-2 text-[18px] leading-[1.4] font-extrabold tracking-[-0.02em] text-[#15171C]">
+                <span className="mb-2 text-[18px] leading-[1.4] font-extrabold tracking-[-0.02em] text-[#15171C] block">
                   {phase.title}
-                </h3>
+                </span>
                 <p className="text-[14.5px] leading-[1.65] text-[#5C6270]">{phase.text}</p>
               </div>
             </div>
@@ -846,9 +846,9 @@ function TechnologySection() {
         <div ref={gridRef} className="mt-8.5 grid grid-cols-1 gap-5 sm:grid-cols-2">
           {TECH_GROUPS.map((group) => (
             <div key={group.title}>
-              <h4 className="mb-3 font-mono text-[16px] font-medium tracking-[0.12em] text-[#D9502B] uppercase">
+              <span className="mb-3 font-mono text-[16px] font-medium tracking-[0.12em] text-[#D9502B] uppercase block">
                 {group.title}
-              </h4>
+              </span>
               <ul className="list-none">
                 {group.items.map((item, index) => (
                   <li key={item} className={cx("py-1.75 text-[15px] text-[#5C6270]", index > 0 && "border-t border-[#F6F3ED]")}>
@@ -890,7 +890,7 @@ function RelatedSection() {
               <img src={item.img} alt={item.alt} width={800} height={500} loading="lazy" className="aspect-16/10 block w-full object-cover" />
               <div className="p-5.5">
                 <span className="font-mono text-[12px] tracking-[0.11em] text-[#8D93A1] uppercase">{item.k}</span>
-                <h3 className="mt-2 mb-1.5 text-[17px] font-extrabold text-[#15171C]">{item.title}</h3>
+                <span className="mt-2 mb-1.5 text-[17px] font-extrabold text-[#15171C] block">{item.title}</span>
                 <p className="text-[13.5px] leading-[1.55] text-[#5C6270]">{item.text}</p>
               </div>
             </Link>

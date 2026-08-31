@@ -458,7 +458,7 @@ function ChallengeSection() {
           {PROBLEM_CARDS.map((card) => (
             <div key={card.n} className="rounded-2xl border border-[#E7E5F3] bg-white p-6.5 shadow-[0_12px_34px_-14px_rgba(79,70,229,0.22)]">
               <div className="text-[14px] font-bold tracking-[0.1em] text-[#4F46E5]">{card.n}</div>
-              <h3 className="mt-3 mb-2 text-[19px] font-bold text-[#141127]">{card.title}</h3>
+              <span className="mt-3 mb-2 text-[19px] font-bold text-[#141127] block">{card.title}</span>
               <p className="text-[14.5px] text-[#5c5975]">{card.text}</p>
             </div>
           ))}
@@ -487,7 +487,7 @@ function TwoSurfacesSection() {
         <div className="mt-11.5 grid grid-cols-1 items-stretch gap-6.5 lg:grid-cols-[1fr_auto_1fr]">
           <div ref={kRef} className="rounded-[18px] border border-[#E7E5F3] bg-white p-7.5 shadow-[0_12px_34px_-14px_rgba(79,70,229,0.22)]">
             <span className="text-[12px] font-semibold tracking-[0.14em] text-[#4F46E5] uppercase">Kollabry · Tracking</span>
-            <h3 className="mt-2.5 mb-1.5 text-[23px] font-bold text-[#141127]">Run the work</h3>
+            <span className="mt-2.5 mb-1.5 text-[23px] font-bold text-[#141127] block">Run the work</span>
             <p className="mb-4 text-[14.5px] text-[#5c5975]">
               Everything you need to plan and deliver, shaped around how your team actually works.
             </p>
@@ -516,7 +516,7 @@ function TwoSurfacesSection() {
 
           <div ref={sRef} className="rounded-[18px] border border-[#E7E5F3] bg-white p-7.5 shadow-[0_12px_34px_-14px_rgba(79,70,229,0.22)]">
             <span className="text-[12px] font-semibold tracking-[0.14em] text-[#7C3AED] uppercase">Synergy · Knowledge</span>
-            <h3 className="mt-2.5 mb-1.5 text-[23px] font-bold text-[#141127]">Keep the knowledge</h3>
+            <span className="mt-2.5 mb-1.5 text-[23px] font-bold text-[#141127] block">Keep the knowledge</span>
             <p className="mb-4 text-[14.5px] text-[#5c5975]">
               The decisions, specs, and ideas behind the work — versioned, reviewed, and searchable.
             </p>
@@ -555,7 +555,7 @@ function FeaturesSection() {
               <div className="mb-3.5 grid h-[42px] w-[42px] place-items-center rounded-[11px] bg-[#EEF0FF] text-[18px] text-[#4F46E5]">
                 {feature.icon}
               </div>
-              <h3 className="mb-1.5 text-[17px] font-bold text-[#141127]">{feature.title}</h3>
+              <span className="mb-1.5 text-[17px] font-bold text-[#141127] block">{feature.title}</span>
               <p className="text-[14px] text-[#5c5975]">{feature.desc}</p>
             </div>
           ))}
@@ -592,7 +592,7 @@ function DiveRow({ dive, isLast }: { dive: (typeof DIVES)[number]; isLast: boole
     <div className={cx("grid grid-cols-1 items-center gap-9 py-10 lg:grid-cols-2 lg:gap-12", !isLast && "border-b border-[#E7E5F3]")}>
       <div ref={textRef}>
         <span className="text-[12px] font-semibold tracking-[0.14em] text-[#7C3AED] uppercase">{dive.tag}</span>
-        <h3 className="mt-3 mb-3.5 text-[26px] font-bold text-[#141127]">{dive.title}</h3>
+        <span className="mt-3 mb-3.5 text-[26px] font-bold text-[#141127] block">{dive.title}</span>
         <p className="text-[16px] text-[#5c5975]">{dive.desc}</p>
         <ul className="mt-4 grid gap-2.5">
           {dive.bullets.map((bullet) => (
@@ -627,7 +627,7 @@ function ApproachSection() {
           {APPROACH_STEPS.map((step) => (
             <div key={step.num} className="rounded-2xl border border-[rgba(255,255,255,0.12)] bg-[rgba(255,255,255,0.05)] p-6.5">
               <div className="bg-[linear-gradient(120deg,#a5b4fc,#c4b5fd)] bg-clip-text text-[34px] font-bold text-transparent">{step.num}</div>
-              <h3 className="my-2 text-[17px] font-bold text-white">{step.title}</h3>
+              <span className="my-2 text-[17px] font-bold text-white block">{step.title}</span>
               <p className="text-[14px] text-[#c8c5e0]">{step.desc}</p>
             </div>
           ))}
@@ -665,7 +665,7 @@ function TechSection() {
                   {item.icon}
                 </div>
                 <div>
-                  <h3 className="mb-0.5 text-[15.5px] font-bold text-[#141127]">{item.title}</h3>
+                  <span className="mb-0.5 text-[15.5px] font-bold text-[#141127] block">{item.title}</span>
                   <p className="text-[13.5px] text-[#5c5975]">{item.desc}</p>
                 </div>
               </div>
@@ -692,7 +692,7 @@ function LoopSection() {
           {LOOP_ITEMS.map((item) => (
             <div key={item.n} className="min-w-[150px] flex-1 rounded-2xl border border-[#E7E5F3] bg-white p-5 shadow-[0_12px_34px_-14px_rgba(79,70,229,0.22)]">
               <div className="text-[13px] font-bold text-[#4F46E5]">{item.n}</div>
-              <h3 className="my-1.5 text-[16px] font-bold text-[#141127]">{item.title}</h3>
+              <span className="my-1.5 text-[16px] font-bold text-[#141127] block">{item.title}</span>
               <p className="text-[13.5px] text-[#5c5975]">{item.desc}</p>
             </div>
           ))}

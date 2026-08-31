@@ -598,9 +598,9 @@ function WhyItWasHardSection() {
           {HARD_CARDS.map((card) => (
             <div key={card.n} className="bg-white p-7">
               <span className="mb-3.5 block font-mono text-[12px] tracking-[0.1em] text-[#0E9BC4]">{card.n}</span>
-              <h3 className="mb-2.5 text-[19px] leading-[1.5] font-extrabold tracking-[-0.02em] text-[#0B1B2B]">
+              <span className="mb-2.5 text-[19px] leading-[1.5] font-extrabold tracking-[-0.02em] text-[#0B1B2B] block">
                 {card.title}
-              </h3>
+              </span>
               <p className="text-[14px] leading-[1.65] text-[#546A7E]">{card.text}</p>
             </div>
           ))}
@@ -659,9 +659,9 @@ function BuiltRow({ row }: { row: (typeof BUILT_ROWS)[number] }) {
       {row.n}
     </span>
 
-    <h3 className="mb-3.5 text-[24px] leading-[1.4] font-extrabold tracking-[-0.02em] text-[#0B1B2B]">
+    <span className="mb-3.5 text-[24px] leading-[1.4] font-extrabold tracking-[-0.02em] text-[#0B1B2B] block">
       {row.title}
-    </h3>
+    </span>
 
     <p className="mb-1 text-[16px] leading-[1.8] text-[#546A7E]">
       {row.desc}
@@ -750,9 +750,9 @@ function DetailThatMatteredSection() {
         >
           {CARE_CARDS.map((card) => (
             <div key={card.title} className="bg-[#1A1408] p-6.5">
-              <h3 className="mb-2.5 text-[18px] leading-[1.4] font-extrabold tracking-[-0.02em] text-white">
+              <span className="mb-2.5 text-[18px] leading-[1.4] font-extrabold tracking-[-0.02em] text-white block">
                 {card.title}
-              </h3>
+              </span>
               <p className="text-[14.6px] leading-[1.65] text-[#C0B2A0]">{card.text}</p>
             </div>
           ))}
@@ -793,9 +793,9 @@ function HowWeWorkedSection() {
             >
               <span className="pt-1 font-mono text-[12px] tracking-[0.1em] text-[#0E9BC4]">{phase.n}</span>
               <div>
-                <h3 className="mb-2 text-[18px] leading-[1.4] font-extrabold tracking-[-0.02em] text-[#0B1B2B]">
+                <span className="mb-2 text-[18px] leading-[1.4] font-extrabold tracking-[-0.02em] text-[#0B1B2B] block">
                   {phase.title}
-                </h3>
+                </span>
                 <p className="text-[14.5px] leading-[1.65] text-[#546A7E]">{phase.text}</p>
               </div>
             </div>
@@ -878,9 +878,9 @@ function TechnologySection() {
         <div ref={gridRef} className="mt-8.5 grid grid-cols-1 gap-5 sm:grid-cols-2">
           {TECH_GROUPS.map((group) => (
             <div key={group.title}>
-              <h4 className="mb-3 font-mono text-[16px] font-medium tracking-[0.12em] text-[#0E9BC4] uppercase">
+              <span className="mb-3 font-mono text-[16px] font-medium tracking-[0.12em] text-[#0E9BC4] uppercase block">
                 {group.title}
-              </h4>
+              </span>
               <ul className="list-none">
                 {group.items.map((item, index) => (
                   <li
@@ -928,7 +928,7 @@ function RelatedSection() {
               <img src={item.img} alt={item.alt} width={800} height={500} loading="lazy" className="aspect-16/10 block w-full object-cover" />
               <div className="p-5.5">
                 <span className="font-mono text-[12px] tracking-[0.11em] text-[#8598AA] uppercase">{item.k}</span>
-                <h3 className="mt-2 mb-1.5 text-[17px] font-extrabold text-[#0B1B2B]">{item.title}</h3>
+                <span className="mt-2 mb-1.5 text-[17px] font-extrabold text-[#0B1B2B] block">{item.title}</span>
                 <p className="text-[13.5px] leading-[1.55] text-[#546A7E]">{item.text}</p>
               </div>
             </Link>

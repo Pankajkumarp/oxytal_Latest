@@ -700,7 +700,7 @@ function FeaturesSection() {
               >
                 {feature.icon}
               </div>
-              <h3 className="mb-2.5 text-[16px] font-bold text-[#111111]">{feature.title}</h3>
+              <span className="mb-2.5 text-[16px] font-bold text-[#111111]">{feature.title}</span>
               <p className="text-[14px] leading-[1.65] text-[#555555]">{feature.desc}</p>
             </div>
           ))}
@@ -760,7 +760,7 @@ function PipelineSection() {
         </div>
 
         <div className="mt-14 rounded-2xl border border-[rgba(99,102,241,0.2)] bg-[rgba(99,102,241,0.05)] p-7">
-          <h3 className="mb-2.5 text-[18px] font-bold text-white">{agent.name} Agent</h3>
+          <span className="mb-2.5 text-[18px] font-bold text-white block">{agent.name} Agent</span>
           <p className="mb-4 text-[14px] leading-[1.7] text-[rgba(248,248,255,0.5)]">{agent.detailDesc}</p>
           <div className="flex flex-wrap gap-2">
             {agent.tags.map((tag) => (

@@ -562,9 +562,9 @@ function WhyItWasHardSection() {
           {HARD_CARDS.map((card) => (
             <div key={card.n} className="bg-white p-7">
               <span className="mb-3.5 block font-mono text-[12px] tracking-[0.1em] text-[#D93A72]">{card.n}</span>
-              <h3 className="mb-2.5 text-[19px] leading-[1.5] font-extrabold tracking-[-0.02em] text-[#1B0E17]">
+              <span className="mb-2.5 text-[19px] leading-[1.5] font-extrabold tracking-[-0.02em] text-[#1B0E17] block">
                 {card.title}
-              </h3>
+              </span>
               <p className="text-[14px] leading-[1.65] text-[#6B5A65]">{card.text}</p>
             </div>
           ))}
@@ -611,9 +611,9 @@ function BuiltRow({ row }: { row: (typeof BUILT_ROWS)[number] }) {
     <div className="grid grid-cols-1 items-center gap-8 lg:grid-cols-2 lg:gap-14">
       <div ref={textRef}>
         <span className="mb-3.5 block font-mono text-[12px] tracking-[0.11em] text-[#D93A72]">{row.n}</span>
-        <h3 className="mb-3.5 text-[24px] leading-[1.4] font-extrabold tracking-[-0.02em] text-[#1B0E17]">
+        <span className="mb-3.5 text-[24px] leading-[1.4] font-extrabold tracking-[-0.02em] text-[#1B0E17] block">
           {row.title}
-        </h3>
+        </span>
         <p className="mb-1 text-[16px] leading-[1.8] text-[#6B5A65]">{row.desc}</p>
         <ul className="mt-5 list-none">
           {row.bullets.map((bullet, index) => (
@@ -692,9 +692,9 @@ function DetailThatMatteredSection() {
         >
           {CARE_CARDS.map((card) => (
             <div key={card.title} className="bg-[#150A12] p-6.5">
-              <h3 className="mb-2.5 text-[18px] leading-[1.4] font-extrabold tracking-[-0.02em] text-white">
+              <span className="mb-2.5 text-[18px] leading-[1.4] font-extrabold tracking-[-0.02em] text-white block">
                 {card.title}
-              </h3>
+              </span>
               <p className="text-[14.6px] leading-[1.65] text-[#BCA3B2]">{card.text}</p>
             </div>
           ))}
@@ -735,9 +735,9 @@ function HowWeWorkedSection() {
             >
               <span className="pt-1 font-mono text-[12px] tracking-[0.1em] text-[#D93A72]">{phase.n}</span>
               <div>
-                <h3 className="mb-2 text-[18px] leading-[1.4] font-extrabold tracking-[-0.02em] text-[#1B0E17]">
+                <span className="mb-2 text-[18px] leading-[1.4] font-extrabold tracking-[-0.02em] text-[#1B0E17] block">
                   {phase.title}
-                </h3>
+                </span>
                 <p className="text-[14.5px] leading-[1.65] text-[#6B5A65]">{phase.text}</p>
               </div>
             </div>
@@ -825,9 +825,9 @@ function TechnologySection() {
         <div ref={gridRef} className="mt-8.5 grid grid-cols-1 gap-5 sm:grid-cols-2">
           {TECH_GROUPS.map((group) => (
             <div key={group.title}>
-              <h4 className="mb-3 font-mono text-[16px] font-medium tracking-[0.12em] text-[#D93A72] uppercase">
+              <span className="mb-3 font-mono text-[16px] font-medium tracking-[0.12em] text-[#D93A72] uppercase block">
                 {group.title}
-              </h4>
+              </span>
               <ul className="list-none">
                 {group.items.map((item, index) => (
                   <li key={item} className={cx("py-1.75 text-[15px] text-[#6B5A65]", index > 0 && "border-t border-[#FBF3F7]")}>
@@ -869,7 +869,7 @@ function RelatedSection() {
               <img src={item.img} alt={item.alt} width={800} height={500} loading="lazy" className="aspect-16/10 block w-full object-cover" />
               <div className="p-5.5">
                 <span className="font-mono text-[12px] tracking-[0.11em] text-[#9C8A96] uppercase">{item.k}</span>
-                <h3 className="mt-2 mb-1.5 text-[17px] font-extrabold text-[#1B0E17]">{item.title}</h3>
+                <span className="mt-2 mb-1.5 text-[17px] font-extrabold text-[#1B0E17] block">{item.title}</span>
                 <p className="text-[13.5px] leading-[1.55] text-[#6B5A65]">{item.text}</p>
               </div>
             </Link>
