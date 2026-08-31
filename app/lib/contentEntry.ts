@@ -261,3 +261,46 @@ export const getRelatedCaseStudies = cachedQuery(
   ["related-case-studies"],
   { revalidate: REVALIDATE_SECONDS, tags: ["case-study"] }
 );
+
+/**
+ * Every `page` entry flagged `fields.published` (see `PageSkeleton` — a
+ * manual editorial flag distinct from Contentful's own entry publish
+ * status, unused anywhere else in this codebase today) — the full list
+ * `app/sitemap.ts` maps into sitemap URLs. `limit: 1000` (Contentful's own
+ * per-request cap) rather than paginated fetching, same "good enough for
+ * this site's actual scale" simplicity as every other query here.
+ */
+export const getSitemapPages = cachedQuery(
+  async function getSitemapPages() {
+    const { items } = await client.getEntries<PageSkeleton>({
+      content_type: "page",
+      "fields.published": true,
+      include: 0,
+      limit: 1000,
+    });
+
+    return items;
+  },
+  ["sitemap-pages"],
+  { revalidate: REVALIDATE_SECONDS, tags: ["page"] }
+);
+
+/**
+ * Every case-study `contentDetail` entry (same `CASE_STUDY_CATEGORIES`
+ * filter `getRelatedCaseStudies` uses) — the full list `app/sitemap.ts`
+ * maps into `/case-studies/<slug>` sitemap URLs.
+ */
+export const getSitemapCaseStudies = cachedQuery(
+  async function getSitemapCaseStudies() {
+    const { items } = await client.getEntries<ContentDetailSkeleton>({
+      content_type: "contentDetail",
+      "fields.category[in]": CASE_STUDY_CATEGORIES,
+      include: 0,
+      limit: 1000,
+    });
+
+    return items;
+  },
+  ["sitemap-case-studies"],
+  { revalidate: REVALIDATE_SECONDS, tags: ["case-study"] }
+);
