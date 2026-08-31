@@ -680,7 +680,7 @@ export default function ServicesPage({ entry }: Props) {
             className={cx(styles.index, "border", cardBorderClass, cardBgClass)}
             aria-label="Services index"
           >
-            <p className={cx(styles.indexHead, mutedClass)}>Seven disciplines</p>
+            <p className={cx(styles.indexHead, mutedClass)}>SEVEN DISCIPLINES</p>
             <ol>
               {services.map((service) => (
                 <li key={service.id}>
