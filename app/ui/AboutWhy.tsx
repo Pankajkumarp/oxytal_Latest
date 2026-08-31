@@ -523,7 +523,7 @@ export default function AboutWhy({ entry }: Props) {
             {eyebrow}
           </span>
           <DynamicHeading
-            level={resolveHeadingLevel(aiLabCopy?.fields.headingLevel, "h2")}
+            level={resolveHeadingLevel(quoteEntry?.fields.headingLevel, "h2")}
             ref={aiLabHeadingRef}
             id="ai-lab-heading"
             className={cx(
@@ -624,13 +624,13 @@ export default function AboutWhy({ entry }: Props) {
               theme?.eyebrowBg ?? "bg-white/10",
               theme?.eyebrowText ?? "text-cyan-300"
             )}>0{1 + index}</span>
-                <h3
+                <span
                 className={cx(
-              "text-[16px] font-bold",
+              "text-[16px] font-bold block",
               theme?.heading ?? "text-white"
             )}>
                   {item.title}
-                </h3>
+                </span>
                 <p 
                 className={cx(
                 "mt-1.5 text-[13.5px] leading-relaxed ",

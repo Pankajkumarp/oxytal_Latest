@@ -296,21 +296,33 @@
   left: 50%;
   transform: translateX(-50%);
   display: flex;
-  gap: 6px;
   z-index: 10;
 }
 
 .stepPip {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  background: #c8dfeb;
-  transition: width 0.3s ease, background 0.3s ease;
+  width: 24px;
+  height: 24px;
+  margin: 0 !important;
+  padding: 0;
+  opacity: 1;
+  border-radius: 9px;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
 }
 
-.stepPipActive {
-  width: 20px;
-  border-radius: 99px;
+.stepPip::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 9px;
+  background: #c8dfeb;
+}
+.stepPipActive::before {
+  width: 12px;
+  height: 12px;
   background: linear-gradient(90deg, #007595, #007595);
 }
 

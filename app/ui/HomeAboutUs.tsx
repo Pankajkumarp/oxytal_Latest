@@ -634,7 +634,7 @@ export default function HomeAboutUs({ entry }: Props) {
                 {eyebrow}
               </span>
             )}
-
+            {copy?.fields.heading && (
             <DynamicHeading
               level={resolveHeadingLevel(copy?.fields.headingLevel, "h2")}
               ref={headingRef}
@@ -653,6 +653,7 @@ export default function HomeAboutUs({ entry }: Props) {
                 </>
               )}
             </DynamicHeading>
+            )}
 
             {description && (
               <div

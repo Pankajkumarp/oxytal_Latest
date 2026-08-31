@@ -743,7 +743,7 @@ export default function AboutApproach({ entry }: Props) {
                 onClick={() => jumpToStage(index)}
               >
                 <div className={styles.sideNumber}>{step.num}</div>
-                <h3>{step.title}</h3>
+                <span className="block">{step.title}</span>
                 <p>{truncateDescription(step.description, SIDE_DESCRIPTION_LIMIT)}</p>
               </article>
             ))}
@@ -800,14 +800,15 @@ export default function AboutApproach({ entry }: Props) {
                         )}
                       </div>
 
-                      <h2
+                      <div
                         ref={(el) => {
                           titleRefs.current[index] = el;
                         }}
+                        className="text-[21px] font-bold leading-[1.5]"
                         style={hiddenStyle}
                       >
                         {step.title}
-                      </h2>
+                      </div>
 
                       <p
                         ref={(el) => {

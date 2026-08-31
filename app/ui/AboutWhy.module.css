@@ -42,7 +42,6 @@
    * class instead would fight that at equal CSS specificity.
    */
   position: relative;
-  color: var(--paper);
   -webkit-font-smoothing: antialiased;
   padding: clamp(64px, 9vw, 110px) var(--gut);
 }
@@ -129,6 +128,7 @@
   align-items: center;
   gap: 10px;
   padding: 9px 14px;
+    color: var(--paper);
   border-radius: 8px;
   border: 1px solid var(--line);
   background: var(--ink2);

@@ -399,15 +399,15 @@ export default function AboutCulture({ entry }: Props) {
                     )}
                   </div>
                 )}
-                <h3
+                <span
                   className={cx(
-                    "text-[20px] font-semibold",
+                    "text-[20px] font-semibold block",
                     item.showIcon ? "mt-4" : "",
                     theme?.eyebrowText ?? "text-white"
                   )}
                 >
                   {item.title}
-                </h3>
+                </span>
                 <p
                   className={cx(
                     "mt-1.5 text-[13.5px] leading-relaxed",
