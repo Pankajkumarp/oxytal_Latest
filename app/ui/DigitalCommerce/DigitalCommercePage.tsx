@@ -55,6 +55,8 @@ import {
 import { ComposableElementSkeleton, DataImageSkeleton } from "@/app/types/contentful";
 import { Entry, EntrySkeletonType } from "contentful";
 import { getAssetUrl } from "@/app/lib/contentfulAsset";
+import type { HeadingLevel } from "@/app/lib/headingLevel";
+import DynamicHeading from "@/app/ui/DynamicHeading";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger, SplitText);
@@ -139,6 +141,7 @@ function SectionHeading({
   lede,
   center = false,
   dark = false,
+  headingLevel = "h2",
 }: {
   eyebrow: string;
   eyebrowVariant?: "brand" | "brand2";
@@ -147,6 +150,8 @@ function SectionHeading({
   center?: boolean;
   /** Why-Oxytal section only — sits on the dark `#1A1220` background. */
   dark?: boolean;
+  /** Which heading tag to render — `h1`–`h6` (see app/lib/headingLevel.ts). Defaults to `h2`, this component's original fixed level, so every existing call site renders unchanged. */
+  headingLevel?: HeadingLevel;
 }) {
   const titleRef = useSplitReveal<HTMLHeadingElement>();
   return (
@@ -154,7 +159,8 @@ function SectionHeading({
       <Eyebrow variant={eyebrowVariant} center={center}>
         {eyebrow}
       </Eyebrow>
-      <h2
+      <DynamicHeading
+        level={headingLevel}
         ref={titleRef}
         className={cx(
           "max-w-2xl text-[28px] font-extrabold leading-[1.2] tracking-tight sm:text-[34px] md:text-[40px]",
@@ -163,7 +169,7 @@ function SectionHeading({
         )}
       >
         {title}
-      </h2>
+      </DynamicHeading>
       {lede && (
         <p className={cx(LEDE, "text-[15.5px] leading-relaxed md:text-[17px] mt-4", dark && "text-[#B4ABB6]", center && "mx-auto")}>{lede}</p>
       )}
@@ -282,7 +288,7 @@ function ProblemCard({ Icon, title, body, say }: (typeof PROBLEMS)[number]) {
       <div className="mb-4 flex h-[42px] w-[42px] items-center justify-center rounded-[11px] bg-[#fef1ed]">
         <Icon size={20} strokeWidth={1.9} className="text-[#fe7f52]" />
       </div>
-      <h3 className="mb-[9px] text-[1.04rem] font-bold leading-[1.3] text-[#1A1220]">{title}</h3>
+      <span className="mb-[9px] text-[1.04rem] font-bold leading-[1.3] text-[#1A1220] block">{title}</span>
       <p className="text-[0.9rem] leading-[1.6] text-[#5C6072]">{body}</p>
       <p className="mt-[14px] border-t border-[#F8F3F5] pt-[13px] text-[0.85rem] italic text-[#8D8E9E]">{say}</p>
     </div>
@@ -297,6 +303,7 @@ function ProblemsSection() {
         <SectionHeading
           eyebrow="The business problem"
           title="Commerce rarely fails at the storefront."
+          headingLevel="h1"
           lede="It fails in the gap between the storefront and everything behind it — the systems, the manual work, the rules nobody wrote down. These are the four conversations we're brought into most often."
         />
         <div ref={gridRef} className="mt-11 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
@@ -335,7 +342,7 @@ function CapabilityCard({ n, title, body }: (typeof CAPABILITIES)[number]) {
   return (
     <div ref={cardRef} className="bg-white p-6 transition-colors duration-200 hover:bg-[#FFFCFD]">
       <span className="mb-[11px] block text-[10.5px] tracking-[0.1em] text-[#fe7f52]">{n}</span>
-      <h3 className="mb-[7px] text-[1rem] font-bold text-[#1A1220]">{title}</h3>
+      <span className="mb-[7px] text-[1rem] font-bold text-[#1A1220] block">{title}</span>
       <p className="text-[0.875rem] leading-[1.58] text-[#5C6072]">{body}</p>
     </div>
   );
@@ -353,6 +360,7 @@ function CapabilitySection() {
           center
           eyebrow="Commerce capability"
           title="One team across the whole commerce lifecycle."
+          headingLevel="h2"
           lede="Strategy, design, engineering, integration and support sit in the same practice — so the person who scoped it is accountable for how it runs."
         />
 
@@ -437,7 +445,7 @@ function PlatformCard({ variant, tag, title, body, best, items }: (typeof PLATFO
       <span className={cx("mb-3 block text-[10px] uppercase tracking-[0.11em]", isBrand ? "text-[#fe7f52]" : "text-[#4351E6]")}>
         {tag}
       </span>
-      <h3 className="mb-3 text-[1.42rem] font-bold text-[#1A1220]">{title}</h3>
+      <span className="mb-3 text-[1.42rem] font-bold text-[#1A1220] block">{title}</span>
       <p className="text-[0.95rem] leading-[1.65] text-[#5C6072]">{body}</p>
       <div className="mt-5 rounded-[11px] bg-[#F8F3F5] p-[16px_18px] text-[0.89rem] text-[#5C6072]">
         <b className={cx("mb-[7px] block text-[9.5px] font-medium uppercase tracking-[0.11em]", isBrand ? "text-[#fe7f52]" : "text-[#4351E6]")}>
@@ -524,9 +532,9 @@ function PlatformChecker() {
     <div className="mt-6 rounded-2xl border border-[#EDE5E9] bg-white p-6">
       <div className="grid grid-cols-1 items-end gap-[16px] lg:grid-cols-[1fr_auto_auto]">
         <div>
-          <h4 className="mb-[5px] text-[1.02rem] font-bold tracking-[-0.02em] text-[#1A1220]">
+          <span className="mb-[5px] text-[1.02rem] font-bold tracking-[-0.02em] text-[#1A1220] block">
             Not sure where your platform stands?
-          </h4>
+          </span>
           <p className="text-[0.87rem] text-[#5C6072]">Version support windows move. Check yours in two clicks.</p>
         </div>
         <div>
@@ -606,6 +614,7 @@ function PlatformsSection() {
         <SectionHeading
           eyebrow="Platforms"
           title="We build on both. That's the point."
+          headingLevel="h2"
           lede="An agency that only builds on one platform will always find a reason it's the right one. We've delivered on Shopify and Adobe Commerce for years, so the recommendation follows your catalogue, your operating model and your three-year cost — not our bench."
         />
 
@@ -685,7 +694,7 @@ function WhyCard({ n, title, body, em, tail }: (typeof WHY_CARDS)[number]) {
         className="absolute left-0 top-0 h-full w-[3px] origin-top scale-y-0 bg-[#fe7f52]"
       />
       <span ref={numberRef} className="mb-[14px] inline-block text-[11px] tracking-[0.1em] text-[#fe7f52]">{n}</span>
-      <h3 className="mb-[9px] text-[1.1rem] font-bold leading-[1.3] text-white">{title}</h3>
+      <span className="mb-[9px] text-[1.1rem] font-bold leading-[1.3] text-white block">{title}</span>
       <p className="text-[0.9rem] leading-[1.62] text-[#B4ABB6]">
         {body}
         <em className="font-medium not-italic text-white">{em}</em>
@@ -707,6 +716,7 @@ function WhySection() {
           eyebrow="Why Oxytal"
           eyebrowVariant="brand2"
           title="Why us and not another Shopify or Magento agency?"
+          headingLevel="h3"
           lede="A fair question, and one you should ask everyone on your shortlist. Here's our honest answer."
         />
         <div ref={gridRef} className="mt-11 grid grid-cols-1 gap-px overflow-hidden rounded-2xl border border-[#332434] bg-[#332434] sm:grid-cols-2 lg:grid-cols-3">
@@ -776,7 +786,7 @@ function WorkCard({ brand, title, body, outputs }: (typeof WORK)[number]) {
       <div aria-hidden className="h-[6px] bg-[linear-gradient(90deg,#fe7f52,#ffb1c8)]" />
       <div className="flex flex-1 flex-col p-[26px]">
         <span className="mb-[13px] text-[10.5px] uppercase tracking-[0.12em] text-[#8D8E9E]">{brand}</span>
-        <h3 className="mb-[10px] text-[1.06rem] font-bold leading-[1.32] text-[#1A1220]">{title}</h3>
+        <span className="mb-[10px] text-[1.06rem] font-bold leading-[1.32] text-[#1A1220] block">{title}</span>
         <p className="flex-1 text-[0.89rem] leading-[1.6] text-[#5C6072]">{body}</p>
         <div className="mt-[18px] flex gap-6 border-t border-[#EDE5E9] pt-[15px]">
           {outputs.map((o) => (
@@ -801,6 +811,7 @@ function EvidenceSection() {
         <SectionHeading
           eyebrow="Evidence"
           title="Outcomes, not screenshots."
+          headingLevel="h3"
           lede="Drinks and DTC brands are a harder commerce problem than they look — age verification, region-restricted shipping, allocation, and demand that spikes twentyfold in December. We've built for enough of them to know where it breaks."
         />
 
@@ -842,7 +853,7 @@ function EngagementCard({ k, title, body, meta, featured }: (typeof ENGAGEMENT_M
       )}
     >
       <span className="mb-3 text-[10px] uppercase tracking-[0.12em] text-[#fe7f52]">{k}</span>
-      <h3 className={cx("mb-[9px] text-[1.18rem] font-bold", featured ? "text-white" : "text-[#1A1220]")}>{title}</h3>
+      <span className={cx("mb-[9px] text-[1.18rem] font-bold block", featured ? "text-white" : "text-[#1A1220]")}>{title}</span>
       <p className={cx("flex-1 text-[0.9rem] leading-[1.62]", featured ? "text-[#B4ABB6]" : "text-[#5C6072]")}>{body}</p>
       <div
         className={cx(
@@ -861,7 +872,7 @@ function EngagementSection() {
   return (
     <section className={SECTION}>
       <div className="container relative mx-auto px-5 md:px-10">
-        <SectionHeading eyebrow="How we engage" title="Three ways in. All start with thinking, not a quote." />
+        <SectionHeading eyebrow="How we engage" title="Three ways in. All start with thinking, not a quote." headingLevel="h3" />
         <div ref={gridRef} className="mt-11 grid grid-cols-1 gap-5 lg:grid-cols-3">
           {ENGAGEMENT_MODES.map((m) => (
             <EngagementCard key={m.title} {...m} />
@@ -897,7 +908,7 @@ function FaqSection() {
   return (
     <section className={SECTION}>
       <div className="container relative mx-auto px-5 md:px-10">
-        <SectionHeading eyebrow="Straight answers" title="What clients ask first." />
+        <SectionHeading eyebrow="Straight answers" title="What clients ask first." headingLevel="h4" />
         <div ref={listRef} className="mt-[30px] max-w-[880px]">
           {FAQS.map((f, i) => (
             <details key={f.q} open={i === 0} className="group border-b border-[#EDE5E9]">
@@ -929,7 +940,7 @@ function RelatedCard({ k, title, body, href }: (typeof RELATED)[number]) {
   return (
     <Link href={href} ref={cardRef} className="block rounded-[14px] border border-[#EDE5E9] bg-white p-[22px]">
       <span className="text-[10px] uppercase tracking-[0.11em] text-[#8D8E9E]">{k}</span>
-      <h3 className="mt-[9px] mb-[6px] text-[1rem] font-bold text-[#1A1220]">{title}</h3>
+      <span className="mt-[9px] mb-[6px] text-[1rem] font-bold text-[#1A1220] block">{title}</span>
       <p className="text-[0.85rem] leading-[1.55] text-[#5C6072]">{body}</p>
     </Link>
   );
@@ -942,7 +953,7 @@ function RelatedAndCtaSection() {
   return (
     <section className={SECTION}>
       <div className="container relative mx-auto px-5 md:px-10">
-        <SectionHeading eyebrow="Related services" title="Commerce rarely travels alone." />
+        <SectionHeading eyebrow="Related services" title="Commerce rarely travels alone." headingLevel="h4" />
         <div ref={relRef} className="mt-9 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {RELATED.map((r) => (
             <RelatedCard key={r.href} {...r} />
@@ -955,9 +966,9 @@ function RelatedAndCtaSection() {
         >
           <div className="pointer-events-none absolute -right-[14%] -bottom-[52%] h-[620px] w-[620px] rounded-full bg-[radial-gradient(circle,rgba(254,127,82,.42),transparent_66%)]" />
           <div className="relative">
-            <h2 className="mb-[14px] text-[clamp(1.9rem,3.6vw,2.9rem)] font-bold leading-[1.05] tracking-[-0.03em] text-white">
+            <h4 className="mb-[14px] text-[clamp(1.9rem,3.6vw,2.9rem)] font-bold leading-[1.05] tracking-[-0.03em] text-white">
               Start with the business problem.
-            </h2>
+            </h4>
             <p className="max-w-[48ch] text-[#B4ABB6]">
               Sixty minutes. Bring the thing that&rsquo;s actually worrying you &mdash; the number that won&rsquo;t
               move, the process that needs three people, the platform nobody wants to touch. We&rsquo;ll tell you

@@ -58,6 +58,8 @@ import {
 import { ComposableElementSkeleton, DataImageSkeleton } from "@/app/types/contentful";
 import { Entry, EntrySkeletonType } from "contentful";
 import { getAssetUrl } from "@/app/lib/contentfulAsset";
+import type { HeadingLevel } from "@/app/lib/headingLevel";
+import DynamicHeading from "@/app/ui/DynamicHeading";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger, SplitText);
@@ -144,6 +146,7 @@ function SectionHeading({
   lede,
   center = false,
   dark = false,
+  headingLevel = "h2",
 }: {
   eyebrow: string;
   eyebrowVariant?: "brand" | "brand2";
@@ -152,6 +155,8 @@ function SectionHeading({
   center?: boolean;
   /** Featured-work section only — sits on the dark `#0D1B2A` background. */
   dark?: boolean;
+  /** Which heading tag to render — `h1`–`h6` (see app/lib/headingLevel.ts). Defaults to `h2`, this component's original fixed level, so every existing call site renders unchanged. */
+  headingLevel?: HeadingLevel;
 }) {
   const titleRef = useSplitReveal<HTMLHeadingElement>();
   return (
@@ -159,7 +164,8 @@ function SectionHeading({
       <Eyebrow variant={eyebrowVariant} center={center}>
         {eyebrow}
       </Eyebrow>
-      <h2
+      <DynamicHeading
+        level={headingLevel}
         ref={titleRef}
         className={cx(
           "max-w-2xl text-[28px] font-extrabold leading-[1.2] tracking-tight sm:text-[34px] md:text-[40px]",
@@ -168,7 +174,7 @@ function SectionHeading({
         )}
       >
         {title}
-      </h2>
+      </DynamicHeading>
       {lede && (
         <p className={cx(LEDE, "text-[15.5px] leading-relaxed md:text-[17px] mt-4", dark && "text-[#B4ABB6]", center && "mx-auto")}>{lede}</p>
       )}
@@ -286,7 +292,7 @@ function ProblemCard({ Icon, title, body, say }: (typeof PROBLEMS)[number]) {
       <div className="mb-4 flex h-[42px] w-[42px] items-center justify-center rounded-[11px] bg-[#f2ebf8]">
         <Icon size={20} strokeWidth={1.9} className="text-[#8b3fc4]" />
       </div>
-      <h3 className="mb-[9px] text-[1.04rem] font-bold leading-[1.3] text-[#0D1B2A]">{title}</h3>
+      <span className="mb-[9px] text-[1.04rem] font-bold leading-[1.3] text-[#0D1B2A] block">{title}</span>
       <p className="text-[0.9rem] leading-[1.6] text-[#5a6379]">{body}</p>
       <p className="mt-[14px] border-t border-[#f4ecfa] pt-[13px] text-[0.85rem] italic text-[#8D8E9E]">{say}</p>
     </div>
@@ -301,6 +307,7 @@ function ProblemsSection() {
         <SectionHeading
           eyebrow="The business problem"
           title="Nobody buys an integration. They buy the end of an argument."
+          headingLevel="h1"
           lede="The request is usually technical. The reason behind it almost never is — it's a number two teams can't agree on, or a person spending their week moving information between screens. These are the four conversations we're brought into most often."
         />
         <div ref={gridRef} className="mt-11 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
@@ -336,7 +343,7 @@ function CapabilityCard({ n, title, body }: (typeof CAPABILITIES)[number]) {
   return (
     <div ref={cardRef} className="bg-white p-6 transition-colors duration-200 hover:bg-[#FFFCFD]">
       <span className="mb-[11px] block text-[10.5px] tracking-[0.1em] text-[#8b3fc4]">{n}</span>
-      <h3 className="mb-[7px] text-[1rem] font-bold text-[#0D1B2A]">{title}</h3>
+      <span className="mb-[7px] text-[1rem] font-bold text-[#0D1B2A] block">{title}</span>
       <p className="text-[0.875rem] leading-[1.58] text-[#5a6379]">{body}</p>
     </div>
   );
@@ -354,6 +361,7 @@ function CapabilitySection() {
           center
           eyebrow="Integration capability"
           title="One team from mapping the estate through to continuous improvement."
+          headingLevel="h2"
           lede="Strategy, design, engineering, governance and ongoing monitoring sit in the same team — so the connections have an owner long after the project closes."
         />
 
@@ -506,9 +514,9 @@ function DecisionHelper() {
     <div className="mt-6 rounded-2xl border border-[#EDE5E9] bg-white p-6">
       <div className="grid grid-cols-1 items-end gap-[18px] lg:grid-cols-[1fr_auto]">
         <div>
-          <h4 className="mb-[5px] text-[1.02rem] font-bold tracking-[-0.02em] text-[#0D1B2A]">
+          <span className="mb-[5px] text-[1.02rem] font-bold tracking-[-0.02em] text-[#0D1B2A] block">
             What isn&rsquo;t connecting?
-          </h4>
+          </span>
           <p className="text-[0.87rem] text-[#5a6379]">
             Choose the gap closest to yours. We&rsquo;ll show you where the real problem usually turns out to be.
           </p>
@@ -565,7 +573,7 @@ function ShapeCard({ variant, tag, title, body, best, items }: (typeof SHAPES)[n
       <span className={cx("mb-3 block text-[10px] uppercase tracking-[0.11em]", isBrand ? "text-[#8b3fc4]" : "text-[#4351E6]")}>
         {tag}
       </span>
-      <h3 className="mb-3 text-[1.42rem] font-bold text-[#0D1B2A]">{title}</h3>
+      <span className="mb-3 text-[1.42rem] font-bold text-[#0D1B2A] block">{title}</span>
       <p className="text-[0.95rem] leading-[1.65] text-[#5a6379]">{body}</p>
       <div className="mt-5 rounded-[11px] bg-[#f4ecfa] p-[16px_18px] text-[0.89rem] text-[#5a6379]">
         <b className={cx("mb-[7px] block text-[9.5px] font-medium uppercase tracking-[0.11em]", isBrand ? "text-[#8b3fc4]" : "text-[#4351E6]")}>
@@ -595,6 +603,7 @@ function TwoShapesSection() {
         <SectionHeading
           eyebrow="How the work usually arrives"
           title="Connect what you have, or replace what's blocking it."
+          headingLevel="h2"
           lede="Most requests are for the first. A good number turn out to need the second — because no connection can rescue a system that fundamentally can't do what the business now needs. We'll tell you which one you're facing before you spend anything."
         />
 
@@ -727,7 +736,7 @@ function FeaturedNoteCard({ n, title, body }: (typeof FEATURED_NOTES)[number]) {
   return (
     <div ref={cardRef} className="bg-[#0D1B2A] p-[26px_24px]">
       <span className="mb-3 block text-[10.5px] tracking-[0.1em] text-[#8b3fc4]">{n}</span>
-      <h3 className="mb-2 text-[1.02rem] font-bold leading-[1.3] text-white">{title}</h3>
+      <span className="mb-2 text-[1.02rem] font-bold leading-[1.3] text-white block">{title}</span>
       <p className="text-[0.89rem] leading-[1.6] text-[#B4ABB6]">{body}</p>
     </div>
   );
@@ -748,6 +757,7 @@ function FeaturedWorkSection() {
           eyebrow="Proof · Diageo brand sites"
           eyebrowVariant="brand2"
           title="Sign up on a brand site. Four systems have to agree on what just happened."
+          headingLevel="h2"
           lede="We build and integrate consumer brand sites for multiple clients and brands. Every 'Join Us' sign-up has to reach the marketing platform and the customer record correctly, carry what the person agreed to, respect age verification, and honour privacy rules that differ by country and by US state. Getting that wrong isn't a bug. In a regulated category it's a compliance incident."
         />
 
@@ -836,7 +846,7 @@ function WhyCard({ n, title, body, em, tail }: (typeof WHY_CARDS)[number]) {
         className="absolute left-0 top-0 h-full w-[3px] origin-top scale-y-0 bg-[#8b3fc4]"
       />
       <span ref={numberRef} className="mb-[14px] inline-block text-[11px] tracking-[0.1em] text-[#8b3fc4]">{n}</span>
-      <h3 className="mb-[9px] text-[1.1rem] font-bold leading-[1.3] text-[#0D1B2A]">{title}</h3>
+      <span className="mb-[9px] text-[1.1rem] font-bold leading-[1.3] text-[#0D1B2A] block">{title}</span>
       <p className="text-[0.9rem] leading-[1.62] text-[#5a6379]">
         {body}
         <em className="font-medium not-italic text-[#0D1B2A]">{em}</em>
@@ -854,6 +864,7 @@ function WhySection() {
         <SectionHeading
           eyebrow="Why Oxytal"
           title="Why us and not a specialist integration firm?"
+          headingLevel="h3"
           lede="A fair question, and worth putting to everyone on your shortlist. Here's our honest answer."
         />
         <div ref={gridRef} className="mt-11 grid grid-cols-1 gap-px overflow-hidden rounded-2xl border border-[#EDE5E9] bg-[#EDE5E9] sm:grid-cols-2 lg:grid-cols-3">
@@ -883,12 +894,13 @@ function StackSection() {
         <SectionHeading
           eyebrow="What we work with"
           title="Chosen for your estate, not for our convenience."
+          headingLevel="h3"
           lede="We choose based on the systems you already run, what your team can maintain, your security obligations and long-term cost — not technology trends."
         />
         <div ref={gridRef} className="mt-9 grid grid-cols-1 gap-x-[18px] gap-y-8 sm:grid-cols-2 lg:grid-cols-5">
           {STACK_COLUMNS.map((col) => (
             <div key={col.heading}>
-              <h4 className="mb-3 text-[10.5px] font-medium uppercase tracking-[0.12em] text-[#8b3fc4]">{col.heading}</h4>
+              <span className="mb-3 text-[10.5px] font-medium uppercase tracking-[0.12em] text-[#8b3fc4] block">{col.heading}</span>
               <ul className="m-0 list-none p-0">
                 {col.items.map((item) => (
                   <li key={item} className="border-b border-[#f4ecfa] py-[6px] text-[0.89rem] text-[#5a6379]">
@@ -926,7 +938,7 @@ function EngagementCard({ k, title, body, meta, featured }: (typeof ENGAGEMENT_M
       )}
     >
       <span className="mb-3 text-[10px] uppercase tracking-[0.12em] text-[#8b3fc4]">{k}</span>
-      <h3 className={cx("mb-[9px] text-[1.18rem] font-bold", featured ? "text-white" : "text-[#0D1B2A]")}>{title}</h3>
+      <span className={cx("mb-[9px] text-[1.18rem] font-bold block", featured ? "text-white" : "text-[#0D1B2A]")}>{title}</span>
       <p className={cx("flex-1 text-[0.9rem] leading-[1.62]", featured ? "text-[#B4ABB6]" : "text-[#5a6379]")}>{body}</p>
       <div
         className={cx(
@@ -945,7 +957,7 @@ function EngagementSection() {
   return (
     <section className={SECTION}>
       <div className="container relative mx-auto px-5 md:px-10">
-        <SectionHeading eyebrow="How we engage" title="Three ways in. All start with mapping what you actually have." />
+        <SectionHeading eyebrow="How we engage" title="Three ways in. All start with mapping what you actually have." headingLevel="h3" />
         <div ref={gridRef} className="mt-11 grid grid-cols-1 gap-5 lg:grid-cols-3">
           {ENGAGEMENT_MODES.map((m) => (
             <EngagementCard key={m.title} {...m} />
@@ -989,7 +1001,7 @@ function FaqSection() {
   return (
     <section className={SECTION}>
       <div className="container relative mx-auto px-5 md:px-10">
-        <SectionHeading eyebrow="Straight answers" title="What clients ask first." />
+        <SectionHeading eyebrow="Straight answers" title="What clients ask first." headingLevel="h4" />
         <div ref={listRef} className="mt-[30px] max-w-[880px]">
           {FAQS.map((f, i) => (
             <details key={f.q} open={i === 0} className="group border-b border-[#EDE5E9]">
@@ -1021,7 +1033,7 @@ function RelatedCard({ k, title, body, href }: (typeof RELATED)[number]) {
   return (
     <Link href={href} ref={cardRef} className="block rounded-[14px] border border-[#EDE5E9] bg-white p-[22px]">
       <span className="text-[10px] uppercase tracking-[0.11em] text-[#8D8E9E]">{k}</span>
-      <h3 className="mt-[9px] mb-[6px] text-[1rem] font-bold text-[#0D1B2A]">{title}</h3>
+      <span className="mt-[9px] mb-[6px] text-[1rem] font-bold text-[#0D1B2A] block">{title}</span>
       <p className="text-[0.85rem] leading-[1.55] text-[#5a6379]">{body}</p>
     </Link>
   );
@@ -1034,7 +1046,7 @@ function RelatedAndCtaSection() {
   return (
     <section className={SECTION}>
       <div className="container relative mx-auto px-5 md:px-10">
-        <SectionHeading eyebrow="Related services" title="Integration rarely stands alone." />
+        <SectionHeading eyebrow="Related services" title="Integration rarely stands alone." headingLevel="h4" />
         <div ref={relRef} className="mt-9 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {RELATED.map((r) => (
             <RelatedCard key={r.href} {...r} />
@@ -1047,9 +1059,9 @@ function RelatedAndCtaSection() {
         >
           <div className="pointer-events-none absolute -right-[14%] -bottom-[52%] h-[620px] w-[620px] rounded-full bg-[radial-gradient(circle,rgba(126,102,225,.34),transparent_66%)]" />
           <div className="relative">
-            <h2 className="mb-[14px] text-[clamp(1.9rem,3.6vw,2.9rem)] font-bold leading-[1.05] tracking-[-0.03em] text-white">
+            <h4 className="mb-[14px] text-[clamp(1.9rem,3.6vw,2.9rem)] font-bold leading-[1.05] tracking-[-0.03em] text-white">
               Start with where the numbers disagree.
-            </h2>
+            </h4>
             <p className="max-w-[48ch] text-[#B4ABB6]">
               Sixty minutes with the engineers who build these connections. Bring the report two teams argue about,
               the spreadsheet someone rebuilds every Monday, or the system everything has to work around.

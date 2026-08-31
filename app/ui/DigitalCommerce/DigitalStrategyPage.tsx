@@ -46,6 +46,8 @@ import {
 import { ComposableElementSkeleton, DataImageSkeleton } from "@/app/types/contentful";
 import { Entry, EntrySkeletonType } from "contentful";
 import { getAssetUrl } from "@/app/lib/contentfulAsset";
+import type { HeadingLevel } from "@/app/lib/headingLevel";
+import DynamicHeading from "@/app/ui/DynamicHeading";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger, SplitText);
@@ -132,6 +134,7 @@ function SectionHeading({
   lede,
   center = false,
   dark = false,
+  headingLevel = "h2",
 }: {
   eyebrow: string;
   eyebrowVariant?: "brand" | "brand2";
@@ -140,6 +143,8 @@ function SectionHeading({
   center?: boolean;
   /** Proof section only — sits on the dark `#1A1220` background. */
   dark?: boolean;
+  /** Which heading tag to render — `h1`–`h6` (see app/lib/headingLevel.ts). Defaults to `h2`, this component's original fixed level, so every existing call site renders unchanged. */
+  headingLevel?: HeadingLevel;
 }) {
   const titleRef = useSplitReveal<HTMLHeadingElement>();
   return (
@@ -147,7 +152,8 @@ function SectionHeading({
       <Eyebrow variant={eyebrowVariant} center={center}>
         {eyebrow}
       </Eyebrow>
-      <h2
+      <DynamicHeading
+        level={headingLevel}
         ref={titleRef}
         className={cx(
           "max-w-2xl text-[28px] font-extrabold leading-[1.2] tracking-tight sm:text-[34px] md:text-[40px]",
@@ -156,7 +162,7 @@ function SectionHeading({
         )}
       >
         {title}
-      </h2>
+      </DynamicHeading>
       {lede && (
         <p className={cx(LEDE, "text-[15.5px] leading-relaxed md:text-[17px] mt-4", dark && "text-[#B4ABB6]", center && "mx-auto")}>{lede}</p>
       )}
@@ -274,7 +280,7 @@ function ProblemCard({ Icon, title, body, say }: (typeof PROBLEMS)[number]) {
       <div className="mb-4 flex h-[42px] w-[42px] items-center justify-center rounded-[11px] bg-[#fef1ed]">
         <Icon size={20} strokeWidth={1.9} className="text-[#FF704D]" />
       </div>
-      <h3 className="mb-[9px] text-[1.04rem] font-bold leading-[1.3] text-[#171122]">{title}</h3>
+      <span className="mb-[9px] text-[1.04rem] font-bold leading-[1.3] text-[#171122] block">{title}</span>
       <p className="text-[0.9rem] leading-[1.6] text-[#5F647F]">{body}</p>
       <p className="mt-[14px] border-t border-[#F8F3F5] pt-[13px] text-[0.85rem] italic text-[#817D9A]">{say}</p>
     </div>
@@ -289,6 +295,7 @@ function ProblemsSection() {
         <SectionHeading
           eyebrow="The business problem"
           title="The hard part was never generating ideas."
+          headingLevel="h1"
           lede="Every organisation we meet has a longer list of things to do than budget to do them with. What's usually missing is a defensible way to choose. These are the four conversations we're brought into most often."
         />
         <div ref={gridRef} className="mt-11 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
@@ -324,7 +331,7 @@ function CapabilityCard({ n, title, body }: (typeof CAPABILITIES)[number]) {
   return (
     <div ref={cardRef} className="bg-white p-6 transition-colors duration-200 hover:bg-[#FFFCFD]">
       <span className="mb-[11px] block text-[10.5px] tracking-[0.1em] text-[#FF704D]">{n}</span>
-      <h3 className="mb-[7px] text-[1rem] font-bold text-[#171122]">{title}</h3>
+      <span className="mb-[7px] text-[1rem] font-bold text-[#171122] block">{title}</span>
       <p className="text-[0.875rem] leading-[1.58] text-[#5F647F]">{body}</p>
     </div>
   );
@@ -342,6 +349,7 @@ function CapabilitySection() {
           center
           eyebrow="Strategy capability"
           title="One team from the first question through to continuous improvement."
+          headingLevel="h2"
           lede="The people who frame the decision are the people who deliver against it — which is why our recommendations tend to be shorter and more specific than the ones you'll get elsewhere."
         />
 
@@ -494,9 +502,9 @@ function DecisionHelper() {
     <div className="mt-6 rounded-2xl border border-[#EDE5E9] bg-white p-6">
       <div className="grid grid-cols-1 items-end gap-[18px] lg:grid-cols-[1fr_auto]">
         <div>
-          <h4 className="mb-[5px] text-[1.02rem] font-bold tracking-[-0.02em] text-[#171122]">
+          <span className="mb-[5px] text-[1.02rem] font-bold tracking-[-0.02em] text-[#171122] block">
             What decision are you facing?
-          </h4>
+          </span>
           <p className="text-[0.87rem] text-[#5F647F]">
             Choose the one closest to yours. We&rsquo;ll show you what usually settles it.
           </p>
@@ -553,7 +561,7 @@ function ShapeCard({ variant, tag, title, body, best, items }: (typeof SHAPES)[n
       <span className={cx("mb-3 block text-[10px] uppercase tracking-[0.11em]", isBrand ? "text-[#FF704D]" : "text-[#4351E6]")}>
         {tag}
       </span>
-      <h3 className="mb-3 text-[1.42rem] font-bold text-[#171122]">{title}</h3>
+      <span className="mb-3 text-[1.42rem] font-bold text-[#171122] block">{title}</span>
       <p className="text-[0.95rem] leading-[1.65] text-[#5F647F]">{body}</p>
       <div className="mt-5 rounded-[11px] bg-[#F8F3F5] p-[16px_18px] text-[0.89rem] text-[#5F647F]">
         <b className={cx("mb-[7px] block text-[9.5px] font-medium uppercase tracking-[0.11em]", isBrand ? "text-[#FF704D]" : "text-[#4351E6]")}>
@@ -583,6 +591,7 @@ function TwoShapesSection() {
         <SectionHeading
           eyebrow="How the work usually arrives"
           title="One decision, or the order of many."
+          headingLevel="h2"
           lede="Some clients arrive with a single question that has stalled — build or buy, replatform or fix, which supplier. Others have a list they can't rank. The work is different, and so is the length of it."
         />
 
@@ -649,7 +658,7 @@ function CaseStudyCard({ who, title, question, built, cutLabel, cut, href }: (ty
   return (
     <div ref={cardRef} className="flex flex-col bg-[#171122] p-[30px_26px]">
       <span className="mb-[6px] text-[10.5px] uppercase tracking-[0.11em] text-[#FF704D]">{who}</span>
-      <h3 className="mb-4 text-[1.14rem] font-bold leading-[1.28] text-white">{title}</h3>
+      <span className="mb-4 text-[1.14rem] font-bold leading-[1.28] text-white block">{title}</span>
       <dl className="m-0">
         <dt className="mt-[18px] text-[9.5px] uppercase tracking-[0.11em] text-[#8A8093]">The question</dt>
         <dd className="mt-[6px] text-[0.9rem] leading-[1.58] text-[#C4BCC7]">{question}</dd>
@@ -688,6 +697,7 @@ function ProofSection() {
           eyebrow="Proof · three clients, three scopes"
           eyebrowVariant="brand2"
           title="Three digital projects. Three completely different sizes. Because they had three different jobs."
+          headingLevel="h2"
           lede="The clearest evidence of strategy isn't a document — it's what got built, and more tellingly what didn't. These three ran at the same firm, with the same team, and look nothing alike. That's the point."
         />
 
@@ -761,7 +771,7 @@ function WhyCard({ n, title, body, em, tail }: (typeof WHY_CARDS)[number]) {
         className="absolute left-0 top-0 h-full w-[3px] origin-top scale-y-0 bg-[#FF704D]"
       />
       <span ref={numberRef} className="mb-[14px] inline-block text-[11px] tracking-[0.1em] text-[#FF704D]">{n}</span>
-      <h3 className="mb-[9px] text-[1.1rem] font-bold leading-[1.3] text-[#171122]">{title}</h3>
+      <span className="mb-[9px] text-[1.1rem] font-bold leading-[1.3] text-[#171122] block">{title}</span>
       <p className="text-[0.9rem] leading-[1.62] text-[#5F647F]">
         {body}
         <em className="font-medium not-italic text-[#171122]">{em}</em>
@@ -779,6 +789,7 @@ function WhySection() {
         <SectionHeading
           eyebrow="Why Oxytal"
           title="Why us and not a management consultancy?"
+          headingLevel="h3"
           lede="A fair question, and the answer isn't that we're cheaper. Here's the honest version."
         />
         <div ref={gridRef} className="mt-11 grid grid-cols-1 gap-px overflow-hidden rounded-2xl border border-[#EDE5E9] bg-[#EDE5E9] sm:grid-cols-2 lg:grid-cols-3">
@@ -804,7 +815,7 @@ function DeliverableCard({ title, body }: (typeof DELIVERABLES)[number]) {
   const cardRef = useCardHover<HTMLDivElement>({ y: -4 });
   return (
     <div ref={cardRef} className="bg-white p-[24px_22px]">
-      <h4 className="mb-[7px] text-[1rem] font-bold tracking-[-0.02em] text-[#171122]">{title}</h4>
+      <span className="mb-[7px] text-[1rem] font-bold tracking-[-0.02em] text-[#171122] block">{title}</span>
       <p className="text-[0.875rem] leading-[1.58] text-[#5F647F]">{body}</p>
     </div>
   );
@@ -818,6 +829,7 @@ function DeliverablesSection() {
         <SectionHeading
           eyebrow="What you get"
           title="Short documents that get decisions made."
+          headingLevel="h3"
           lede="Not a hundred-page report nobody finishes. The test we apply: could a board approve funding from this, and could a delivery team start from it? If either answer is no, it isn't finished."
         />
         <div ref={gridRef} className="mt-9 grid grid-cols-1 gap-px overflow-hidden rounded-2xl border border-[#EDE5E9] bg-[#EDE5E9] sm:grid-cols-2 lg:grid-cols-5">
@@ -852,7 +864,7 @@ function EngagementCard({ k, title, body, meta, featured }: (typeof ENGAGEMENT_M
       )}
     >
       <span className="mb-3 text-[10px] uppercase tracking-[0.12em] text-[#FF704D]">{k}</span>
-      <h3 className={cx("mb-[9px] text-[1.18rem] font-bold", featured ? "text-white" : "text-[#171122]")}>{title}</h3>
+      <span className={cx("mb-[9px] text-[1.18rem] font-bold block", featured ? "text-white" : "text-[#171122]")}>{title}</span>
       <p className={cx("flex-1 text-[0.9rem] leading-[1.62]", featured ? "text-[#B4ABB6]" : "text-[#5F647F]")}>{body}</p>
       <div
         className={cx(
@@ -871,7 +883,7 @@ function EngagementSection() {
   return (
     <section className={SECTION}>
       <div className="container relative mx-auto px-5 md:px-10">
-        <SectionHeading eyebrow="How we engage" title="Three ways in. All of them fixed price." />
+        <SectionHeading eyebrow="How we engage" title="Three ways in. All of them fixed price." headingLevel="h3"/>
         <div ref={gridRef} className="mt-11 grid grid-cols-1 gap-5 lg:grid-cols-3">
           {ENGAGEMENT_MODES.map((m) => (
             <EngagementCard key={m.title} {...m} />
@@ -915,7 +927,7 @@ function FaqSection() {
   return (
     <section className={SECTION}>
       <div className="container relative mx-auto px-5 md:px-10">
-        <SectionHeading eyebrow="Straight answers" title="What clients ask first." />
+        <SectionHeading eyebrow="Straight answers" title="What clients ask first." headingLevel="h4" />
         <div ref={listRef} className="mt-[30px] max-w-[880px]">
           {FAQS.map((f, i) => (
             <details key={f.q} open={i === 0} className="group border-b border-[#EDE5E9]">
@@ -947,7 +959,7 @@ function RelatedCard({ k, title, body, href }: (typeof RELATED)[number]) {
   return (
     <Link href={href} ref={cardRef} className="block rounded-[14px] border border-[#EDE5E9] bg-white p-[22px]">
       <span className="text-[10px] uppercase tracking-[0.11em] text-[#817D9A]">{k}</span>
-      <h3 className="mt-[9px] mb-[6px] text-[1rem] font-bold text-[#171122]">{title}</h3>
+      <span className="mt-[9px] mb-[6px] text-[1rem] font-bold text-[#171122]">{title}</span>
       <p className="text-[0.85rem] leading-[1.55] text-[#5F647F]">{body}</p>
     </Link>
   );
@@ -960,7 +972,7 @@ function RelatedAndCtaSection() {
   return (
     <section className={SECTION}>
       <div className="container relative mx-auto px-5 md:px-10">
-        <SectionHeading eyebrow="Related services" title="Where the plan usually goes next." />
+        <SectionHeading eyebrow="Related services" title="Where the plan usually goes next." headingLevel="h4"/>
         <div ref={relRef} className="mt-9 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {RELATED.map((r) => (
             <RelatedCard key={r.href} {...r} />
@@ -973,9 +985,9 @@ function RelatedAndCtaSection() {
         >
           <div className="pointer-events-none absolute -right-[14%] -bottom-[52%] h-[620px] w-[620px] rounded-full bg-[radial-gradient(circle,rgba(110,113,230,.24),transparent_65%)]" />
           <div className="relative">
-            <h2 className="mb-[14px] text-[clamp(1.9rem,3.6vw,2.9rem)] font-bold leading-[1.05] tracking-[-0.03em] text-white">
+            <h4 className="mb-[14px] text-[clamp(1.9rem,3.6vw,2.9rem)] font-bold leading-[1.05] tracking-[-0.03em] text-white">
               Start with the decision you keep deferring.
-            </h2>
+            </h4>
             <p className="max-w-[48ch] text-[#B4ABB6]">
               Sixty minutes with the people who&rsquo;d do the thinking. Bring the business case you can&rsquo;t
               finish, the proposals you can&rsquo;t compare, or the list nobody can rank. We&rsquo;ll tell you how

@@ -59,6 +59,8 @@ import {
 import { ComposableElementSkeleton, DataImageSkeleton } from "@/app/types/contentful";
 import { Entry, EntrySkeletonType } from "contentful";
 import { getAssetUrl } from "@/app/lib/contentfulAsset";
+import type { HeadingLevel } from "@/app/lib/headingLevel";
+import DynamicHeading from "@/app/ui/DynamicHeading";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger, SplitText);
@@ -145,6 +147,7 @@ function SectionHeading({
   lede,
   center = false,
   dark = false,
+  headingLevel = "h2",
 }: {
   eyebrow: string;
   eyebrowVariant?: "brand" | "brand2";
@@ -153,6 +156,8 @@ function SectionHeading({
   center?: boolean;
   /** Featured-case section only — sits on the dark `#0D1B2A` background. */
   dark?: boolean;
+  /** Which heading tag to render — `h1`–`h6` (see app/lib/headingLevel.ts). Defaults to `h2`, this component's original fixed level, so every existing call site renders unchanged. */
+  headingLevel?: HeadingLevel;
 }) {
   const titleRef = useSplitReveal<HTMLHeadingElement>();
   return (
@@ -160,7 +165,8 @@ function SectionHeading({
       <Eyebrow variant={eyebrowVariant} center={center}>
         {eyebrow}
       </Eyebrow>
-      <h2
+      <DynamicHeading
+        level={headingLevel}
         ref={titleRef}
         className={cx(
           "max-w-2xl text-[28px] font-extrabold leading-[1.2] tracking-tight sm:text-[34px] md:text-[40px]",
@@ -169,7 +175,7 @@ function SectionHeading({
         )}
       >
         {title}
-      </h2>
+      </DynamicHeading>
       {lede && (
         <p className={cx(LEDE, "text-[15.5px] leading-relaxed md:text-[17px] mt-4", dark && "text-[#B4ABB6]", center && "mx-auto")}>{lede}</p>
       )}
@@ -288,7 +294,7 @@ function ProblemCard({ Icon, title, body, say }: (typeof PROBLEMS)[number]) {
       <div className="mb-4 flex h-[42px] w-[42px] items-center justify-center rounded-[11px] bg-[#e4eff8]">
         <Icon size={20} strokeWidth={1.9} className="text-[#2c87cc]" />
       </div>
-      <h3 className="mb-[9px] text-[1.04rem] font-bold leading-[1.3] text-[#0D1B2A]">{title}</h3>
+      <span className="mb-[9px] text-[1.04rem] font-bold leading-[1.3] text-[#0D1B2A] block">{title}</span>
       <p className="text-[0.9rem] leading-[1.6] text-[#55677f]">{body}</p>
       <p className="mt-[14px] border-t border-[#f2f7fc] pt-[13px] text-[0.85rem] italic text-[#8D8E9E]">{say}</p>
     </div>
@@ -303,6 +309,7 @@ function ProblemsSection() {
         <SectionHeading
           eyebrow="The business problem"
           title="Legacy infrastructure rarely fails. It just quietly costs you more every year."
+          headingLevel="h1"
           lede="Servers keep running, files keep saving, and the bill keeps climbing. By the time it reaches the board it's usually four problems at once. These are the conversations we're brought into most often."
         />
         <div ref={gridRef} className="mt-11 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
@@ -338,7 +345,7 @@ function CapabilityCard({ n, title, body }: (typeof CAPABILITIES)[number]) {
   return (
     <div ref={cardRef} className="bg-white p-6 transition-colors duration-200 hover:bg-[#FFFCFD]">
       <span className="mb-[11px] block text-[10.5px] tracking-[0.1em] text-[#2c87cc]">{n}</span>
-      <h3 className="mb-[7px] text-[1rem] font-bold text-[#0D1B2A]">{title}</h3>
+      <span className="mb-[7px] text-[1rem] font-bold text-[#0D1B2A] block">{title}</span>
       <p className="text-[0.875rem] leading-[1.58] text-[#55677f]">{body}</p>
     </div>
   );
@@ -356,6 +363,7 @@ function CapabilitySection() {
           center
           eyebrow="Cloud capability"
           title="One team from assessment through to continuous improvement."
+          headingLevel="h2"
           lede="Strategy, architecture, migration, governance and ongoing operation sit in the same team — so the people who designed the target are the ones who have to live in it."
         />
 
@@ -508,9 +516,9 @@ function DecisionHelper() {
     <div className="mt-6 rounded-2xl border border-[#EDE5E9] bg-white p-6">
       <div className="grid grid-cols-1 items-end gap-[18px] lg:grid-cols-[1fr_auto]">
         <div>
-          <h4 className="mb-[5px] text-[1.02rem] font-bold tracking-[-0.02em] text-[#0D1B2A]">
+          <span className="mb-[5px] text-[1.02rem] font-bold tracking-[-0.02em] text-[#0D1B2A] block">
             What&rsquo;s driving your move?
-          </h4>
+          </span>
           <p className="text-[0.87rem] text-[#55677f]">
             Choose the reason closest to yours. We&rsquo;ll show you where the real work usually turns out to be.
           </p>
@@ -567,7 +575,7 @@ function ShapeCard({ variant, tag, title, body, best, items }: (typeof SHAPES)[n
       <span className={cx("mb-3 block text-[10px] uppercase tracking-[0.11em]", isBrand ? "text-[#2c87cc]" : "text-[#4351E6]")}>
         {tag}
       </span>
-      <h3 className="mb-3 text-[1.42rem] font-bold text-[#0D1B2A]">{title}</h3>
+      <span className="mb-3 text-[1.42rem] font-bold text-[#0D1B2A] block">{title}</span>
       <p className="text-[0.95rem] leading-[1.65] text-[#55677f]">{body}</p>
       <div className="mt-5 rounded-[11px] bg-[#f2f7fc] p-[16px_18px] text-[0.89rem] text-[#55677f]">
         <b className={cx("mb-[7px] block text-[9.5px] font-medium uppercase tracking-[0.11em]", isBrand ? "text-[#2c87cc]" : "text-[#4351E6]")}>
@@ -597,6 +605,7 @@ function TwoShapesSection() {
         <SectionHeading
           eyebrow="How the work usually arrives"
           title="Move the systems, or transform what's inside them."
+          headingLevel="h2"
           lede="Most organisations ask for the first and need both. Moving a server is an infrastructure exercise. Moving twenty years of documents is a data problem wearing an infrastructure costume — and it's the one that decides whether anyone's life actually improves."
         />
 
@@ -671,14 +680,14 @@ function BeforeAfterColumn({
   const Marker = isBefore ? X : Check;
   return (
     <div className="rounded-2xl border border-[#332434] bg-white/[0.03] p-[26px]">
-      <h4
+      <span
         className={cx(
-          "mb-4 text-[10px] font-medium uppercase tracking-[0.13em]",
+          "mb-4 text-[10px] font-medium uppercase tracking-[0.13em] block",
           isBefore ? "text-[#F09080]" : "text-[#7FD8B6]"
         )}
       >
         {heading}
-      </h4>
+      </span>
       <ul className="m-0 list-none p-0">
         {items.map((item, i) => (
           <li
@@ -717,6 +726,7 @@ function FeaturedCaseSection() {
           eyebrow="Proof · Kaneff Group"
           eyebrowVariant="brand2"
           title="7 TB of documents. Zero data loss. Delivered on time."
+          headingLevel="h2"
           lede="Kaneff Group, a real estate and property management business, held more than 7 TB of documents across on-premise servers — no consistent naming, large volumes of duplicates, thousands of scanned drawings and PDFs that no search could reach, and no retention rules behind any of it. We treated it as a data problem rather than a file move."
         />
 
@@ -735,7 +745,7 @@ function FeaturedCaseSection() {
         </div>
 
         <div ref={howRef} className="mt-7 rounded-2xl border border-[#332434] p-[24px_26px]">
-          <h4 className="mb-[10px] text-[1.06rem] font-bold text-white">Where the AI actually did the work</h4>
+          <span className="mb-[10px] text-[1.06rem] font-bold text-white block">Where the AI actually did the work</span>
           <p className="max-w-[78ch] text-[0.92rem] leading-[1.65] text-[#B4ABB6]">
             We built a classification engine specifically for Kaneff&rsquo;s document types. It read scanned files
             using text recognition to make them searchable, sorted every document by type and owning department,
@@ -810,7 +820,7 @@ function WhyCard({ n, title, body, em, tail }: (typeof WHY_CARDS)[number]) {
         className="absolute left-0 top-0 h-full w-[3px] origin-top scale-y-0 bg-[#2c87cc]"
       />
       <span ref={numberRef} className="mb-[14px] inline-block text-[11px] tracking-[0.1em] text-[#2c87cc]">{n}</span>
-      <h3 className="mb-[9px] text-[1.1rem] font-bold leading-[1.3] text-[#0D1B2A]">{title}</h3>
+      <span className="mb-[9px] text-[1.1rem] font-bold leading-[1.3] text-[#0D1B2A] block">{title}</span>
       <p className="text-[0.9rem] leading-[1.62] text-[#55677f]">
         {body}
         <em className="font-medium not-italic text-[#0D1B2A]">{em}</em>
@@ -828,6 +838,7 @@ function WhySection() {
         <SectionHeading
           eyebrow="Why Oxytal"
           title="Why us and not a specialist migration firm?"
+          headingLevel="h3"
           lede="A fair question, and worth putting to everyone on your shortlist. Here's our honest answer."
         />
         <div ref={gridRef} className="mt-11 grid grid-cols-1 gap-px overflow-hidden rounded-2xl border border-[#EDE5E9] bg-[#EDE5E9] sm:grid-cols-2 lg:grid-cols-3">
@@ -857,12 +868,13 @@ function StackSection() {
         <SectionHeading
           eyebrow="What we work with"
           title="Chosen for your estate, not for our convenience."
+          headingLevel="h3"
           lede="We choose based on where your systems already live, what your team can maintain, your security obligations and long-term cost — not technology trends."
         />
         <div ref={gridRef} className="mt-9 grid grid-cols-1 gap-x-[18px] gap-y-8 sm:grid-cols-2 lg:grid-cols-5">
           {STACK_COLUMNS.map((col) => (
             <div key={col.heading}>
-              <h4 className="mb-3 text-[10.5px] font-medium uppercase tracking-[0.12em] text-[#2c87cc]">{col.heading}</h4>
+              <span className="mb-3 text-[10.5px] font-medium uppercase tracking-[0.12em] text-[#2c87cc] block">{col.heading}</span>
               <ul className="m-0 list-none p-0">
                 {col.items.map((item) => (
                   <li key={item} className="border-b border-[#f2f7fc] py-[6px] text-[0.89rem] text-[#55677f]">
@@ -900,7 +912,7 @@ function EngagementCard({ k, title, body, meta, featured }: (typeof ENGAGEMENT_M
       )}
     >
       <span className="mb-3 text-[10px] uppercase tracking-[0.12em] text-[#2c87cc]">{k}</span>
-      <h3 className={cx("mb-[9px] text-[1.18rem] font-bold", featured ? "text-white" : "text-[#0D1B2A]")}>{title}</h3>
+      <span className={cx("mb-[9px] text-[1.18rem] font-bold block", featured ? "text-white" : "text-[#0D1B2A]")}>{title}</span>
       <p className={cx("flex-1 text-[0.9rem] leading-[1.62]", featured ? "text-[#B4ABB6]" : "text-[#55677f]")}>{body}</p>
       <div
         className={cx(
@@ -919,7 +931,7 @@ function EngagementSection() {
   return (
     <section className={SECTION}>
       <div className="container relative mx-auto px-5 md:px-10">
-        <SectionHeading eyebrow="How we engage" title="Three ways in. All start with understanding what you hold." />
+        <SectionHeading eyebrow="How we engage" title="Three ways in. All start with understanding what you hold." headingLevel="h3" />
         <div ref={gridRef} className="mt-11 grid grid-cols-1 gap-5 lg:grid-cols-3">
           {ENGAGEMENT_MODES.map((m) => (
             <EngagementCard key={m.title} {...m} />
@@ -963,7 +975,7 @@ function FaqSection() {
   return (
     <section className={SECTION}>
       <div className="container relative mx-auto px-5 md:px-10">
-        <SectionHeading eyebrow="Straight answers" title="What clients ask first." />
+        <SectionHeading eyebrow="Straight answers" title="What clients ask first." headingLevel="h4" />
         <div ref={listRef} className="mt-[30px] max-w-[880px]">
           {FAQS.map((f, i) => (
             <details key={f.q} open={i === 0} className="group border-b border-[#EDE5E9]">
@@ -995,7 +1007,7 @@ function RelatedCard({ k, title, body, href }: (typeof RELATED)[number]) {
   return (
     <Link href={href} ref={cardRef} className="block rounded-[14px] border border-[#EDE5E9] bg-white p-[22px]">
       <span className="text-[10px] uppercase tracking-[0.11em] text-[#8D8E9E]">{k}</span>
-      <h3 className="mt-[9px] mb-[6px] text-[1rem] font-bold text-[#0D1B2A]">{title}</h3>
+      <span className="mt-[9px] mb-[6px] text-[1rem] font-bold text-[#0D1B2A] block">{title}</span>
       <p className="text-[0.85rem] leading-[1.55] text-[#55677f]">{body}</p>
     </Link>
   );
@@ -1008,7 +1020,7 @@ function RelatedAndCtaSection() {
   return (
     <section className={SECTION}>
       <div className="container relative mx-auto px-5 md:px-10">
-        <SectionHeading eyebrow="Related services" title="A move rarely stands alone." />
+        <SectionHeading eyebrow="Related services" title="A move rarely stands alone." headingLevel="h4" />
         <div ref={relRef} className="mt-9 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {RELATED.map((r) => (
             <RelatedCard key={r.href} {...r} />
@@ -1021,9 +1033,9 @@ function RelatedAndCtaSection() {
         >
           <div className="pointer-events-none absolute -right-[14%] -bottom-[52%] h-[620px] w-[620px] rounded-full bg-[radial-gradient(circle,rgba(125,185,239,.30),transparent_66%)]" />
           <div className="relative">
-            <h2 className="mb-[14px] text-[clamp(1.9rem,3.6vw,2.9rem)] font-bold leading-[1.05] tracking-[-0.03em] text-white">
+            <h4 className="mb-[14px] text-[clamp(1.9rem,3.6vw,2.9rem)] font-bold leading-[1.05] tracking-[-0.03em] text-white">
               Start with what you&rsquo;re actually holding.
-            </h2>
+            </h4>
             <p className="max-w-[48ch] text-[#B4ABB6]">
               Sixty minutes with the people who did the Kaneff migration. Bring the storage bill that keeps growing,
               the audit you&rsquo;d rather not face, or the programme that stopped halfway. We&rsquo;ll tell you
