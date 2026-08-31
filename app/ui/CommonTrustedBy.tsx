@@ -445,23 +445,37 @@ export default function CommonTrustedBy({
           display: flex;
           align-items: center;
           justify-content: center;
-          gap: 8px;
         }
         .trusted-by-swiper .swiper-pagination-bullet {
-          width: 8px;
-          height: 8px;
-          margin: 0 !important;
-          opacity: 1;
-          border-radius: 999px;
-          background: #d9dee5;
-          transition:
-            width 0.3s ease,
-            background 0.3s ease;
-        }
-        .trusted-by-swiper .swiper-pagination-bullet-active {
-          width: 24px;
-          background: #0092b8;
-        }
+  width: 24px;
+  height: 24px;
+  margin: 0 !important;
+  padding: 0;
+  opacity: 1;
+  border-radius: 999px;
+  background: transparent;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+
+.trusted-by-swiper .swiper-pagination-bullet::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: #d9dee5;
+  transition:
+    width 0.3s ease,
+    background 0.3s ease;
+}
+
+.trusted-by-swiper .swiper-pagination-bullet-active::before {
+  width: 24px;
+  height: 8px;
+  background: #0092b8;
+}
       `}</style>
     </section>
   );
