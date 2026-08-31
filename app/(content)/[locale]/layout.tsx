@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "../../globals.css";
 import type { ReactNode } from "react";
 import { Poppins } from "next/font/google";
+import { SITE_URL } from "@/app/lib/siteUrl";
 
 export const poppins = Poppins({
   subsets: ["latin"],
@@ -21,7 +22,7 @@ export const metadata: Metadata = {
 
   applicationName: APP_NAME,
 
-  metadataBase: new URL("https://www.oxytal.com"),
+  metadataBase: new URL(SITE_URL),
 
   appleWebApp: {
     capable: true,

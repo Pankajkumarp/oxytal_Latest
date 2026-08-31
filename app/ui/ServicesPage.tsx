@@ -10,6 +10,7 @@ import { cx } from "@/app/lib/cx";
 import { getAssetUrl } from "../lib/contentfulAsset";
 import { resolveTheme } from "../lib/theme";
 import { resolveHeadingLevel } from "../lib/headingLevel";
+import { SITE_URL } from "../lib/siteUrl";
 import DynamicHeading from "./DynamicHeading";
 import {
   ComposableElementSkeleton,
@@ -238,7 +239,7 @@ function contentDetailToService(
         : { type: "empty", text: "Case study in preparation" },
     ctaHref:
       (primaryLink && resolveLinkHref(primaryLink)) ??
-      "https://www.oxytal.com/contact",
+      `${SITE_URL}/contact`,
   };
 }
 

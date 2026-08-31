@@ -6,6 +6,7 @@ import { cx } from "@/app/lib/cx";
 import { getAssetUrl } from "../lib/contentfulAsset";
 import { resolveTheme } from "../lib/theme";
 import { resolveHeadingLevel } from "../lib/headingLevel";
+import { SITE_URL } from "../lib/siteUrl";
 import DynamicHeading from "./DynamicHeading";
 import ThemePattern from "./ThemePattern";
 import {
@@ -136,7 +137,7 @@ export default function Home404({ entry }: Props) {
     : DEFAULT_PRIMARY_LABEL;
   const secondaryHref =
     (secondaryLink && resolveLinkHref(secondaryLink)) ??
-    "https://www.oxytal.com/contact";
+    `${SITE_URL}/contact`;
   const secondaryLabel = secondaryLink?.fields.label;
 
   // Resolves `themeColor` (e.g. "dark", "blue", "emerald" — see

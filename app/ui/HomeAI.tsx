@@ -11,6 +11,7 @@ import { cx } from "@/app/lib/cx";
 import { getAssetUrl } from "../lib/contentfulAsset";
 import { resolveTheme } from "../lib/theme";
 import { resolveHeadingLevel } from "../lib/headingLevel";
+import { SITE_URL } from "../lib/siteUrl";
 import DynamicHeading from "./DynamicHeading";
 import ThemePattern from "./ThemePattern";
 import AIPipelineDemo from "./AIPipelineDemo";
@@ -192,7 +193,7 @@ export default function HomeAI({ entry }: Props) {
   const secondaryLabel = secondaryLink?.fields.label;
   const primaryHref =
     (primaryLink && resolveLinkHref(primaryLink)) ??
-    "https://www.oxytal.com/contact";
+    `${SITE_URL}/contact`;
   const primaryLabel = primaryLink?.fields.label;
 
   // `backgroundImage` links to a `dataImage` *entry*, not a raw asset —

@@ -1,4 +1,5 @@
 import type { MetadataRoute } from "next";
+import { SITE_URL } from "./lib/siteUrl";
 
 /**
  * Placed at the true top-level `app/` (same reasoning as `sitemap.ts` and
@@ -18,6 +19,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: "/",
       disallow: ["/api/", "/page-not-found"],
     },
-    sitemap: "https://www.oxytal.com/sitemap.xml",
+    sitemap: `${SITE_URL}/sitemap.xml`,
   };
 }

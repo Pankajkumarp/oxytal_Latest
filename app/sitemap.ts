@@ -1,13 +1,6 @@
 import type { MetadataRoute } from "next";
 import { getSitemapCaseStudies, getSitemapPages } from "./lib/contentEntry";
-
-/**
- * Same production origin `app/(content)/[locale]/layout.tsx`'s
- * `metadataBase` and the slug page's `generateMetadata` hardcode — every
- * URL emitted here has to be absolute, so it's repeated rather than
- * imported (none of those other spots export it as a constant).
- */
-const BASE_URL = "https://www.oxytal.com";
+import { SITE_URL as BASE_URL } from "./lib/siteUrl";
 
 /**
  * Placed at the true top-level `app/` (a sibling of `icon.tsx`/

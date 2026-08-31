@@ -7,6 +7,7 @@ import {
   getPageBySlug,
 } from "../../../lib/contentEntry";
 import { getAssetUrl } from "../../../lib/contentfulAsset";
+import { SITE_URL } from "../../../lib/siteUrl";
 import Navbar from "@/app/ui/Navbar";
 import PageBody from "@/app/ui/PageBody";
 import Footer from "@/app/ui/Footer";
@@ -87,7 +88,7 @@ export async function generateMetadata({
         title: page.fields.metaTitle ?? page.fields.systemTitle,
         description: page.fields.metaDescription,
         siteName: "Oxytal",
-        url: `https://www.oxytal.com/${path}`,
+        url: `${SITE_URL}/${path}`,
         images: imageUrl ? [{ url: imageUrl }] : [],
       },
 
@@ -126,7 +127,7 @@ export async function generateMetadata({
       title,
       description,
       siteName: "Oxytal",
-      url: `https://www.oxytal.com/${path}`,
+      url: `${SITE_URL}/${path}`,
       images: imageUrl ? [{ url: imageUrl }] : [],
     },
     twitter: {

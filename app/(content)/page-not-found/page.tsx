@@ -3,6 +3,7 @@ import type { ReactElement } from 'react';
 import type { Entry, EntrySkeletonType } from "contentful";
 import { getFooter, getNavigation, getPageBySlug } from "@/app/lib/contentEntry";
 import { getAssetUrl } from "@/app/lib/contentfulAsset";
+import { SITE_URL } from "@/app/lib/siteUrl";
 import Navbar from "@/app/ui/Navbar";
 import PageBody from "@/app/ui/PageBody";
 import Footer from "@/app/ui/Footer";
@@ -107,7 +108,7 @@ export async function generateMetadata(): Promise<Metadata> {
       title,
       description,
       siteName: "Oxytal",
-      url: "https://www.oxytal.com/page-not-found",
+      url: `${SITE_URL}/page-not-found`,
       images: imageUrl ? [{ url: imageUrl }] : [],
     },
     twitter: {
