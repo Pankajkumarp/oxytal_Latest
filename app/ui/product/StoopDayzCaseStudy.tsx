@@ -7,6 +7,8 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SplitText } from "gsap/SplitText";
 import { cx } from "@/app/lib/cx";
 import { prefersReducedMotion, useSplitReveal, useFadeUp, useListStagger } from "./useReveal";
+import type { HeadingLevel } from "@/app/lib/headingLevel";
+import DynamicHeading from "@/app/ui/DynamicHeading";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger, SplitText);
@@ -253,6 +255,7 @@ function SectionHead({
   lede,
   dark,
   narrow = true,
+  headingLevel = "h2",
 }: {
   eyebrow: string;
   eyebrowColor?: string;
@@ -260,13 +263,16 @@ function SectionHead({
   lede?: ReactNode;
   dark?: boolean;
   narrow?: boolean;
+  /** Which heading tag to render — `h1`–`h6` (see app/lib/headingLevel.ts). Defaults to `h2`, this component's original fixed level, so every existing call site renders unchanged. */
+  headingLevel?: HeadingLevel;
 }) {
   const titleRef = useSplitReveal<HTMLHeadingElement>();
 
   return (
     <div className={narrow ? "max-w-[620px]" : undefined}>
       <Eyebrow color={eyebrowColor}>{eyebrow}</Eyebrow>
-      <h2
+      <DynamicHeading
+        level={headingLevel}
         ref={titleRef}
         className={cx(
           "max-w-[20ch] text-[clamp(28px,3.2vw,40px)] leading-[1.2] font-extrabold tracking-[-0.03em]",
@@ -274,7 +280,7 @@ function SectionHead({
         )}
       >
         {title}
-      </h2>
+      </DynamicHeading>
       {lede && (
         <p className={cx("mt-4 text-[16px] leading-[1.8]", dark ? "text-[#AEB5C2]" : "text-[#5C6270]")}>{lede}</p>
       )}
@@ -521,7 +527,7 @@ function ChallengeSection() {
   return (
     <section className="bg-[#FDFBF7] px-5 py-14 sm:px-8 sm:py-16 lg:py-[104px]">
       <div ref={bodyRef} className="mx-auto max-w-5xl">
-        <SectionHead eyebrow="The challenge" title="Selling &quot;no plans required&quot; without pushing." narrow={false} />
+        <SectionHead eyebrow="The challenge" title="Selling &quot;no plans required&quot; without pushing." headingLevel="h2" narrow={false} />
         <p className="mt-5 mb-4.5 text-[clamp(1.05rem,1.6vw,1.2rem)] leading-[1.8] font-normal text-[#15171C]">
           Stoop Dayz has a genuine point of view. The world is obsessed with being busy — more plans, more
           pressure, more noise — and the best times usually started with none of it. Just people on a stoop and a
@@ -564,6 +570,7 @@ function WhyItWasHardSection() {
           <SectionHead
             eyebrow="Why it was hard"
             title="Three problems hiding behind a simple brief."
+            headingLevel="h2"
             lede="&quot;Build a site for a hard soda brand&quot; is a two-line brief. These are the parts that actually took the thinking."
           />
         </div>
@@ -601,6 +608,7 @@ function WhatWeBuiltSection() {
           <SectionHead
             eyebrow="What we built"
             title="A site that gets out of the way."
+            headingLevel="h2"
             lede="Home, Flavors, Where to Buy, Subscribe, Contact. Each one does a job, and none of them chase anybody."
             narrow={false}
           />
@@ -697,7 +705,7 @@ function DetailThatMatteredSection() {
 
       <div className="relative mx-auto max-w-7xl">
         <div ref={introRef} className="max-w-[760px]">
-          <SectionHead eyebrow="The detail that mattered" eyebrowColor="#F2895F" title="Every pattern we didn't use." dark />
+          <SectionHead eyebrow="The detail that mattered" eyebrowColor="#F2895F" headingLevel="h3" title="Every pattern we didn't use." dark />
           <p className="mt-4 mb-4.5 text-[16px] leading-[1.8] text-[#AEB5C2]">
             There is a standard set of moves for a consumer brand site, and they&apos;re standard because in
             aggregate they work. An email dialogue after a few seconds. A sticky banner. A second banner when the
@@ -746,6 +754,7 @@ function HowWeWorkedSection() {
           <SectionHead
             eyebrow="How we worked"
             title="The tone was a requirement, not a finish."
+            headingLevel="h3"
             lede="On most projects, brand voice is applied to a structure that already exists. Here it had to shape the structure, which meant settling it before anything was designed."
             narrow={false}
           />
@@ -796,7 +805,7 @@ function StillOursSection() {
           />
 
           <div className="relative">
-            <SectionHead eyebrow="What happened next" eyebrowColor="#F2895F" title="Restraint is easy to erode." dark narrow={false} />
+            <SectionHead eyebrow="What happened next" eyebrowColor="#F2895F" headingLevel="h3" title="Restraint is easy to erode." dark narrow={false} />
             <p className="mt-4 mb-4 text-[16px] leading-[1.8] text-[#AEB5C2]">
               A decision not to interrupt people is only as durable as the team defending it. Six months after
               launch, someone will suggest a pop-up because a number needs moving — and if nobody remembers why it
@@ -838,6 +847,7 @@ function TechnologySection() {
           <SectionHead
             eyebrow="Technology"
             title="Fast on a phone, editable in an afternoon."
+            headingLevel="h4"
             lede="A brand site is judged on two things: whether it appears before someone's thumb moves on, and whether the marketing team can change it without booking developer time."
             narrow={false}
           />
@@ -876,7 +886,7 @@ function RelatedSection() {
     <section className="bg-[#FDFBF7] px-5 py-14 sm:px-8 sm:py-16">
       <div className="mx-auto max-w-7xl">
         <div ref={introRef}>
-          <SectionHead eyebrow="More of our work" title="Related case studies." narrow={false} />
+          <SectionHead eyebrow="More of our work" title="Related case studies." headingLevel="h4" narrow={false} />
         </div>
 
         <div ref={gridRef} className="mt-9 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">

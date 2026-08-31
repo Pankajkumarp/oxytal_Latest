@@ -7,6 +7,8 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SplitText } from "gsap/SplitText";
 import { cx } from "@/app/lib/cx";
 import { prefersReducedMotion, useSplitReveal, useFadeUp, useListStagger } from "./useReveal";
+import type { HeadingLevel } from "@/app/lib/headingLevel";
+import DynamicHeading from "@/app/ui/DynamicHeading";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger, SplitText);
@@ -266,6 +268,7 @@ function SectionHead({
   lede,
   dark,
   narrow = true,
+  headingLevel = "h2",
 }: {
   eyebrow: string;
   eyebrowColor?: string;
@@ -273,13 +276,16 @@ function SectionHead({
   lede?: ReactNode;
   dark?: boolean;
   narrow?: boolean;
+  /** Which heading tag to render — `h1`–`h6` (see app/lib/headingLevel.ts). Defaults to `h2`, this component's original fixed level, so every existing call site renders unchanged. */
+  headingLevel?: HeadingLevel;
 }) {
   const titleRef = useSplitReveal<HTMLHeadingElement>();
 
   return (
     <div className={narrow ? "max-w-[620px]" : undefined}>
       <Eyebrow color={eyebrowColor}>{eyebrow}</Eyebrow>
-      <h2
+      <DynamicHeading
+        level={headingLevel}
         ref={titleRef}
         className={cx(
           "max-w-[20ch] text-[clamp(28px,3.2vw,40px)] leading-[1.2] font-extrabold tracking-[-0.03em]",
@@ -287,7 +293,7 @@ function SectionHead({
         )}
       >
         {title}
-      </h2>
+      </DynamicHeading>
       {lede && (
         <p className={cx("mt-4 text-[16px] leading-[1.8]", dark ? "text-[#C4B2A0]" : "text-[#6B5C4E]")}>{lede}</p>
       )}
@@ -534,7 +540,7 @@ function ChallengeSection() {
   return (
     <section className="bg-[#FDFBF8] px-5 py-14 sm:px-8 sm:py-16 lg:py-[104px]">
       <div ref={bodyRef} className="mx-auto max-w-5xl">
-        <SectionHead eyebrow="The challenge" title="An unfamiliar product, and a doubt the site can't hear." narrow={false} />
+        <SectionHead eyebrow="The challenge" title="An unfamiliar product, and a doubt the site can't hear." headingLevel="h2" narrow={false} />
         <p className="mt-5 mb-4.5 text-[clamp(1.05rem,1.6vw,1.2rem)] leading-[1.8] font-normal text-[#1E140C]">
           Taffer&apos;s began in a Georgia tavern. Someone took an Old Fashioned, worked browned butter into the
           bourbon to see whether it tasted better, and it did. That&apos;s a good story — but &ldquo;browned butter
@@ -577,6 +583,7 @@ function WhyItWasHardSection() {
           <SectionHead
             eyebrow="Why it was hard"
             title="Three constraints, none of them visual."
+            headingLevel="h2"
             lede="The design work people notice is the photography and the type. The work that decided whether this succeeded was elsewhere."
           />
         </div>
@@ -614,6 +621,7 @@ function WhatWeBuiltSection() {
           <SectionHead
             eyebrow="What we built"
             title="Four answers to the same hesitation."
+            headingLevel="h3"
             lede="Each part of the site removes one specific reason someone doesn't buy. Nothing on it is there because brand sites usually have one."
             narrow={false}
           />
@@ -708,6 +716,7 @@ function DetailThatMatteredSection() {
           <SectionHead
             eyebrow="The detail that mattered"
             eyebrowColor="#D9A05B"
+            headingLevel="h3"
             title="Designing the rules you can't negotiate."
             dark
           />
@@ -757,6 +766,7 @@ function HowWeWorkedSection() {
           <SectionHead
             eyebrow="How we worked"
             title="Designed and built by one team, then kept improving."
+            headingLevel="h3"
             lede="Design and engineering worked together throughout, which is why the site that launched matches the one that was drawn — and why we could keep changing it afterwards without the structure fighting back."
             narrow={false}
           />
@@ -807,7 +817,7 @@ function StillOursSection() {
           />
 
           <div className="relative">
-            <SectionHead eyebrow="What happened next" eyebrowColor="#D9A05B" title="We didn't hand over the keys." dark narrow={false} />
+            <SectionHead eyebrow="What happened next" eyebrowColor="#D9A05B" headingLevel="h4" title="We didn't hand over the keys." dark narrow={false} />
             <p className="mt-4 mb-4 text-[16px] leading-[1.8] text-[#C4B2A0]">
               Launching a brand site is the easy half. The half that decides whether it keeps earning is what
               happens over the following years — new awards, new recipes, seasonal campaigns, privacy rules that
@@ -849,6 +859,7 @@ function TechnologySection() {
           <SectionHead
             eyebrow="Technology"
             title="Fast to load, easy to change."
+            headingLevel="h4"
             lede="A brand site lives or dies on two things: how quickly it appears on a phone, and how easily the marketing team can change it without calling us. Everything here serves one of those."
             narrow={false}
           />
@@ -887,7 +898,7 @@ function RelatedSection() {
     <section className="bg-[#FDFBF8] px-5 py-14 sm:px-8 sm:py-16">
       <div className="mx-auto max-w-7xl">
         <div ref={introRef}>
-          <SectionHead eyebrow="More of our work" title="Related case studies." narrow={false} />
+          <SectionHead eyebrow="More of our work" title="Related case studies." headingLevel="h4" narrow={false} />
         </div>
 
         <div ref={gridRef} className="mt-9 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">

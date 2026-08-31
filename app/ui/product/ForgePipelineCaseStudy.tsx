@@ -8,6 +8,8 @@ import { SplitText } from "gsap/SplitText";
 import { cx } from "@/app/lib/cx";
 import { prefersReducedMotion, useSplitReveal, useListStagger } from "./useReveal";
 import CountUpNumber from "./CountUpNumber";
+import type { HeadingLevel } from "@/app/lib/headingLevel";
+import DynamicHeading from "@/app/ui/DynamicHeading";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger, SplitText);
@@ -285,12 +287,15 @@ function SectionIntro({
   sub,
   dark,
   titleSizeClass = "text-[clamp(28px,4vw,44px)]",
+  headingLevel = "h2",
 }: {
   label: string;
   title: ReactNode;
   sub?: string;
   dark?: boolean;
   titleSizeClass?: string;
+  /** Which heading tag to render — `h1`–`h6` (see app/lib/headingLevel.ts). Defaults to `h2`, this component's original fixed level, so every existing call site renders unchanged. */
+  headingLevel?: HeadingLevel;
 }) {
   const titleRef = useSplitReveal<HTMLHeadingElement>();
 
@@ -305,7 +310,8 @@ function SectionIntro({
         <span aria-hidden className="h-px w-5 bg-[#6366F1]" />
         {label}
       </div>
-      <h2
+      <DynamicHeading
+        level={headingLevel}
         ref={titleRef}
         className={cx(
           titleSizeClass,
@@ -314,7 +320,7 @@ function SectionIntro({
         )}
       >
         {title}
-      </h2>
+      </DynamicHeading>
       {sub && <p className={cx("max-w-[540px] text-[17px] leading-[1.7]", dark ? "text-[rgba(248,248,255,0.5)]" : "text-[#555555]")}>{sub}</p>}
     </div>
   );
@@ -682,6 +688,7 @@ function FeaturesSection() {
               that care about quality.
             </>
           }
+          headingLevel="h2"
           sub="Not just fast. Auditable, controllable, and transparent at every step of the way."
         />
         <div ref={gridRef} className="mt-14 grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -731,6 +738,7 @@ function PipelineSection() {
               Zero handoff delays.
             </>
           }
+          headingLevel="h2"
           sub="Click any agent to explore what it does and how it fits into the flow."
           dark
         />
@@ -791,6 +799,7 @@ function ApproachSection() {
         <SectionIntro
           label="Our approach"
           title="How we built ForgePipeline."
+          headingLevel="h3"
           sub="From whiteboard to working pipeline in weeks, using the same agile methodology we apply across all Oxytal products."
         />
         <div ref={stepsRef} className="relative mt-14 grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
@@ -832,6 +841,7 @@ function IntegrationsSection() {
               your team already uses.
             </>
           }
+          headingLevel="h3"
           sub="ForgePipeline connects to your existing ecosystem out of the box — no re-tooling required."
           dark
         />
@@ -879,6 +889,7 @@ function TechSection() {
               production-grade stack.
             </>
           }
+          headingLevel="h3"
         />
         <div ref={gridRef} className="mt-12 grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5">
           {TECH_CARDS.map((tech) => (
@@ -906,7 +917,7 @@ function ResultsSection() {
   return (
     <section className="relative z-10 bg-[#06061A] px-6 py-24">
       <div className="mx-auto max-w-6xl">
-        <SectionIntro label="Results" title="Proven in production." sub="Real numbers from real pipeline runs on the live platform." dark />
+        <SectionIntro label="Results" headingLevel="h4" title="Proven in production." sub="Real numbers from real pipeline runs on the live platform." dark />
         <div ref={gridRef} className="mt-12 grid grid-cols-1 gap-5 md:grid-cols-3">
           {RESULTS.map((result) => (
             <div key={result.label} className="relative overflow-hidden rounded-2xl border border-[rgba(255,255,255,0.06)] bg-[rgba(255,255,255,0.03)] p-7">
@@ -936,11 +947,11 @@ function CtaSection() {
     <section className="relative z-10 overflow-hidden bg-[linear-gradient(135deg,#06061A_0%,#0D0D28_50%,#06061A_100%)] px-6 py-24">
       <div aria-hidden className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_60%_60%_at_50%_50%,rgba(99,102,241,0.12),transparent_70%)]" />
       <div className="relative z-10 mx-auto max-w-[700px] text-center">
-        <h2 ref={titleRef} className="mb-4 text-[clamp(32px,5vw,52px)] leading-[1.1] font-black tracking-[-2px] text-white">
+        <h4 ref={titleRef} className="mb-4 text-[clamp(32px,5vw,52px)] leading-[1.1] font-black tracking-[-2px] text-white">
           Ready to automate
           <br />
           your SDLC?
-        </h2>
+        </h4>
         <p className="mb-9 text-[17px] leading-[1.7] text-[rgba(248,248,255,0.5)]">
           ForgePipeline is live and accepting early access requests. Join engineering teams already
           cutting coordination time by 40%.
@@ -975,7 +986,7 @@ function ExploreSection() {
     <section className="relative z-10 bg-[#F8F8FC] px-6 py-20">
       <div className="mx-auto max-w-6xl">
         <div className="mb-2.5 text-[12px] font-semibold tracking-[0.1em] text-[#6366F1] uppercase">More from Oxytal</div>
-        <h2 className="mb-2 text-[28px] font-extrabold tracking-[-1px] text-[#111111]">Explore More Work</h2>
+        <h4 className="mb-2 text-[28px] font-extrabold tracking-[-1px] text-[#111111]">Explore More Work</h4>
         <p className="mb-10 text-[15px] text-[#666666]">
           See how we&apos;ve helped ambitious brands and enterprises build next-generation digital
           products.

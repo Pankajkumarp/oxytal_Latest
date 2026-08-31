@@ -158,7 +158,7 @@ export default async function Page({ params }: Props) {
       <>
         <SkipToContent />
         <Navbar entry={navigation} />
-        <main id="main-content">
+        <main id="main-content" suppressHydrationWarning >
           <PageBody blocks={page.fields.body} />
         </main>
         <Footer entry={footer} />

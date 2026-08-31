@@ -7,6 +7,8 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SplitText } from "gsap/SplitText";
 import { cx } from "@/app/lib/cx";
 import { prefersReducedMotion, useSplitReveal, useFadeUp, useListStagger } from "./useReveal";
+import type { HeadingLevel } from "@/app/lib/headingLevel";
+import DynamicHeading from "@/app/ui/DynamicHeading";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger, SplitText);
@@ -260,6 +262,7 @@ function SectionHead({
   lede,
   dark,
   narrow = true,
+  headingLevel = "h2",
 }: {
   eyebrow: string;
   eyebrowColor?: string;
@@ -267,13 +270,16 @@ function SectionHead({
   lede?: ReactNode;
   dark?: boolean;
   narrow?: boolean;
+  /** Which heading tag to render — `h1`–`h6` (see app/lib/headingLevel.ts). Defaults to `h2`, this component's original fixed level, so every existing call site renders unchanged. */
+  headingLevel?: HeadingLevel;
 }) {
   const titleRef = useSplitReveal<HTMLHeadingElement>();
 
   return (
     <div className={narrow ? "max-w-[620px]" : undefined}>
       <Eyebrow color={eyebrowColor}>{eyebrow}</Eyebrow>
-      <h2
+      <DynamicHeading
+        level={headingLevel}
         ref={titleRef}
         className={cx(
           "max-w-[20ch] text-[clamp(28px,3.2vw,40px)] leading-[1.2] font-extrabold tracking-[-0.03em]",
@@ -281,7 +287,7 @@ function SectionHead({
         )}
       >
         {title}
-      </h2>
+      </DynamicHeading>
       {lede && (
         <p className={cx("mt-4 text-[16px] leading-[1.8]", dark ? "text-[#A9BACE]" : "text-[#546A7E]")}>{lede}</p>
       )}
@@ -527,7 +533,7 @@ function ChallengeSection() {
   return (
     <section className="bg-[#FBFDFE] px-5 py-14 sm:px-8 sm:py-16 lg:py-[104px]">
       <div ref={bodyRef} className="mx-auto max-w-5xl">
-        <SectionHead eyebrow="The challenge" title="Twenty years of documents, and no map." narrow={false} />
+        <SectionHead eyebrow="The challenge" title="Twenty years of documents, and no map." headingLevel="h2" narrow={false} />
         <p className="mt-5 mb-4.5 text-[clamp(1.05rem,1.6vw,1.2rem)] leading-[1.8] font-normal text-[#0B1B2B]">
           Kaneff Group runs real estate and property management. Leases, drawings, contracts, inspections,
           correspondence — the business runs on paperwork, and two decades of it had accumulated across
@@ -570,6 +576,7 @@ function WhyItWasHardSection() {
           <SectionHead
             eyebrow="Why it was hard"
             title="Three things made this more than a file move."
+            headingLevel="h2"
             lede="Each one would have derailed the programme if it had been treated as a detail to sort out later."
           />
         </div>
@@ -750,6 +757,7 @@ function WhatWeBuiltSection() {
           <SectionHead
             eyebrow="What we built"
             title="A classification engine made for Kaneff's documents."
+            headingLevel="h2"
             lede="Not an off-the-shelf migration tool. We built software that understood what a Kaneff lease, drawing or inspection report looks like — because generic classification on twenty years of specific paperwork produces confident nonsense."
             narrow={false}
           />
@@ -821,7 +829,7 @@ function DetailThatMatteredSection() {
 
       <div className="relative mx-auto max-w-7xl">
         <div ref={introRef} className="max-w-[760px]">
-          <SectionHead eyebrow="The detail that mattered" eyebrowColor="#7FC4F3" title="We deleted before we moved." dark />
+          <SectionHead eyebrow="The detail that mattered" eyebrowColor="#7FC4F3" headingLevel="h3" title="We deleted before we moved." dark />
           <p className="mt-4 mb-4.5 text-[16px] leading-[1.8] text-[#A9BACE]">
             Almost every migration copies everything first and promises to tidy up afterwards. It never happens —
             once the business is running on the new platform, nobody gets budget to go back and sort out files
@@ -867,7 +875,7 @@ function BeforeAfterSection() {
     <section className="bg-[#FBFDFE] px-5 py-14 sm:px-8 sm:py-16">
       <div className="mx-auto max-w-7xl">
         <div ref={introRef}>
-          <SectionHead eyebrow="What changed" title="The same documents. A different organisation." narrow={false} />
+          <SectionHead eyebrow="What changed" title="The same documents. A different organisation."  headingLevel="h3" narrow={false} />
         </div>
 
         <div
@@ -940,6 +948,7 @@ function HowWeWorkedSection() {
           <SectionHead
             eyebrow="How we worked"
             title="Department by department, proven each time."
+            headingLevel="h3"
             lede="No single cutover, no batch move run overnight and hoped for. Each phase was verified before the next one started, and the old environment stayed available throughout."
             narrow={false}
           />
@@ -993,6 +1002,7 @@ function HandoverSection() {
             <SectionHead
               eyebrow="What happened next"
               eyebrowColor="#7FC4F3"
+              headingLevel="h4"
               title="The best outcome was that they didn't need us afterwards."
               dark
               narrow={false}
@@ -1039,6 +1049,7 @@ function TechnologySection() {
           <SectionHead
             eyebrow="Technology"
             title="Conventional platform, custom intelligence."
+            headingLevel="h4"
             lede="The destination was deliberately mainstream — Kaneff's team already knew Microsoft, and a document platform has to be maintainable for a decade. The custom work went where it earned its place: understanding the documents."
             narrow={false}
           />
@@ -1077,7 +1088,7 @@ function RelatedSection() {
     <section className="bg-[#FBFDFE] px-5 py-14 sm:px-8 sm:py-16">
       <div className="mx-auto max-w-7xl">
         <div ref={introRef}>
-          <SectionHead eyebrow="More of our work" title="Related case studies." narrow={false} />
+          <SectionHead eyebrow="More of our work" title="Related case studies." headingLevel="h4" narrow={false} />
         </div>
 
         <div ref={gridRef} className="mt-9 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">

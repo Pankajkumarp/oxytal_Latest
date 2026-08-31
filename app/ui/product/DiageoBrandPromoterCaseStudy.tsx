@@ -7,6 +7,8 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SplitText } from "gsap/SplitText";
 import { cx } from "@/app/lib/cx";
 import { prefersReducedMotion, useSplitReveal, useFadeUp, useListStagger } from "./useReveal";
+import type { HeadingLevel } from "@/app/lib/headingLevel";
+import DynamicHeading from "@/app/ui/DynamicHeading";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger, SplitText);
@@ -272,6 +274,7 @@ function SectionHead({
   lede,
   dark,
   narrow = true,
+  headingLevel = "h2",
 }: {
   eyebrow: string;
   eyebrowColor?: string;
@@ -279,13 +282,16 @@ function SectionHead({
   lede?: ReactNode;
   dark?: boolean;
   narrow?: boolean;
+  /** Which heading tag to render — `h1`–`h6` (see app/lib/headingLevel.ts). Defaults to `h2`, this component's original fixed level, so every existing call site renders unchanged. */
+  headingLevel?: HeadingLevel;
 }) {
   const titleRef = useSplitReveal<HTMLHeadingElement>();
 
   return (
     <div className={narrow ? "max-w-[620px]" : undefined}>
       <Eyebrow color={eyebrowColor}>{eyebrow}</Eyebrow>
-      <h2
+      <DynamicHeading
+        level={headingLevel}
         ref={titleRef}
         className={cx(
           "max-w-[20ch] text-[clamp(28px,3.2vw,40px)] leading-[1.2] font-extrabold tracking-[-0.03em]",
@@ -293,7 +299,7 @@ function SectionHead({
         )}
       >
         {title}
-      </h2>
+      </DynamicHeading>
       {lede && (
         <p className={cx("mt-4 text-[16px] leading-[1.8]", dark ? "text-[#A9BACE]" : "text-[#546A7E]")}>{lede}</p>
       )}
@@ -543,7 +549,7 @@ function ChallengeSection() {
   return (
     <section className="bg-[#FBFDFE] px-5 py-14 sm:px-8 sm:py-16 lg:py-[104px]">
       <div ref={bodyRef} className="mx-auto max-w-5xl">
-        <SectionHead eyebrow="The challenge" title="Accountability without an employment relationship." narrow={false} />
+        <SectionHead eyebrow="The challenge" title="Accountability without an employment relationship." headingLevel="h2" narrow={false} />
         <p className="mt-5 mb-4.5 text-[clamp(1.05rem,1.6vw,1.2rem)] leading-[1.8] font-normal text-[#0B1B2B]">
           Brand promoters are the people pouring the drink, running the tasting, staffing the stand. To a customer
           at an event they <em>are</em> the brand. But they&apos;re employed by third-party agencies, often for a
@@ -587,6 +593,7 @@ function WhyItWasHardSection() {
           <SectionHead
             eyebrow="Why it was hard"
             title="Three constraints shaped every decision."
+            headingLevel="h2"
             lede="None of them are visible in a screenshot, and all three would have sunk the project if they'd been treated as details."
           />
         </div>
@@ -624,6 +631,7 @@ function WhatWeBuiltSection() {
           <SectionHead
             eyebrow="What we built"
             title="A training platform and the admin system behind it."
+            headingLevel="h2"
             lede="Two halves that had to work as one: the experience the promoter sees, and the tooling the market teams use to run it."
           />
         </div>
@@ -727,6 +735,7 @@ function DetailThatMatteredSection() {
           <SectionHead
             eyebrow="The detail that mattered"
             eyebrowColor="#E08A2C"
+            headingLevel="h3"
             title="Designing the part of a product you hope nobody needs."
             dark
           />
@@ -777,6 +786,7 @@ function HowWeWorkedSection() {
           <SectionHead
             eyebrow="How we worked"
             title="Built with the brand team, not for them."
+            headingLevel="h3"
             lede="Corporate Relations knew the standard inside out. We knew how to make it reach people who'd never seen a Diageo system. The work happened in the overlap."
             narrow={false}
           />
@@ -827,7 +837,7 @@ function StillRunningSection() {
           />
 
           <div className="relative">
-            <SectionHead eyebrow="In production" eyebrowColor="#16B9E8" title="Launched in 2022. Still ours." dark narrow={false} />
+            <SectionHead eyebrow="In production" eyebrowColor="#16B9E8" headingLevel="h3" title="Launched in 2022. Still ours." dark narrow={false} />
             <p className="mt-4 text-[16px] leading-[1.8] text-[#A9BACE]">
               Plenty of agencies could have built this. The measure we&apos;d rather be judged on is that it has
               been running continuously ever since, supported by the same team, absorbing new markets and content
@@ -870,6 +880,7 @@ function TechnologySection() {
           <SectionHead
             eyebrow="Technology"
             title="Chosen for a decade, not a launch."
+            headingLevel="h4"
             lede="A platform that has to be maintained across many markets for years rewards conventional, well-understood choices over interesting ones."
             narrow={false}
           />
@@ -914,7 +925,7 @@ function RelatedSection() {
     <section className="bg-[#FBFDFE] px-5 py-14 sm:px-8 sm:py-16">
       <div className="mx-auto max-w-7xl">
         <div ref={introRef}>
-          <SectionHead eyebrow="More of our work" title="Related case studies." narrow={false} />
+          <SectionHead eyebrow="More of our work" title="Related case studies." headingLevel="h4" narrow={false} />
         </div>
 
         <div ref={gridRef} className="mt-9 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">

@@ -7,6 +7,8 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SplitText } from "gsap/SplitText";
 import { cx } from "@/app/lib/cx";
 import { prefersReducedMotion, useSplitReveal, useFadeUp, useListStagger } from "./useReveal";
+import type { HeadingLevel } from "@/app/lib/headingLevel";
+import DynamicHeading from "@/app/ui/DynamicHeading";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger, SplitText);
@@ -240,6 +242,7 @@ function SectionHead({
   lede,
   dark,
   narrow = true,
+  headingLevel = "h2",
 }: {
   eyebrow: string;
   eyebrowColor?: string;
@@ -247,13 +250,16 @@ function SectionHead({
   lede?: ReactNode;
   dark?: boolean;
   narrow?: boolean;
+  /** Which heading tag to render — `h1`–`h6` (see app/lib/headingLevel.ts). Defaults to `h2`, this component's original fixed level, so every existing call site renders unchanged. */
+  headingLevel?: HeadingLevel;
 }) {
   const titleRef = useSplitReveal<HTMLHeadingElement>();
 
   return (
     <div className={narrow ? "max-w-[620px]" : undefined}>
       <Eyebrow color={eyebrowColor}>{eyebrow}</Eyebrow>
-      <h2
+      <DynamicHeading
+        level={headingLevel}
         ref={titleRef}
         className={cx(
           "max-w-[20ch] text-[clamp(28px,3.2vw,40px)] leading-[1.2] font-extrabold tracking-[-0.03em]",
@@ -261,7 +267,7 @@ function SectionHead({
         )}
       >
         {title}
-      </h2>
+      </DynamicHeading>
       {lede && (
         <p className={cx("mt-4 text-[16px] leading-[1.8]", dark ? "text-[#C9B2C0]" : "text-[#6B5A65]")}>{lede}</p>
       )}
@@ -508,7 +514,7 @@ function ChallengeSection() {
   return (
     <section className="bg-[#FEFBFC] px-5 py-14 sm:px-8 sm:py-16 lg:py-[104px]">
       <div ref={bodyRef} className="mx-auto max-w-5xl">
-        <SectionHead eyebrow="The challenge" title="A launch has nothing to trade on." narrow={false} />
+        <SectionHead eyebrow="The challenge" title="A launch has nothing to trade on." narrow={false} headingLevel="h2" />
         <p className="mt-5 mb-4.5 text-[clamp(1.05rem,1.6vw,1.2rem)] leading-[1.8] font-normal text-[#1B0E17]">
           Casa Famosa is a fresh take on a traditional agua fresca — premium Mexican agave spirit, real juice, no
           fizz — in four flavours built to be shared. Everything about it is designed for a moment with other
@@ -550,6 +556,7 @@ function WhyItWasHardSection() {
         <div ref={introRef}>
           <SectionHead
             eyebrow="Why it was hard"
+            headingLevel="h2"
             title="Three tensions to hold at once."
             lede="A launch site looks like the simplest kind of project. It's simple to describe and unforgiving to get wrong, because there's no existing audience to absorb the mistakes."
           />
@@ -588,6 +595,7 @@ function WhatWeBuiltSection() {
           <SectionHead
             eyebrow="What we built"
             title="Six pages, and a reason for every one."
+            headingLevel="h2"
             lede="Home, Flavors, Our Story, Where To Buy, Join Us, Contact. Nothing was added because brand sites usually have it, and quite a lot was left out for the same reason."
             narrow={false}
           />
@@ -669,6 +677,7 @@ function DetailThatMatteredSection() {
           <SectionHead
             eyebrow="The detail that mattered"
             eyebrowColor="#FF8FB8"
+            headingLevel="h3"
             title="The brand is made of pictures. Pictures make pages slow."
             dark
           />
@@ -719,6 +728,7 @@ function HowWeWorkedSection() {
           <SectionHead
             eyebrow="How we worked"
             title="Scoped tightly, on purpose."
+            headingLevel="h3"
             lede="The most valuable decisions on this project were about what not to build. A launch budget spent on features nobody uses is a launch budget not spent on being found."
             narrow={false}
           />
@@ -772,6 +782,7 @@ function StillOursSection() {
             <SectionHead
               eyebrow="What happened next"
               eyebrowColor="#FF8FB8"
+              headingLevel="h3"
               title="Year one is when a launch brand changes most."
               dark
               narrow={false}
@@ -817,6 +828,7 @@ function TechnologySection() {
           <SectionHead
             eyebrow="Technology"
             title="Fast on a phone, editable in an afternoon."
+            headingLevel="h4"
             lede="Two requirements drove every choice. It has to render before someone's thumb moves on, and the brand team has to be able to change it without booking developer time."
             narrow={false}
           />
@@ -855,7 +867,7 @@ function RelatedSection() {
     <section className="bg-[#FEFBFC] px-5 py-14 sm:px-8 sm:py-16">
       <div className="mx-auto max-w-7xl">
         <div ref={introRef}>
-          <SectionHead eyebrow="More of our work" title="Related case studies." narrow={false} />
+          <SectionHead eyebrow="More of our work" title="Related case studies." headingLevel="h4" narrow={false} />
         </div>
 
         <div ref={gridRef} className="mt-9 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">

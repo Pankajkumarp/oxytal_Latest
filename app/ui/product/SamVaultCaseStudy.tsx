@@ -8,6 +8,8 @@ import { SplitText } from "gsap/SplitText";
 import { cx } from "@/app/lib/cx";
 import { prefersReducedMotion, useSplitReveal, useFadeUp, useListStagger } from "./useReveal";
 import CountUpNumber from "./CountUpNumber";
+import type { HeadingLevel } from "@/app/lib/headingLevel";
+import DynamicHeading from "@/app/ui/DynamicHeading";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger, SplitText);
@@ -389,11 +391,14 @@ function SectionHeading({
   title,
   sub,
   center,
+  headingLevel = "h2",
 }: {
   eyebrow: string;
   title: ReactNode;
   sub?: string;
   center?: boolean;
+  /** Which heading tag to render — `h1`–`h6` (see app/lib/headingLevel.ts). Defaults to `h2`, this component's original fixed level, so every existing call site renders unchanged. */
+  headingLevel?: HeadingLevel;
 }) {
   const titleRef = useSplitReveal<HTMLHeadingElement>();
 
@@ -402,12 +407,13 @@ function SectionHeading({
       <div className="mb-3.5 text-[11px] font-semibold tracking-[0.14em] text-[#c9a84c] uppercase">
         {eyebrow}
       </div>
-      <h2
+      <DynamicHeading
+        level={headingLevel}
         ref={titleRef}
         className="mb-4 text-[clamp(2rem,4vw,3rem)] leading-[1.15] text-[#f0ede8] font-bold"
       >
         {title}
-      </h2>
+      </DynamicHeading>
       {sub && (
         <p className={cx(center ? "mx-auto" : undefined, "max-w-[560px] text-[1.05rem] font-light text-[#6b7280]")}>
           {sub}
@@ -678,7 +684,7 @@ function StatsSection() {
   return (
     <section className="relative z-10 px-6 py-24">
       <div className="mx-auto max-w-[1100px]">
-        <SectionHeading eyebrow="By the numbers" title="Built to scale, designed to last" />
+        <SectionHeading eyebrow="By the numbers" title="Built to scale, designed to last" headingLevel="h2"/>
         <div
           ref={gridRef}
           className="mt-14 grid grid-cols-1 gap-px overflow-hidden rounded-2xl border border-[rgba(255,255,255,0.07)] bg-[rgba(255,255,255,0.07)] sm:grid-cols-2 lg:grid-cols-4"
@@ -722,6 +728,7 @@ function FeaturesSection() {
           eyebrow="What we built"
           title="Every feature a user actually needs"
           sub="From personal document storage to enterprise team vaults — a complete platform, not a prototype."
+          headingLevel="h2"
         />
         <div
           ref={gridRef}
@@ -771,7 +778,7 @@ function ArchitectureSection() {
   return (
     <section className="relative z-10 px-6 py-24">
       <div className="mx-auto max-w-[1100px]">
-        <SectionHeading eyebrow="Architecture" title="Built on a solid foundation" />
+        <SectionHeading eyebrow="Architecture" title="Built on a solid foundation" headingLevel="h3"/>
         <div className="mt-14 grid grid-cols-1 items-center gap-10 lg:grid-cols-2">
           <div
             ref={diagramRef}
@@ -822,7 +829,7 @@ function SecuritySection() {
   return (
     <section className="relative z-10 border-y border-[rgba(255,255,255,0.07)] bg-[#0f1018] px-6 py-24">
       <div className="mx-auto max-w-[1100px]">
-        <SectionHeading eyebrow="Security first" title="Defence in depth, not security theatre" />
+        <SectionHeading eyebrow="Security first" title="Defence in depth, not security theatre" headingLevel="h3"/>
         <div ref={gridRef} className="mt-14 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {SEC_CARDS.map((card) => (
             <div
@@ -854,7 +861,7 @@ function DifferentiatorsSection() {
   return (
     <section className="relative z-10 border-y border-[rgba(255,255,255,0.07)] bg-[#0f1018] px-6 py-24">
       <div className="mx-auto max-w-[1100px]">
-        <SectionHeading eyebrow="Why SamVault" title="What sets it apart" />
+        <SectionHeading eyebrow="Why SamVault" title="What sets it apart" headingLevel="h3"/>
         <div ref={gridRef} className="mt-14 grid grid-cols-1 items-start gap-10 lg:grid-cols-2">
           <div className="overflow-x-auto">
             <table className="w-full border-collapse text-[13px]">
@@ -942,7 +949,7 @@ function StackSection() {
   return (
     <section className="relative z-10 px-6 py-24">
       <div className="mx-auto max-w-[1100px]">
-        <SectionHeading eyebrow="Tech stack" title="Modern stack, production-grade choices" />
+        <SectionHeading eyebrow="Tech stack" title="Modern stack, production-grade choices" headingLevel="h4"/>
         <div ref={gridRef} className="mt-10 flex flex-wrap gap-2.5">
           {STACK_GROUPS.map((group) => (
             <div key={group.category} className="flex w-full flex-wrap items-center gap-2.5">
@@ -981,6 +988,7 @@ function TimelineSection() {
           eyebrow="How we built it"
           title="Phase by phase"
           sub="From zero to a production-ready multi-tenant SaaS in a focused sprint."
+          headingLevel="h4"
         />
         <div ref={listRef} className="relative mt-14">
           <span
@@ -1022,6 +1030,7 @@ function CtaSection() {
               for your business?
             </>
           }
+          headingLevel="h4"
           center
         />
         <p className="mx-auto mt-5 mb-10 max-w-[560px] text-[1.05rem] font-light text-[#6b7280]">

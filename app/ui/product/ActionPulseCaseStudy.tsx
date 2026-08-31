@@ -7,6 +7,8 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SplitText } from "gsap/SplitText";
 import { cx } from "@/app/lib/cx";
 import { prefersReducedMotion, useSplitReveal, useFadeUp, useListStagger } from "./useReveal";
+import type { HeadingLevel } from "@/app/lib/headingLevel";
+import DynamicHeading from "@/app/ui/DynamicHeading";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger, SplitText);
@@ -300,18 +302,32 @@ const OUTCOME_CARDS: {
    SHARED PIECES
 ========================================================= */
 
-function SectionHeader({ eyebrow, title, sub, center = true }: { eyebrow: string; title: ReactNode; sub?: string; center?: boolean }) {
+function SectionHeader({
+  eyebrow,
+  title,
+  sub,
+  center = true,
+  headingLevel = "h2",
+}: {
+  eyebrow: string;
+  title: ReactNode;
+  sub?: string;
+  center?: boolean;
+  /** Which heading tag to render — `h1`–`h6` (see app/lib/headingLevel.ts). Defaults to `h2`, this component's original fixed level, so every existing call site renders unchanged. */
+  headingLevel?: HeadingLevel;
+}) {
   const titleRef = useSplitReveal<HTMLHeadingElement>();
 
   return (
     <div className={cx(center ? "mx-auto max-w-[640px] text-center" : undefined, "mb-16")}>
       <p className="text-[11px] font-medium tracking-[0.18em] text-[#818CF8] uppercase">{eyebrow}</p>
-      <h2
+      <DynamicHeading
+        level={headingLevel}
         ref={titleRef}
         className="my-4 text-[clamp(32px,4vw,52px)] leading-[1.15] font-extrabold tracking-[-0.02em] text-white"
       >
         {title}
-      </h2>
+      </DynamicHeading>
       {sub && <p className="text-[18px] leading-[1.7] text-[#A8A4CC]">{sub}</p>}
     </div>
   );
@@ -983,9 +999,9 @@ function FeatureText({ panel }: { panel: (typeof FEATURE_PANELS)[TabKey] }) {
   return (
     <div>
       <p className="text-[11px] font-medium tracking-[0.18em] text-[#818CF8] uppercase">{panel.module}</p>
-      <h2 ref={titleRef} className="my-4 text-[clamp(26px,3vw,38px)] leading-[1.15] font-bold text-white">
+      <h3 ref={titleRef} className="my-4 text-[clamp(26px,3vw,38px)] leading-[1.15] font-bold text-white">
         {panel.title}
-      </h2>
+      </h3>
       <p className="mb-7 text-[17px] leading-[1.75] text-[#A8A4CC]">{panel.desc}</p>
       <ul className="flex flex-col gap-3.5">
         {panel.bullets.map((bullet) => (
@@ -1020,6 +1036,7 @@ function TechSection() {
               production-grade stack
             </>
           }
+          headingLevel="h3"
           sub="Every technology chosen for a reason — scalability, developer velocity, and enterprise security."
         />
         <div ref={gridRef} className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -1052,7 +1069,7 @@ function ApproachSection() {
   return (
     <section className="relative z-10 px-[5%] py-[70px]">
       <div className="mx-auto max-w-[1200px]">
-        <SectionHeader eyebrow="How we built it" title="Our delivery approach" />
+        <SectionHeader eyebrow="How we built it" title="Our delivery approach" headingLevel="h3"/>
         <div ref={gridRef} className="grid grid-cols-1 gap-px bg-[rgba(255,255,255,0.07)] sm:grid-cols-2 lg:grid-cols-4">
           {APPROACH_CARDS.map((card) => (
             <div key={card.num} className="group relative overflow-hidden bg-[#0D0B1F] p-10  hover:bg-[rgba(79,70,229,0.04)]">
@@ -1085,6 +1102,7 @@ function OutcomesSection() {
           eyebrow="Outcomes"
           title="What ActionPulse delivers"
           sub="Measurable impact across the teams that use it daily."
+          headingLevel="h4"
         />
         <div ref={gridRef} className="grid grid-cols-1 gap-6 lg:grid-cols-3">
           {OUTCOME_CARDS.map((outcome) => (
@@ -1170,7 +1188,7 @@ function GalleryScreens() {
       <div className="mx-auto max-w-[1200px]">
         <div className="mb-8 max-w-[640px]">
           <p className="text-[11px] font-medium tracking-[0.18em] text-[#818CF8] uppercase">Screens</p>
-          <h2 className="my-4 text-[clamp(26px,3vw,40px)] leading-[1.15] font-extrabold text-white">Every screen, purpose-built</h2>
+          <h4 className="my-4 text-[clamp(26px,3vw,40px)] leading-[1.15] font-extrabold text-white">Every screen, purpose-built</h4>
         </div>
 
         <div ref={trackRef} className="ap-gallery-scroll flex snap-x snap-mandatory gap-5 overflow-x-auto pb-6">
@@ -1321,7 +1339,7 @@ function CtaSection() {
       />
       <div className="relative mx-auto max-w-[720px]">
         <p className="inline-block text-[11px] font-medium tracking-[0.18em] text-[#818CF8] uppercase">Ready to build yours?</p>
-        <h2 className="my-4 text-[clamp(36px,5vw,64px)] leading-[1.15] font-extrabold text-white">
+        <h4 className="my-4 text-[clamp(36px,5vw,64px)] leading-[1.15] font-extrabold text-white">
           <span ref={line1Ref} className="block">
             Let&apos;s build your
           </span>
@@ -1331,7 +1349,7 @@ function CtaSection() {
           >
             platform next
           </span>
-        </h2>
+        </h4>
         <p className="mx-auto mb-12 max-w-[560px] text-[19px] text-[#A8A4CC]">
           ActionPulse proves what Oxytal builds — bespoke enterprise platforms that replace entire
           SaaS toolchains. If your team needs something this specific, we should talk.

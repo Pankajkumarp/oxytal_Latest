@@ -7,6 +7,8 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SplitText } from "gsap/SplitText";
 import { cx } from "@/app/lib/cx";
 import { prefersReducedMotion, useSplitReveal, useFadeUp, useListStagger } from "./useReveal";
+import type { HeadingLevel } from "@/app/lib/headingLevel";
+import DynamicHeading from "@/app/ui/DynamicHeading";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger, SplitText);
@@ -194,7 +196,20 @@ const GALLERY_ITEMS: { caption: string; sub: string }[] = [
    SHARED PIECES
 ========================================================= */
 
-function SectionHead({ eyebrow, title, sub, dark }: { eyebrow: string; title: ReactNode; sub?: string; dark?: boolean }) {
+function SectionHead({
+  eyebrow,
+  title,
+  sub,
+  dark,
+  headingLevel = "h2",
+}: {
+  eyebrow: string;
+  title: ReactNode;
+  sub?: string;
+  dark?: boolean;
+  /** Which heading tag to render — `h1`–`h6` (see app/lib/headingLevel.ts). Defaults to `h2`, this component's original fixed level, so every existing call site renders unchanged. */
+  headingLevel?: HeadingLevel;
+}) {
   const titleRef = useSplitReveal<HTMLHeadingElement>();
 
   return (
@@ -202,12 +217,13 @@ function SectionHead({ eyebrow, title, sub, dark }: { eyebrow: string; title: Re
       <span className={cx("text-[13px] font-semibold tracking-[0.16em] uppercase", dark ? "text-[#A5B4FC]" : "text-[#4F46E5]")}>
         {eyebrow}
       </span>
-      <h2
+      <DynamicHeading
+        level={headingLevel}
         ref={titleRef}
         className={cx("mt-3 text-[clamp(28px,4vw,40px)] leading-[1.08] font-bold tracking-[-0.02em]", dark ? "text-white" : "text-[#141127]")}
       >
         {title}
-      </h2>
+      </DynamicHeading>
       {sub && <p className={cx("mt-3.5 text-[17px]", dark ? "text-[#c8c5e0]" : "text-[#5c5975]")}>{sub}</p>}
     </div>
   );
@@ -453,7 +469,7 @@ function ChallengeSection() {
   return (
     <section className="bg-[#f7f6fd] px-6 py-[78px]">
       <div className="mx-auto max-w-7xl">
-        <SectionHead eyebrow="The challenge" title="Plans and the thinking behind them drift apart" />
+        <SectionHead eyebrow="The challenge" title="Plans and the thinking behind them drift apart" headingLevel="h2"/>
         <div ref={gridRef} className="mt-11 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {PROBLEM_CARDS.map((card) => (
             <div key={card.n} className="rounded-2xl border border-[#E7E5F3] bg-white p-6.5 shadow-[0_12px_34px_-14px_rgba(79,70,229,0.22)]">
@@ -482,6 +498,7 @@ function TwoSurfacesSection() {
         <SectionHead
           eyebrow="The idea"
           title="Two surfaces, one workspace"
+          headingLevel="h2"
           sub="Not separate tools bolted together — work flows across both, and documents and issues stay linked in both directions."
         />
         <div className="mt-11.5 grid grid-cols-1 items-stretch gap-6.5 lg:grid-cols-[1fr_auto_1fr]">
@@ -545,7 +562,7 @@ function FeaturesSection() {
   return (
     <section id="features" className="bg-[#f7f6fd] px-6 py-[78px]">
       <div className="mx-auto max-w-7xl">
-        <SectionHead eyebrow="Features" title="A complete delivery & knowledge platform" sub="Everything the team needs across the whole cycle, in one place." />
+        <SectionHead eyebrow="Features" headingLevel="h3" title="A complete delivery & knowledge platform" sub="Everything the team needs across the whole cycle, in one place." />
         <div ref={gridRef} className="mt-11.5 grid grid-cols-1 gap-4.5 sm:grid-cols-2 lg:grid-cols-3">
           {FEATURES.map((feature) => (
             <div
@@ -573,7 +590,7 @@ function DivesSection() {
   return (
     <section className="bg-white px-6 py-[78px]">
       <div className="mx-auto max-w-7xl">
-        <SectionHead eyebrow="A closer look" title="Built for real-time teamwork" />
+        <SectionHead eyebrow="A closer look" title="Built for real-time teamwork" headingLevel="h3"/>
         <div className="mt-4">
           {DIVES.map((dive, i) => (
             <DiveRow key={dive.title} dive={dive} isLast={i === DIVES.length - 1} />
@@ -622,7 +639,7 @@ function ApproachSection() {
   return (
     <section className="bg-[#141127] px-6 py-[78px]">
       <div className="mx-auto max-w-7xl">
-        <SectionHead eyebrow="Our approach" title="How we built it" sub="A deliberate path from discovery to a launched, hardened product." dark />
+        <SectionHead eyebrow="Our approach" title="How we built it" headingLevel="h3" sub="A deliberate path from discovery to a launched, hardened product." dark />
         <div ref={stepsRef} className="mt-11.5 grid grid-cols-1 gap-4.5 sm:grid-cols-2 lg:grid-cols-4">
           {APPROACH_STEPS.map((step) => (
             <div key={step.num} className="rounded-2xl border border-[rgba(255,255,255,0.12)] bg-[rgba(255,255,255,0.05)] p-6.5">
@@ -648,7 +665,7 @@ function TechSection() {
   return (
     <section className="bg-white px-6 py-[78px]">
       <div className="mx-auto max-w-7xl">
-        <SectionHead eyebrow="Architecture & technology" title="Engineered for real-time and scale" />
+        <SectionHead eyebrow="Architecture & technology" title="Engineered for real-time and scale" headingLevel="h3"/>
         <div className="mt-11 grid grid-cols-1 items-start gap-11 lg:grid-cols-[1.1fr_1fr]">
           <div ref={stackRef} className="grid grid-cols-1 gap-3.5 sm:grid-cols-2">
             {TECH_STACK.map((row) => (
@@ -687,7 +704,7 @@ function LoopSection() {
   return (
     <section className="bg-[#f7f6fd] px-6 py-[78px]">
       <div className="mx-auto max-w-7xl">
-        <SectionHead eyebrow="The loop" title="From idea to shipped — and remembered" />
+        <SectionHead eyebrow="The loop" title="From idea to shipped — and remembered" headingLevel="h4"/>
         <div ref={loopRef} className="mt-11 flex flex-wrap gap-3">
           {LOOP_ITEMS.map((item) => (
             <div key={item.n} className="min-w-[150px] flex-1 rounded-2xl border border-[#E7E5F3] bg-white p-5 shadow-[0_12px_34px_-14px_rgba(79,70,229,0.22)]">
@@ -712,7 +729,7 @@ function ImpactSection() {
   return (
     <section className="bg-white px-6 py-[78px]">
       <div className="mx-auto max-w-7xl">
-        <SectionHead eyebrow="Impact" title="What it delivers" sub="Qualitative outcomes below. Replace the placeholders with real figures you can stand behind." />
+        <SectionHead eyebrow="Impact" title="What it delivers" headingLevel="h4" sub="Qualitative outcomes below. Replace the placeholders with real figures you can stand behind." />
         <div ref={gridRef} className="mt-11 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {IMPACT_ITEMS.map((item) => (
             <div key={item.big} className="rounded-2xl border border-[#E7E5F3] bg-[linear-gradient(135deg,#ffffff,#EEF0FF)] p-7 shadow-[0_12px_34px_-14px_rgba(79,70,229,0.22)]">
@@ -736,7 +753,7 @@ function GallerySection() {
   return (
     <section className="bg-[#f7f6fd] px-6 py-[78px]">
       <div className="mx-auto max-w-7xl">
-        <SectionHead eyebrow="Gallery" title="Inside the product" sub="Add real captures — login, board, backlog, a Synergy doc, a whiteboard, and a retro read well here." />
+        <SectionHead eyebrow="Gallery" title="Inside the product" headingLevel="h4" sub="Add real captures — login, board, backlog, a Synergy doc, a whiteboard, and a retro read well here." />
         <div ref={gridRef} className="mt-11 grid grid-cols-1 gap-4.5 lg:grid-cols-2">
           {GALLERY_ITEMS.map((item) => (
             <ShotPlaceholder key={item.caption} caption={item.caption} sub={item.sub} />
@@ -762,9 +779,9 @@ function CtaSection() {
           ref={cardRef}
           className="rounded-[22px] bg-[linear-gradient(120deg,#4F46E5,#7C3AED)] px-6 py-14 text-center text-white shadow-[0_30px_70px_-30px_rgba(30,27,75,0.35)] sm:px-12"
         >
-          <h2 ref={titleRef} className="text-[clamp(26px,4vw,38px)] leading-[1.08] font-bold text-white">
+          <h4 ref={titleRef} className="text-[clamp(26px,4vw,38px)] leading-[1.08] font-bold text-white">
             Have a product like this in mind?
-          </h2>
+          </h4>
           <p className="mx-auto mt-3.5 mb-6.5 max-w-[52ch] text-[17px] text-[rgba(255,255,255,0.9)]">
             We design and build scalable digital products end-to-end — from the first idea to a
             launched, hardened platform. Let&apos;s talk about yours.
