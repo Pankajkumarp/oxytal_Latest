@@ -286,7 +286,7 @@ const RELATED: { href: string; img: string; alt: string; k: string; title: strin
 
 function Eyebrow({ children, color = "#D9502B" }: { children: ReactNode; color?: string }) {
   return (
-    <span className="mb-4 flex items-center gap-2.5 text-[12px] font-bold tracking-[0.16em] uppercase" style={{ color }}>
+    <span className="mb-4 flex items-center gap-2.5 text-[12px] font-bold uppercase" style={{ color }}>
       <span aria-hidden className="h-0.5 w-[22px] rounded-sm" style={{ backgroundColor: color }} />
       {children}
     </span>
@@ -360,7 +360,7 @@ function Breadcrumb() {
   return (
     <nav aria-label="Breadcrumb" className="bg-[#0F1114] py-4 pt-26">
       <div className="mx-auto max-w-7xl px-5 sm:px-8">
-        <ol className="flex flex-wrap items-center gap-2 font-mono text-[12px] tracking-[0.09em] text-[#767C89] uppercase">
+        <ol className="flex flex-wrap items-center gap-2 text-[12px] text-[#767C89] uppercase">
           <li>
             <Link href="/" className="text-[#A8AEBB] transition-colors duration-150 hover:text-white">
               Home
@@ -463,7 +463,7 @@ function Hero({ mainBanner }: { mainBanner?: string }) {
       />
 
       <div className="relative mx-auto max-w-7xl px-5 sm:px-8">
-        <p ref={clientRef} className="mb-4.5 font-mono text-[12px] tracking-[0.18em] text-[#F2895F] uppercase">
+        <p ref={clientRef} className="mb-4.5 font-semibold text-[12px] text-[#F2895F] uppercase">
           Case study · Diageo · Stoop Dayz Hard Soda
         </p>
 
@@ -487,7 +487,7 @@ function Hero({ mainBanner }: { mainBanner?: string }) {
         >
           {FACTS.map((fact) => (
             <div key={fact.k} className="bg-[#0F1114] px-5 py-4.5">
-              <dt className="mb-1.5 font-mono text-[11px] tracking-[0.12em] text-[#767C89] uppercase">{fact.k}</dt>
+              <dt className="mb-1.5 font-semibold text-[11px] text-[#767C89] uppercase">{fact.k}</dt>
               <dd className="text-[15.6px] leading-[1.45] font-semibold text-[#EDEFF3]">{fact.v}</dd>
             </div>
           ))}
@@ -625,7 +625,7 @@ function WhyItWasHardSection() {
         >
           {HARD_CARDS.map((card) => (
             <div key={card.n} className="bg-white p-7">
-              <span className="mb-3.5 block font-mono text-[12px] tracking-[0.1em] text-[#D9502B]">{card.n}</span>
+              <span className="mb-3.5 block font-semibold text-[12px] text-[#D9502B]">{card.n}</span>
               <span className="mb-2.5 text-[19px] leading-[1.5] font-extrabold tracking-[-0.02em] text-[#15171C] block">
                 {card.title}
               </span>
@@ -676,7 +676,7 @@ function BuiltRow({ row, image }: { row: (typeof BUILT_ROWS)[number]; image?: st
   return (
     <div className="grid grid-cols-1 items-center gap-8 lg:grid-cols-2 lg:gap-14">
       <div ref={textRef}>
-        <span className="mb-3.5 block font-mono text-[12px] tracking-[0.11em] text-[#D9502B]">{row.n}</span>
+        <span className="mb-3.5 block font-semibold text-[12px] text-[#D9502B]">{row.n}</span>
         <span className="mb-3.5 text-[24px] leading-[1.4] font-extrabold tracking-[-0.02em] text-[#15171C] block">
           {row.title}
         </span>
@@ -707,7 +707,7 @@ function BuiltRow({ row, image }: { row: (typeof BUILT_ROWS)[number]; image?: st
                 <div className="p-5.5">
                   <span className="mb-2 text-[17px] font-bold tracking-[-0.02em] text-[#15171C] block">{flavour.name}</span>
                   <p className="mb-3 text-[14px] leading-[1.6] text-[#5C6270]">{flavour.text}</p>
-                  <span className="font-mono text-[10px] tracking-[0.1em] text-[#8D93A1]">{flavour.abv}</span>
+                  <span className="font-semibold text-[10px] text-[#8D93A1]">{flavour.abv}</span>
                 </div>
               </div>
             ))}
@@ -812,7 +812,7 @@ function HowWeWorkedSection() {
                 index > 0 && "border-t border-[#E9E5DD]"
               )}
             >
-              <span className="pt-1 font-mono text-[12px] tracking-[0.1em] text-[#D9502B]">{phase.n}</span>
+              <span className="pt-1 font-semibold text-[12px] text-[#D9502B]">{phase.n}</span>
               <div>
                 <span className="mb-2 text-[18px] leading-[1.4] font-extrabold tracking-[-0.02em] text-[#15171C] block">
                   {phase.title}
@@ -899,7 +899,7 @@ function TechnologySection() {
         <div ref={gridRef} className="mt-8.5 grid grid-cols-1 gap-5 sm:grid-cols-2">
           {TECH_GROUPS.map((group) => (
             <div key={group.title}>
-              <span className="mb-3 font-mono text-[16px] font-medium tracking-[0.12em] text-[#D9502B] uppercase block">
+              <span className="mb-3 font-semibold text-[16px] font-medium text-[#D9502B] uppercase block">
                 {group.title}
               </span>
               <ul className="list-none">
@@ -1005,7 +1005,7 @@ function RelatedSection({ related }: { related?: RelatedItem[] }) {
               className="block overflow-hidden rounded-2xl border border-[#E9E5DD] bg-white hover:-translate-y-1 hover:border-[#E5C7B8] hover:shadow-[0_20px_44px_-20px_rgba(21,23,28,0.2)]"
             >
               {/* eslint-disable-next-line @next/next/no-img-element -- matches the plain <img> convention this project already uses for external/hosted assets */}
-              <img src={item.img} alt={item.alt} width={800} height={500} loading="lazy" className="aspect-16/10 block w-full object-cover" />
+              <img src={item.img} alt={item.alt} loading="lazy" className="aspect-[1672/941] block w-full object-cover" />
               <div className="p-5.5">
                 <span className="text-[12px] font-semibold text-[#D9502B] uppercase">{item.k}</span>
                 <span className="mt-2 mb-1.5 text-[17px] font-extrabold text-[#15171C] block">{item.title}</span>

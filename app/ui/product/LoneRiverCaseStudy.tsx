@@ -9,33 +9,81 @@ import { cx } from "@/app/lib/cx";
 import { prefersReducedMotion, useSplitReveal, useFadeUp, useListStagger } from "./useReveal";
 import type { HeadingLevel } from "@/app/lib/headingLevel";
 import DynamicHeading from "@/app/ui/DynamicHeading";
+import { Entry, EntrySkeletonType } from "contentful";
+import { ComposableElementSkeleton, ContentDetailSkeleton, DataLinkSkeleton } from "@/app/types/contentful";
+import { getAssetUrl } from "@/app/lib/contentfulAsset";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger, SplitText);
+}
+
+// Contentful wiring — same shape as `KaneffCaseStudy`'s/`RedMirchiCaseStudy`'s
+// own, minus the gallery: `entry.fields.elements` may hold up to 4
+// `contentDetail` entries. `[0]` supplies this case study's own hero photo
+// (`heroImage`) only — the "what we built" rows here are hand-drawn SVG
+// diagrams, not photography, so there's no per-row gallery image to
+// override. `[1]`–`[3]` each become one `RelatedSection` card (see
+// `resolveRelatedItem`). Everything here works exactly as before when
+// `entry` is omitted or those fields are unset — each piece falls back to
+// its own hardcoded default individually.
+type PlainEntry<Skeleton extends EntrySkeletonType> = Entry<Skeleton, undefined>;
+
+interface Props {
+  entry?: PlainEntry<ComposableElementSkeleton>;
+}
+
+interface AnyEntry {
+  sys: {
+    id: string;
+    contentType: {
+      sys: {
+        id: string;
+      };
+    };
+  };
+  fields: Record<string, unknown>;
+}
+
+function isEntry(value: unknown): value is AnyEntry {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "sys" in value &&
+    "fields" in value &&
+    typeof (value as { sys: unknown }).sys === "object"
+  );
 }
 
 /**
  * `LoneRiverCaseStudy` — a standalone, static case-study one-pager ported
  * from `Refrence/oxytal-case-study-lone-river.html`. Same treatment as its
  * siblings in this folder (`RedMirchiCaseStudy`/`TinyIslandCaseStudy`/
- * `KaneffCaseStudy`): no Contentful wiring, keeps the reference's own
- * colour identity (`--ink` `#0D1719`, `--body` `#4E6265`, `--accent`
- * `#12808F`, `--accent-2` `#267F87`, `--sand` `#C9964A`, the `--deep-1`/
- * `--deep-2` `#081214`/`#12262A` near-black-teal gradient) rather than the
- * site's per-page `themeColor` accent, and typography stays the site's
- * own inherited `Poppins`. Every heading size, lede size, and section
+ * `KaneffCaseStudy`): keeps the reference's own colour identity (`--ink`
+ * `#0D1719`, `--body` `#4E6265`, `--accent` `#12808F`, `--accent-2`
+ * `#267F87`, `--sand` `#C9964A`, the `--deep-1`/`--deep-2`
+ * `#081214`/`#12262A` near-black-teal gradient) rather than the site's
+ * per-page `themeColor` accent, and typography stays the site's own
+ * inherited `Poppins`. Every heading size, lede size, and section
  * container width (`max-w-*`) matches its siblings exactly — 12px
  * eyebrows, `clamp(28px,3.2vw,40px)`/`leading-[1.2]` h2s, 16px/1.8 ledes,
  * `max-w-7xl` for the wide sections, `max-w-5xl` for the narrow prose
  * ones, `max-w-6xl` for "what we built" — rather than the numbers baked
- * into the reference's own stylesheet.
+ * into the reference's own stylesheet. Content is still the reference's
+ * own hardcoded copy/photography; the only genuine Contentful wiring is
+ * the optional `entry` prop (see the doc comment above the `isEntry`
+ * helper) — a `contentDetail` entry's own `heroImage` can override the
+ * hero photo, and up to 3 more `contentDetail` entries can override the
+ * related-case-study cards, each falling back to its own hardcoded
+ * default individually when unset.
  *
  * Shape-wise this is closest to `KaneffCaseStudy`: all 3 "what we built"
  * rows illustrate with the reference's own hand-drawn inline SVG diagrams
  * (find-us search → flavours grid → subscribe consent flow) rather than
  * photography, ported as literal `<svg>` markup (camelCased attributes),
  * same `DIAGRAMS` map idiom Kaneff's `ReadingDiagram`/`SortingDiagram`/
- * `GoverningDiagram` use.
+ * `GoverningDiagram` use — this is also why there's no gallery-image
+ * wiring here, unlike `DiageoBrandPromoterCaseStudy`/`TaffersCaseStudy` —
+ * there's no photo slot for a gallery entry to fill.
  *
  * The reference's own client-quote block is a marked placeholder
  * ("Placeholder — replace with a client quote") and is skipped entirely
@@ -389,7 +437,7 @@ const RELATED: { href: string; img: string; alt: string; k: string; title: strin
 
 function Eyebrow({ children, color = "#12808F" }: { children: ReactNode; color?: string }) {
   return (
-    <span className="mb-4 flex items-center gap-2.5 text-[12px] font-bold tracking-[0.16em] uppercase" style={{ color }}>
+    <span className="mb-4 flex items-center gap-2.5 text-[12px] font-bold uppercase" style={{ color }}>
       <span aria-hidden className="h-0.5 w-[22px] rounded-sm" style={{ backgroundColor: color }} />
       {children}
     </span>
@@ -463,7 +511,7 @@ function Breadcrumb() {
   return (
     <nav aria-label="Breadcrumb" className="bg-[#081214] py-4 pt-26">
       <div className="mx-auto max-w-7xl px-5 sm:px-8">
-        <ol className="flex flex-wrap items-center gap-2 font-mono text-[12px] tracking-[0.09em] text-[#6C8285] uppercase">
+        <ol className="flex flex-wrap items-center gap-2 text-[12px] text-[#6C8285] uppercase">
           <li>
             <Link href="/" className="text-[#9CB2B4] transition-colors duration-150 hover:text-white">
               Home
@@ -487,7 +535,7 @@ function Breadcrumb() {
    HERO
 ========================================================= */
 
-function Hero() {
+function Hero({ mainBanner }: { mainBanner?: string }) {
   const sectionRef = useRef<HTMLElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
   const clientRef = useRef<HTMLParagraphElement>(null);
@@ -566,7 +614,7 @@ function Hero() {
       />
 
       <div className="relative mx-auto max-w-7xl px-5 sm:px-8">
-        <p ref={clientRef} className="mb-4.5 font-mono text-[12px] tracking-[0.18em] text-[#267F87] uppercase">
+        <p ref={clientRef} className="mb-4.5 font-semibold text-[12px] text-[#267F87] uppercase">
           Case study · Lone River Beverage Company
         </p>
 
@@ -590,7 +638,7 @@ function Hero() {
         >
           {FACTS.map((fact) => (
             <div key={fact.k} className="bg-[#081214] px-5 py-4.5">
-              <dt className="mb-1.5 font-mono text-[11px] tracking-[0.12em] text-[#6C8285] uppercase">{fact.k}</dt>
+              <dt className="mb-1.5 font-semibold text-[11px] text-[#6C8285] uppercase">{fact.k}</dt>
               <dd className="text-[15.6px] leading-[1.45] font-semibold text-[#E7F2F2]">{fact.v}</dd>
             </div>
           ))}
@@ -621,15 +669,17 @@ function Hero() {
 
         <div
           ref={shotRef}
-          className="overflow-hidden rounded-t-[20px] border border-b-0 border-white/12 shadow-[0_-20px_60px_-30px_rgba(0,0,0,0.7)]"
+          className="overflow-hidden rounded-t-[10px] aspect-[1672/941] shadow-[0_-20px_60px_-30px_rgba(0,0,0,0.7)]"
         >
           {/* eslint-disable-next-line @next/next/no-img-element -- matches the plain <img> convention this project already uses for external/hosted assets */}
           <img
-            src="https://images.ctfassets.net/gjrhdo7lk84j/6V2YCRZ1XxL5GnOOsvfxJp/dabbf010cac7d50f3dd5bd47621a88e0/Inspired-Section-homepage.webp"
+            src={
+              mainBanner ??
+              "https://images.ctfassets.net/gjrhdo7lk84j/6V2YCRZ1XxL5GnOOsvfxJp/dabbf010cac7d50f3dd5bd47621a88e0/Inspired-Section-homepage.webp"
+            }
             alt="Lone River Beverage Company, inspired by the landscape of Far West Texas"
-            width={1600}
-            height={700}
-            className="block aspect-16/7 w-full object-cover"
+            aria-hidden
+            className="h-full w-full object-cover"
           />
         </div>
       </div>
@@ -735,7 +785,7 @@ function WhyItWasHardSection() {
         >
           {HARD_CARDS.map((card) => (
             <div key={card.n} className="bg-white p-7">
-              <span className="mb-3.5 block font-mono text-[12px] tracking-[0.1em] text-[#12808F]">{card.n}</span>
+              <span className="mb-3.5 block font-semibold text-[12px] text-[#12808F]">{card.n}</span>
               <span className="mb-2.5 text-[19px] leading-[1.5] font-extrabold tracking-[-0.02em] text-[#0D1719] block">
                 {card.title}
               </span>
@@ -786,7 +836,7 @@ function BuiltRow({ row }: { row: (typeof BUILT_ROWS)[number] }) {
   return (
     <div className="grid grid-cols-1 items-center gap-8 lg:grid-cols-2 lg:gap-14">
       <div ref={textRef}>
-        <span className="mb-3.5 block font-mono text-[12px] tracking-[0.11em] text-[#12808F]">{row.n}</span>
+        <span className="mb-3.5 block font-semibold text-[12px] text-[#12808F]">{row.n}</span>
         <span className="mb-3.5 text-[24px] leading-[1.4] font-extrabold tracking-[-0.02em] text-[#0D1719] block">
           {row.title}
         </span>
@@ -903,7 +953,7 @@ function HowWeWorkedSection() {
                 index > 0 && "border-t border-[#DFEAEA]"
               )}
             >
-              <span className="pt-1 font-mono text-[12px] tracking-[0.1em] text-[#12808F]">{phase.n}</span>
+              <span className="pt-1 font-semibold text-[12px] text-[#12808F]">{phase.n}</span>
               <div>
                 <span className="mb-2 text-[18px] leading-[1.4] font-extrabold tracking-[-0.02em] text-[#0D1719] block">
                   {phase.title}
@@ -999,7 +1049,7 @@ function TechnologySection() {
         <div ref={gridRef} className="mt-8.5 grid grid-cols-1 gap-5 sm:grid-cols-2">
           {TECH_GROUPS.map((group) => (
             <div key={group.title}>
-              <span className="mb-3 font-mono text-[16px] font-medium tracking-[0.12em] text-[#12808F] uppercase block">
+              <span className="mb-3 text-[16px] font-medium text-[#12808F] uppercase block">
                 {group.title}
               </span>
               <ul className="list-none">
@@ -1021,9 +1071,74 @@ function TechnologySection() {
    RELATED
 ========================================================= */
 
-function RelatedSection() {
+type RelatedItem = (typeof RELATED)[number];
+
+const RELATED_DESCRIPTION_MAX_LENGTH = 150;
+
+/**
+ * Truncates to at most `max` characters, trimmed back to the nearest word
+ * boundary so a cut never lands mid-word, and suffixed with "…". Text
+ * already at or under the limit passes through unchanged, no ellipsis
+ * added.
+ */
+function truncate(text: string, max: number): string {
+  if (text.length <= max) {
+    return text;
+  }
+
+  const cut = text.slice(0, max);
+  const lastSpace = cut.lastIndexOf(" ");
+  return `${(lastSpace > 0 ? cut.slice(0, lastSpace) : cut).trimEnd()}…`;
+}
+
+/**
+ * Maps one `contentDetail` entry (`contentDetailEntries[1]`/`[2]`/`[3]` —
+ * `[0]` is this case study's own hero-photo source, see the default
+ * export below) to one `RelatedSection` card. Same field convention
+ * `CaseStudiesListing`'s own card mapping uses elsewhere in this app:
+ * `heroImage` for the photo, `category` for the small tag, `title`/
+ * `shortDescription` for the copy (capped at
+ * `RELATED_DESCRIPTION_MAX_LENGTH` characters, via `truncate`, so a long
+ * editor-written description can't unbalance the 3-up card grid), and a
+ * link resolved from `cta` (preferred) or else `/case-studies/<slug>`.
+ * Returns `undefined` for a missing entry or one with no `heroImage` — a
+ * related card with no photo would look broken here, so it's dropped
+ * rather than shown empty.
+ */
+function resolveRelatedItem(entry: PlainEntry<ContentDetailSkeleton> | undefined): RelatedItem | undefined {
+  if (!entry) {
+    return undefined;
+  }
+
+  const heroImageEntry = entry.fields.heroImage;
+  const img = heroImageEntry && "fields" in heroImageEntry ? getAssetUrl(heroImageEntry.fields.image) : undefined;
+
+  if (!img) {
+    return undefined;
+  }
+
+  const ctaEntry = entry.fields.cta?.find((link) => link && "fields" in link) as
+    | PlainEntry<DataLinkSkeleton>
+    | undefined;
+  const ctaHref = ctaEntry
+    ? ctaEntry.fields.externalUrl || (ctaEntry.fields.linkedPage ? `/${ctaEntry.fields.linkedPage}` : undefined)
+    : undefined;
+
+  return {
+    href: ctaHref ?? (entry.fields.slug ? `/case-studies/${entry.fields.slug}` : "#"),
+    img,
+    alt: entry.fields.title ?? "",
+    k: entry.fields.category ?? entry.fields.clientName ?? "",
+    title: entry.fields.title ?? "",
+    text: entry.fields.shortDescription ? truncate(entry.fields.shortDescription, RELATED_DESCRIPTION_MAX_LENGTH) : "",
+  };
+}
+
+/** Falls back to the static `RELATED` list when `related` is unset or empty — i.e. until a page's composableElement actually has `contentDetailEntries[1]`/`[2]`/`[3]` set (see `resolveRelatedItem`/the default export below). */
+function RelatedSection({ related }: { related?: RelatedItem[] }) {
   const introRef = useFadeUp<HTMLDivElement>();
   const gridRef = useListStagger<HTMLDivElement>("y", 20);
+  const items = related?.length ? related : RELATED;
 
   return (
     <section className="bg-[#FBFDFD] px-5 py-14 sm:px-8 sm:py-16">
@@ -1033,16 +1148,16 @@ function RelatedSection() {
         </div>
 
         <div ref={gridRef} className="mt-9 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {RELATED.map((item) => (
+          {items.map((item) => (
             <Link
               key={item.href}
               href={item.href}
               className="block overflow-hidden rounded-2xl border border-[#DFEAEA] bg-white hover:-translate-y-1 hover:border-[#BADFE1] hover:shadow-[0_20px_44px_-20px_rgba(13,23,25,0.2)]"
             >
               {/* eslint-disable-next-line @next/next/no-img-element -- matches the plain <img> convention this project already uses for external/hosted assets */}
-              <img src={item.img} alt={item.alt} width={800} height={500} loading="lazy" className="aspect-16/10 block w-full object-cover" />
+              <img src={item.img} alt={item.alt}  loading="lazy" className="aspect-[1672/941] block w-full object-cover" />
               <div className="p-5.5">
-                <span className="font-mono text-[12px] tracking-[0.11em] text-[#84979A] uppercase">{item.k}</span>
+                <span className="font-semibold text-[12px] text-[#12808F] uppercase">{item.k}</span>
                 <span className="mt-2 mb-1.5 text-[17px] font-extrabold text-[#0D1719] block">{item.title}</span>
                 <p className="text-[13.5px] leading-[1.55] text-[#4E6265]">{item.text}</p>
               </div>
@@ -1058,12 +1173,31 @@ function RelatedSection() {
    PAGE
 ========================================================= */
 
-export default function LoneRiverCaseStudy() {
+export default function LoneRiverCaseStudy({ entry }: Props) {
+  const elements = entry?.fields.elements ?? [];
+  const contentDetailEntries = elements.filter(
+    (element): element is PlainEntry<ContentDetailSkeleton> =>
+      isEntry(element) && element.sys.contentType.sys.id === "contentDetail"
+  );
+  const heromainEntry = contentDetailEntries[0];
+  const heroImageEntry = heromainEntry?.fields.heroImage;
+  const mainBanner =
+    heroImageEntry && "fields" in heroImageEntry ? getAssetUrl(heroImageEntry.fields.image) : undefined;
+
+  // The 3 related-case-study cards, one per entry — `[0]` stays this
+  // case study's own hero-photo source above, so the related cards
+  // start at `[1]`. `resolveRelatedItem` drops any that don't resolve
+  // (missing entry, or no `heroImage`), and `RelatedSection` falls back
+  // to its own static list whenever none of the three do.
+  const relatedItems = [contentDetailEntries[1], contentDetailEntries[2], contentDetailEntries[3]]
+    .map(resolveRelatedItem)
+    .filter((item): item is RelatedItem => Boolean(item));
+
   return (
     <div className="relative overflow-hidden bg-[#FBFDFD]">
       <div data-nav-contrast="dark">
         <Breadcrumb />
-        <Hero />
+        <Hero mainBanner={mainBanner} />
       </div>
       <OutcomesSection />
       <ChallengeSection />
@@ -1077,7 +1211,7 @@ export default function LoneRiverCaseStudy() {
         <StillOursSection />
       </div>
       <TechnologySection />
-      <RelatedSection />
+      <RelatedSection related={relatedItems} />
     </div>
   );
 }
