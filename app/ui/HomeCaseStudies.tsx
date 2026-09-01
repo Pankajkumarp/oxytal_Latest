@@ -344,7 +344,7 @@ function CaseStudySlide({
               theme?.body ?? "text-gray-500"
             )}
           >
-            {truncateText(study.description, 140)}
+            {truncateText(study.description, 400)}
           </p>
         )}
 
