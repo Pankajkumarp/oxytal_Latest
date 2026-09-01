@@ -27,12 +27,6 @@ import ContactForm from "@/app/ui/ContactForm";
 import ContactStats from "@/app/ui/ContactStats";
 import ContactProcess from "@/app/ui/ContactProcess";
 import ContactFaq from "@/app/ui/ContactFaq";
-import ProductsHero from "@/app/ui/ProductsHero";
-import ProductShowcase from "@/app/ui/ProductShowcase";
-import ProductCompare from "@/app/ui/ProductCompare";
-import ProductTech from "@/app/ui/ProductTech";
-import ProductPhilosophy from "@/app/ui/ProductPhilosophy";
-import ProductRoadmap from "@/app/ui/ProductRoadmap";
 import AISolutionsHero from "@/app/ui/AISolutionsHero";
 import AISolutionsCapabilities from "@/app/ui/AISolutionsCapabilities";
 import AISolutionsDifferentiators from "@/app/ui/AISolutionsDifferentiators";
@@ -74,6 +68,12 @@ import TaffersCaseStudy from "./product/TaffersCaseStudy";
 import KaneffCaseStudy from "./product/KaneffCaseStudy";
 import CasaFamosaCaseStudy from "./product/CasaFamosaCaseStudy";
 import StoopDayzCaseStudy from "./product/StoopDayzCaseStudy";
+import TinyIslandCaseStudy from "./product/TinyIslandCaseStudy";
+import RedMirchiCaseStudy from "./product/RedMirchiCaseStudy";
+import LoneRiverCaseStudy from "./product/LoneRiverCaseStudy";
+import InkJetWorldCaseStudy from "./product/InkJetWorldCaseStudy";
+import CastletownrocheCaseStudy from "./product/CastletownrocheCaseStudy";
+import ProductsOverviewPage from "./product/ProductsOverviewPage";
 
 type PlainEntry<Skeleton extends EntrySkeletonType> = Entry<
   Skeleton,
@@ -121,12 +121,6 @@ const subtypeComponents: Record<
   contactStats: ContactStats,
   contactProcess: ContactProcess,
   contactFaq: ContactFaq,
-  productsHero: ProductsHero,
-  productShowcase: ProductShowcase,
-  productCompare: ProductCompare,
-  productTech: ProductTech,
-  productPhilosophy: ProductPhilosophy,
-  productRoadmap: ProductRoadmap,
   aiHero: AISolutionsHero,
   aiCapabilities: AISolutionsCapabilities,
   aiDifferentiators: AISolutionsDifferentiators,
@@ -165,6 +159,12 @@ const subtypeComponents: Record<
   kaneffSharepoint: KaneffCaseStudy,
   casaFamosa: CasaFamosaCaseStudy,
   stoopDayz: StoopDayzCaseStudy,
+  tinyIsland: TinyIslandCaseStudy,
+  redMirchi: RedMirchiCaseStudy,
+  loneRiver: LoneRiverCaseStudy,
+  inkjetWorld: InkJetWorldCaseStudy,
+  castletownroche: CastletownrocheCaseStudy,
+  productsOverview: ProductsOverviewPage,
   DigitalCommerceHero: DigitalCommerce,
 };
 
