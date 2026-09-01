@@ -9,33 +9,82 @@ import { cx } from "@/app/lib/cx";
 import { prefersReducedMotion, useSplitReveal, useFadeUp, useListStagger } from "./useReveal";
 import type { HeadingLevel } from "@/app/lib/headingLevel";
 import DynamicHeading from "@/app/ui/DynamicHeading";
+import { Entry, EntrySkeletonType } from "contentful";
+import { ComposableElementSkeleton, ContentDetailSkeleton, DataLinkSkeleton } from "@/app/types/contentful";
+import { getAssetUrl } from "@/app/lib/contentfulAsset";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger, SplitText);
+}
+
+// Contentful wiring — same shape as `DiageoBrandPromoterCaseStudy`'s/
+// `TaffersCaseStudy`'s own, minus the gallery: `entry.fields.elements`
+// may hold up to 4 `contentDetail` entries. `[0]` supplies this case
+// study's own hero photo (`heroImage`) only — the "what we built" rows
+// here are hand-drawn SVG diagrams, not photography, so there's no
+// per-row gallery image to override. `[1]`–`[3]` each become one
+// `RelatedSection` card (see `resolveRelatedItem`). Everything here
+// works exactly as before when `entry` is omitted or those fields are
+// unset — each piece falls back to its own hardcoded default
+// individually.
+type PlainEntry<Skeleton extends EntrySkeletonType> = Entry<Skeleton, undefined>;
+
+interface Props {
+  entry?: PlainEntry<ComposableElementSkeleton>;
+}
+
+interface AnyEntry {
+  sys: {
+    id: string;
+    contentType: {
+      sys: {
+        id: string;
+      };
+    };
+  };
+  fields: Record<string, unknown>;
+}
+
+function isEntry(value: unknown): value is AnyEntry {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "sys" in value &&
+    "fields" in value &&
+    typeof (value as { sys: unknown }).sys === "object"
+  );
 }
 
 /**
  * `KaneffCaseStudy` — a standalone, static case-study one-pager ported
  * from `Refrence/oxytal-case-study-kaneff-sharepoint.html`. Same
  * treatment as its siblings in this folder
- * (`DiageoBrandPromoterCaseStudy`/`TaffersCaseStudy`): no Contentful
- * wiring, keeps the reference's own colour identity (`--ink` `#0B1B2B`,
- * `--accent` `#2C87CC`, `--accent-2` `#7FC4F3`, the `--deep-1`/
- * `--deep-2` navy gradient) rather than the site's per-page `themeColor`
- * accent, and typography stays the site's own inherited `Poppins`.
- * Every heading size, lede size, and section container width (`max-w-*`)
- * matches its two siblings exactly (12px eyebrows, `clamp(28px,3.2vw,
- * 40px)`/`leading-[1.2]` h2s, 16px/1.8 ledes, `max-w-7xl` for the wide
+ * (`DiageoBrandPromoterCaseStudy`/`TaffersCaseStudy`): keeps the
+ * reference's own colour identity (`--ink` `#0B1B2B`, `--accent`
+ * `#2C87CC`, `--accent-2` `#7FC4F3`, the `--deep-1`/`--deep-2` navy
+ * gradient) rather than the site's per-page `themeColor` accent, and
+ * typography stays the site's own inherited `Poppins`. Every heading
+ * size, lede size, and section container width (`max-w-*`) matches its
+ * two siblings exactly (12px eyebrows, `clamp(28px,3.2vw, 40px)`/
+ * `leading-[1.2]` h2s, 16px/1.8 ledes, `max-w-7xl` for the wide
  * sections, `max-w-5xl` for the narrow prose ones, `max-w-6xl` for "what
  * we built") — this case study reuses the same scale rather than the
  * numbers baked into its own reference stylesheet, per this file's own
- * "same size as the others" brief.
+ * "same size as the others" brief. Content is still the reference's own
+ * hardcoded copy/photography; the only genuine Contentful wiring is the
+ * optional `entry` prop (see the doc comment above the `isEntry` helper)
+ * — a `contentDetail` entry's own `heroImage` can override the hero
+ * photo, and up to 3 more `contentDetail` entries can override the
+ * related-case-study cards, each falling back to its own hardcoded
+ * default individually when unset.
  *
  * Two things this reference has that its siblings don't:
  * - "What we built"'s 3 rows illustrate with hand-drawn inline SVG
  *   diagrams (reading → sorting → governing) instead of photography —
  *   ported as literal `<svg>` markup (camelCased attributes), same
- *   diagrams, not photos invented to replace them.
+ *   diagrams, not photos invented to replace them. This is also why
+ *   there's no gallery-image wiring here, unlike `DiageoBrandPromoterCaseStudy`/
+ *   `TaffersCaseStudy` — there's no photo slot for a gallery entry to fill.
  * - A "before / after" comparison section (two bordered columns, a
  *   centered arrow, ×/✓ markers) that neither `DiageoBrandPromoterCaseStudy`
  *   nor `TaffersCaseStudy` has — built fresh here as `BeforeAfterSection`.
@@ -346,7 +395,7 @@ function Breadcrumb() {
    HERO
 ========================================================= */
 
-function Hero() {
+function Hero({ mainBanner }: { mainBanner?: string }) {
   const sectionRef = useRef<HTMLElement>(null);
   const titleRef = useRef<HTMLHeadingElement>(null);
   const clientRef = useRef<HTMLParagraphElement>(null);
@@ -479,15 +528,14 @@ function Hero() {
 
         <div
           ref={shotRef}
-          className="overflow-hidden rounded-t-[20px] border border-b-0 border-white/12 shadow-[0_-20px_60px_-30px_rgba(0,0,0,0.6)]"
+          className="overflow-hidden rounded-t-[10px] aspect-[1672/941] shadow-[0_-20px_60px_-30px_rgba(0,0,0,0.6)]"
         >
           {/* eslint-disable-next-line @next/next/no-img-element -- matches the plain <img> convention this project already uses for external/hosted assets */}
           <img
-            src="https://oxytal-ai.vercel.app/images/projects/sharepoint-migration/hero.webp"
+            src={mainBanner ?? ""}
             alt="Kaneff Group document platform on SharePoint Online after migration"
-            width={1600}
-            height={900}
-            className="block w-full"
+            aria-hidden
+            className="h-full w-full object-cover"
           />
         </div>
       </div>
@@ -1080,9 +1128,74 @@ function TechnologySection() {
    RELATED
 ========================================================= */
 
-function RelatedSection() {
+type RelatedItem = (typeof RELATED)[number];
+
+const RELATED_DESCRIPTION_MAX_LENGTH = 150;
+
+/**
+ * Truncates to at most `max` characters, trimmed back to the nearest word
+ * boundary so a cut never lands mid-word, and suffixed with "…". Text
+ * already at or under the limit passes through unchanged, no ellipsis
+ * added.
+ */
+function truncate(text: string, max: number): string {
+  if (text.length <= max) {
+    return text;
+  }
+
+  const cut = text.slice(0, max);
+  const lastSpace = cut.lastIndexOf(" ");
+  return `${(lastSpace > 0 ? cut.slice(0, lastSpace) : cut).trimEnd()}…`;
+}
+
+/**
+ * Maps one `contentDetail` entry (`contentDetailEntries[1]`/`[2]`/`[3]` —
+ * `[0]` is this case study's own hero-photo source, see the default
+ * export below) to one `RelatedSection` card. Same field convention
+ * `CaseStudiesListing`'s own card mapping uses elsewhere in this app:
+ * `heroImage` for the photo, `category` for the small tag, `title`/
+ * `shortDescription` for the copy (capped at
+ * `RELATED_DESCRIPTION_MAX_LENGTH` characters, via `truncate`, so a long
+ * editor-written description can't unbalance the 3-up card grid), and a
+ * link resolved from `cta` (preferred) or else `/case-studies/<slug>`.
+ * Returns `undefined` for a missing entry or one with no `heroImage` — a
+ * related card with no photo would look broken here, so it's dropped
+ * rather than shown empty.
+ */
+function resolveRelatedItem(entry: PlainEntry<ContentDetailSkeleton> | undefined): RelatedItem | undefined {
+  if (!entry) {
+    return undefined;
+  }
+
+  const heroImageEntry = entry.fields.heroImage;
+  const img = heroImageEntry && "fields" in heroImageEntry ? getAssetUrl(heroImageEntry.fields.image) : undefined;
+
+  if (!img) {
+    return undefined;
+  }
+
+  const ctaEntry = entry.fields.cta?.find((link) => link && "fields" in link) as
+    | PlainEntry<DataLinkSkeleton>
+    | undefined;
+  const ctaHref = ctaEntry
+    ? ctaEntry.fields.externalUrl || (ctaEntry.fields.linkedPage ? `/${ctaEntry.fields.linkedPage}` : undefined)
+    : undefined;
+
+  return {
+    href: ctaHref ?? (entry.fields.slug ? `/case-studies/${entry.fields.slug}` : "#"),
+    img,
+    alt: entry.fields.title ?? "",
+    k: entry.fields.category ?? entry.fields.clientName ?? "",
+    title: entry.fields.title ?? "",
+    text: entry.fields.shortDescription ? truncate(entry.fields.shortDescription, RELATED_DESCRIPTION_MAX_LENGTH) : "",
+  };
+}
+
+/** Falls back to the static `RELATED` list when `related` is unset or empty — i.e. until a page's composableElement actually has `contentDetailEntries[1]`/`[2]`/`[3]` set (see `resolveRelatedItem`/the default export below). */
+function RelatedSection({ related }: { related?: RelatedItem[] }) {
   const introRef = useFadeUp<HTMLDivElement>();
   const gridRef = useListStagger<HTMLDivElement>("y", 20);
+  const items = related?.length ? related : RELATED;
 
   return (
     <section className="bg-[#FBFDFE] px-5 py-14 sm:px-8 sm:py-16">
@@ -1092,7 +1205,7 @@ function RelatedSection() {
         </div>
 
         <div ref={gridRef} className="mt-9 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {RELATED.map((item) => (
+          {items.map((item) => (
             <Link
               key={item.href}
               href={item.href}
@@ -1101,7 +1214,7 @@ function RelatedSection() {
               {/* eslint-disable-next-line @next/next/no-img-element -- matches the plain <img> convention this project already uses for external/hosted assets */}
               <img src={item.img} alt={item.alt} width={800} height={500} loading="lazy" className="aspect-16/10 block w-full object-cover" />
               <div className="p-5.5">
-                <span className="font-mono text-[12px] tracking-[0.11em] text-[#8598AA] uppercase">{item.k}</span>
+                <span className="text-[12px] text-[#2C87CC] font-semibold uppercase">{item.k}</span>
                 <span className="mt-2 mb-1.5 text-[17px] font-extrabold text-[#0B1B2B] block">{item.title}</span>
                 <p className="text-[13.5px] leading-[1.55] text-[#546A7E]">{item.text}</p>
               </div>
@@ -1118,12 +1231,31 @@ function RelatedSection() {
    PAGE
 ========================================================= */
 
-export default function KaneffCaseStudy() {
+export default function KaneffCaseStudy({ entry }: Props) {
+  const elements = entry?.fields.elements ?? [];
+  const contentDetailEntries = elements.filter(
+    (element): element is PlainEntry<ContentDetailSkeleton> =>
+      isEntry(element) && element.sys.contentType.sys.id === "contentDetail"
+  );
+  const heromainEntry = contentDetailEntries[0];
+  const heroImageEntry = heromainEntry?.fields.heroImage;
+  const mainBanner =
+    heroImageEntry && "fields" in heroImageEntry ? getAssetUrl(heroImageEntry.fields.image) : undefined;
+
+  // The 3 related-case-study cards, one per entry — `[0]` stays this
+  // case study's own hero-photo source above, so the related cards
+  // start at `[1]`. `resolveRelatedItem` drops any that don't resolve
+  // (missing entry, or no `heroImage`), and `RelatedSection` falls back
+  // to its own static list whenever none of the three do.
+  const relatedItems = [contentDetailEntries[1], contentDetailEntries[2], contentDetailEntries[3]]
+    .map(resolveRelatedItem)
+    .filter((item): item is RelatedItem => Boolean(item));
+
   return (
     <div className="relative overflow-hidden bg-[#FBFDFE]">
       <div data-nav-contrast="dark">
         <Breadcrumb />
-        <Hero />
+        <Hero mainBanner={mainBanner} />
       </div>
       <OutcomesSection />
       <ChallengeSection />
@@ -1136,7 +1268,7 @@ export default function KaneffCaseStudy() {
       <HowWeWorkedSection />
         <HandoverSection />
       <TechnologySection />
-      <RelatedSection />
+      <RelatedSection related={relatedItems} />
     </div>
   );
 }
