@@ -6,6 +6,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SplitText } from "gsap/SplitText";
 import { ArrowRight } from "lucide-react";
 import { cx } from "@/app/lib/cx";
+import { resolveTheme, SectionTheme } from "../lib/theme";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger, SplitText);
@@ -18,6 +19,26 @@ export type CommonVideoAspectRatio = "16/9" | "21/9" | "4/3" | "1/1" | "9/16";
 export type CommonVideoHeadingLevel = "h1" | "h2" | "h3" | "h4";
 
 export type CommonVideoOverlay = "dark" | "light";
+
+/**
+ * "primary" is the filled button (`themeColor.buttonBg`/`buttonText`/
+ * `buttonHoverBg`). "link" is an outline/ghost button that borrows
+ * whatever text color the heading is already using (via `border-
+ * current`), since there's no dedicated field for it on `SectionTheme`.
+ * Named to match `dataLink.type`'s own two values ("primary"/"link"), so
+ * a link entry's `type` field maps onto this with no translation needed
+ * (see `PageBody`'s `dataVideo` case).
+ */
+export type CommonVideoButtonVariant = "primary" | "link";
+
+export interface CommonVideoButton {
+  text: string;
+  /** Renders an `<a>` when set; otherwise a `<button>` that calls `onClick`. */
+  href?: string;
+  onClick?: () => void;
+  /** Defaults to "primary". */
+  variant?: CommonVideoButtonVariant;
+}
 
 export interface CommonVideoProps {
   /** Primary video source. Any browser-playable URL, e.g. a `dataVideo.videoFile` asset URL from Contentful. */
@@ -36,11 +57,13 @@ export interface CommonVideoProps {
   headingLevel?: CommonVideoHeadingLevel;
   /** Always renders in the default size/color — no per-entry override. */
   description?: string;
-  buttonText?: string;
-  /** Href for the CTA. Renders an `<a>` to match the rest of the codebase (no `next/link` usage exists yet). */
-  buttonLink?: string;
-  /** Called instead of navigating when there's no `buttonLink` (e.g. open a modal). Ignored if `buttonLink` is set. */
-  onButtonClick?: () => void;
+  /**
+   * Any number of CTAs, rendered side by side (wrapping on narrow
+   * screens) — one entry is one button, two is two, and so on. Each
+   * button's own `variant` (default "primary") picks its style; see
+   * `CommonVideoButtonVariant`.
+   */
+  buttons?: CommonVideoButton[];
   /** Horizontal alignment of the text overlaid on the video. Defaults to "center". */
   contentPosition?: CommonVideoContentPosition;
   /** Applied to the root `<section>`. */
@@ -60,6 +83,7 @@ export interface CommonVideoProps {
   /** Tint drawn directly over the video itself (independent of the text overlay's own scrim): "dark" lays a black scrim over it, "light" a white one. Omit for no tint at all — this never defaults to either color. */
   overlay?: CommonVideoOverlay;
   textDelay?: number;
+  theme?: string;
 }
 
 const ASPECT_RATIO_CLASSES: Record<CommonVideoAspectRatio, string> = {
@@ -99,27 +123,6 @@ const OVERLAY_CLASSES: Record<CommonVideoOverlay, string> = {
   light: "bg-gradient-to-t from-white/90 via-white/30 to-transparent",
 };
 
-/**
- * Eyebrow badge / description / button label text color follows `overlay`
- * for legibility against its tint: "dark" (black scrim) gets white text,
- * "light" (white scrim) gets black text. Falls back to each element's own
- * original default (see call sites below) when `overlay` is unset — the
- * heading is deliberately not included here since it wasn't part of the
- * request this was added for.
- */
-const OVERLAY_BOX_CLASSES: Record<CommonVideoOverlay, string> = {
-  dark: "bg-white text-slate-800",
-  light: "bg-slate-800 text-white",
-};
-const OVERLAY_BUTTON_CLASSES: Record<CommonVideoOverlay, string> = {
-  dark: "bg-white text-slate-800 hover:bg-white/80 hover:shadow-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white/80",
-  light: "bg-slate-800 text-white hover:bg-slate-600 hover:shadow-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-slate-600",
-};
-const OVERLAY_TEXT_CLASSES: Record<CommonVideoOverlay, string> = {
-  dark: "text-white",
-  light: "text-slate-800",
-};
-
 /** Horizontal placement of the overlay's text block *within* the video box (the overlay itself always spans the full box — see `hasContent` below). */
 const CONTENT_ALIGNMENT_CLASSES: Record<CommonVideoContentPosition, string> = {
   left: "items-start text-left",
@@ -127,6 +130,23 @@ const CONTENT_ALIGNMENT_CLASSES: Record<CommonVideoContentPosition, string> = {
   right: "items-end text-right",
 };
 
+/** Default (unthemed) colors, used for every block rendered outside a themed `composableElement` wrapper — i.e. wherever `renderBlock` isn't passed a resolved `theme`. */
+const DEFAULT_BLOCK_THEME: SectionTheme = {
+  sectionBg:"bg-gradient-to-br from-[#08172E] via-[#112B5C] to-[#123B5D]",
+  eyebrowBg: "bg-white/90",
+  eyebrowText: "text-[#0E9BC4]",
+  heading: "text-white",
+  body: "text-slate-300",
+  muted: "text-slate-500",
+  buttonBg: "bg-cyan-500",
+  buttonText: "text-slate-950",
+  buttonHoverBg: "hover:bg-cyan-400",
+  accentText: "text-cyan-300",
+  cardBg: "bg-white/5 backdrop-blur-md",
+  cardBorder: "border-white/10",
+  patternColor: "#7DC7C7",
+  showPattern: false,
+};
 /**
  * A video block that can stand alone, or grow into a full "premium" section
  * with eyebrow/heading/description/CTA text rendered *directly on top of
@@ -170,9 +190,20 @@ const CONTENT_ALIGNMENT_CLASSES: Record<CommonVideoContentPosition, string> = {
  *   eyebrow="CASE STUDY"
  *   heading="3x organic leads in 90 days"
  *   description="Northwind Labs rebuilt their funnel around how buyers actually research — here's how it played out."
- *   buttonText="Read the case study"
- *   buttonLink="/case-studies/northwind-labs"
+ *   buttons={[{ text: "Read the case study", href: "/case-studies/northwind-labs" }]}
  *   contentPosition="left"
+ * />
+ * ```
+ *
+ * @example Video with two CTAs — a filled primary and an outline "link"
+ * ```tsx
+ * <CommonVideo
+ *   videoSrc="/videos/products-hero.mp4"
+ *   heading="Every one of these started as a problem we had."
+ *   buttons={[
+ *     { text: "See the four", href: "#products" },
+ *     { text: "Build something like this", href: "/contact-us", variant: "link" },
+ *   ]}
  * />
  * ```
  */
@@ -185,9 +216,7 @@ export default function CommonVideo({
   heading,
   headingLevel = "h2",
   description,
-  buttonText,
-  buttonLink,
-  onButtonClick,
+  buttons,
   contentPosition = "center",
   className,
   aspectRatio = "16/9",
@@ -199,15 +228,31 @@ export default function CommonVideo({
   priority = false,
   overlay,
   textDelay,
+  theme,
 }: CommonVideoProps) {
-  const hasCta = Boolean(buttonText && (buttonLink || onButtonClick));
+  const themeColor = resolveTheme(theme) ?? DEFAULT_BLOCK_THEME;
+  const resolvedButtons = buttons ?? [];
+  const hasCta = resolvedButtons.length > 0;
   const hasContent = Boolean(eyebrow || heading || description || hasCta);
+
+  // "link"-variant buttons have no dedicated theme field of their own —
+  // they borrow whatever text color the heading is already using, via
+  // `border-current`, so they read correctly whichever theme is in play.
+  const primaryButtonClasses = cx(
+    themeColor?.buttonBg ?? "bg-gradient-to-r from-[#1450d4] to-[#2d7dfa]",
+    themeColor?.buttonText ?? "text-white",
+    themeColor?.buttonHoverBg
+  );
+  const linkButtonClasses = cx(
+    themeColor?.heading ?? "text-white",
+    "border border-current/35 bg-transparent hover:bg-current/10"
+  );
 
   const sectionRef = useRef<HTMLElement>(null);
   const eyebrowRef = useRef<HTMLSpanElement>(null);
   const headingRef = useRef<HTMLHeadingElement>(null);
   const descriptionRef = useRef<HTMLParagraphElement>(null);
-  const buttonRef = useRef<HTMLAnchorElement | HTMLButtonElement>(null);
+  const buttonsWrapperRef = useRef<HTMLDivElement>(null);
   const videoWrapperRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -243,7 +288,7 @@ export default function CommonVideo({
             eyebrowRef.current,
             headingRef.current,
             descriptionRef.current,
-            buttonRef.current,
+            buttonsWrapperRef.current,
             videoWrapperRef.current,
           ].filter(Boolean) as Element[],
           { opacity: 1, y: 0, scale: 1 }
@@ -274,7 +319,7 @@ export default function CommonVideo({
       const fadeTargets = [
         eyebrowRef.current,
         descriptionRef.current,
-        buttonRef.current,
+        buttonsWrapperRef.current,
       ].filter(Boolean) as Element[];
 
       if (fadeTargets.length) {
@@ -326,7 +371,7 @@ export default function CommonVideo({
       ctx.revert();
       split?.revert();
     };
-  }, [hasContent, eyebrow, heading, description, buttonText, TEXT_REVEAL_DELAY]);
+  }, [hasContent, eyebrow, heading, description, buttons, TEXT_REVEAL_DELAY]);
 
   /* =========================================================
      VIEWPORT-TRIGGERED PLAYBACK — play once visible, pause once
@@ -453,8 +498,9 @@ export default function CommonVideo({
                 <span
                   ref={eyebrowRef}
                   className={cx(
-                    "inline-block w-fit rounded-full  px-3 py-1.5 text-xs font-bold tracking-wide",
-                    overlay ? OVERLAY_BOX_CLASSES[overlay] : "text-white"
+                    "inline-block w-fit rounded-full  px-4 py-1.75 text-xs font-bold tracking-wide",
+                    themeColor?.eyebrowBg ?? "bg-white",
+                  themeColor?.eyebrowText ?? "text-cyan-300"
                   )}
                 >
                   {eyebrow}
@@ -466,7 +512,7 @@ export default function CommonVideo({
                   ref={headingRef as never}
                   className={cx(
                     "text-[28px] leading-[1.2] font-extrabold tracking-tight sm:text-[34px] md:text-[42px] lg:text-[60px]",
-                    overlay ? OVERLAY_TEXT_CLASSES[overlay] : "text-gray-200"
+                    themeColor.heading ?? "text-gray-200"
                   )}
                 >
                   {heading}
@@ -478,46 +524,54 @@ export default function CommonVideo({
                   ref={descriptionRef}
                   className={cx(
                     "text-[15.5px] leading-relaxed md:text-[17px]",
-                    overlay ? OVERLAY_TEXT_CLASSES[overlay] : "text-gray-200"
+                    themeColor?.body ?? "text-blue-200/80"
                   )}
                 >
                   {description}
                 </p>
               )}
 
-              {hasCta &&
-                (buttonLink ? (
-                  <a
-                    ref={buttonRef as never}
-                    href={buttonLink}
-                    className={cx(
-                      "group mt-1 inline-flex w-fit items-center gap-2 rounded-full bg-emerald-600 px-7 py-3.5 text-[15px] font-semibold shadow-lg shadow-black/25 hover:-translate-y-0.5",
-                      overlay ? OVERLAY_BUTTON_CLASSES[overlay] : "text-white"
-                    )}
-                  >
-                    {buttonText}
-                    <ArrowRight
-                      size={16}
-                      className="transition-transform group-hover:translate-x-1"
-                    />
-                  </a>
-                ) : (
-                  <button
-                    type="button"
-                    ref={buttonRef as never}
-                    onClick={onButtonClick}
-                    className={cx(
-                      "group mt-1 inline-flex w-fit items-center gap-2 rounded-full bg-emerald-600 px-7 py-3.5 text-[15px] font-semibold shadow-lg shadow-black/25 hover:-translate-y-0.5 hover:bg-emerald-500 hover:shadow-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emerald-600",
-                      overlay ? OVERLAY_TEXT_CLASSES[overlay] : "text-white"
-                    )}
-                  >
-                    {buttonText}
-                    <ArrowRight
-                      size={16}
-                      className="transition-transform group-hover:translate-x-1"
-                    />
-                  </button>
-                ))}
+              {hasCta && (
+                <div
+                  ref={buttonsWrapperRef}
+                  className={cx(
+                    "mt-1 flex flex-wrap items-center gap-3",
+                    contentPosition === "center" && "justify-center",
+                    contentPosition === "right" && "justify-end"
+                  )}
+                >
+                  {resolvedButtons.map((btn, index) => {
+                    const variantClasses = btn.variant === "link" ? linkButtonClasses : primaryButtonClasses;
+
+                    return btn.href ? (
+                      <a
+                        key={index}
+                        href={btn.href}
+                        className={cx(
+                          "group lg:min-w-[185px] inline-flex w-fit items-center justify-center gap-2 rounded-full px-7 py-3.5 text-[15px] font-semibold shadow-lg shadow-black/25 hover:-translate-y-0.5 hover:shadow-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-current",
+                          variantClasses
+                        )}
+                      >
+                        {btn.text}
+                        <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
+                      </a>
+                    ) : (
+                      <button
+                        key={index}
+                        type="button"
+                        onClick={btn.onClick}
+                        className={cx(
+                          "group lg:min-w-[185px] inline-flex w-fit items-center justify-center gap-2 rounded-full px-7 py-3.5 text-[15px] font-semibold shadow-lg shadow-black/25 hover:-translate-y-0.5 hover:shadow-xl focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-current",
+                          variantClasses
+                        )}
+                      >
+                        {btn.text}
+                        <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           </div>
         </div>

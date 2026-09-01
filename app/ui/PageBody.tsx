@@ -190,17 +190,27 @@ function renderBlock(
         )
         : undefined;
 
-      // `button` links to a `dataLink` *entry* — its own `label`/href
-      // become CommonVideo's `buttonText`/`buttonLink`, same resolution
-      // every other CTA in this file uses. CommonVideo only renders the
+      // `button` is an array of `dataLink` *entries* — one resolved entry
+      // becomes one `CommonVideo` button (in order), so an editor adding a
+      // second link gets a second button rendered alongside the first
+      // rather than replacing it. Each link's own `type` field ("primary"
+      // or "link") maps directly onto `CommonVideoButtonVariant`, which
+      // uses that same vocabulary — "primary" renders filled, "link"
+      // renders as the outline style. CommonVideo only renders the
       // overlay content block at all when at least one of eyebrow/
-      // heading/description/button is set — an editor who only fills in
+      // heading/description/buttons is set — an editor who only fills in
       // `heading`, say, gets just a heading, no empty eyebrow/text/button
       // slots.
-      const buttonEntry = entry.fields.button;
-      const buttonLink = isEntry(buttonEntry)
-        ? (buttonEntry as unknown as PlainEntry<DataLinkSkeleton>)
-        : undefined;
+      const buttons = (entry.fields.button ?? [])
+        .filter(isEntry)
+        .map((link) => {
+          const linkEntry = link as unknown as PlainEntry<DataLinkSkeleton>;
+          return {
+            text: linkEntry.fields.label,
+            href: resolveLinkHref(linkEntry),
+            variant: linkEntry.fields.type === "primary" ? ("primary" as const) : ("link" as const),
+          };
+        });
 
       return (
         // Plain, unstyled wrapper (no visual footprint) just to carry
@@ -224,14 +234,14 @@ function renderBlock(
             heading={entry.fields.heading}
             headingLevel={resolveVideoHeadingLevel(entry.fields.headingLevel)}
             description={entry.fields.text}
-            buttonText={buttonLink?.fields.label}
-            buttonLink={buttonLink ? resolveLinkHref(buttonLink) : undefined}
+            buttons={buttons}
             // Video-only CommonVideo renders with no wrapper by design. Give
             // it the same horizontal gutter as the rest of the page (not the
             // narrow text `container`, which made it look squeezed on wide
             // screens) — CommonVideo's own max-h cap keeps the height in
             // check regardless of how wide this ends up being.
             className=""
+            theme={entry.fields.theme}
           />
         </div>
       );

@@ -55,8 +55,8 @@ export type DataVideoSkeleton = EntrySkeletonType<
     headingLevel?: EntryFieldTypes.Symbol;
     /** Plain (non-rich) overlay body copy — short by design (a video caption, not a full article), unlike `dataText.text`'s `RichText`. */
     text?: EntryFieldTypes.Text;
-    /** The overlay's CTA — reuses `dataLink` for its `label`/href, same convention every other CTA in this project uses. */
-    button?: EntryFieldTypes.EntryLink<DataLinkSkeleton>;
+    /** The overlay's CTA(s) — an array of `dataLink` entries (same `label`/href convention every other CTA in this project uses), rendered as one button per resolved entry: one link in the array is one button, two is two, and so on. A link's own `type` field ("primary" vs. anything else) picks that button's style — see `CommonVideo`'s `buttons` prop. */
+    button?: EntryFieldTypes.Array<EntryFieldTypes.EntryLink<DataLinkSkeleton>>;
     /** Locked Contentful enum — "dark" or "light" only. Only meaningful when this entry is placed directly in a `page.body` field (see `PageBody`) — a `dataVideo` nested inside a `composableElement`'s `elements` ignores it entirely. `PageBody` stamps it onto this block's own wrapper as a `data-nav-contrast` attribute, same mechanism `ComposableElementRenderer`'s own `navType` uses — see `Navbar.tsx`'s "NAV CONTRAST" comment. Falls back to "light" when unset. */
     navType?: EntryFieldTypes.Symbol;
     /**
@@ -71,6 +71,7 @@ export type DataVideoSkeleton = EntrySkeletonType<
     overlay?: EntryFieldTypes.Symbol;
     /** Seconds the text overlay (eyebrow/heading/description/button) waits — after the section scrolls into view — before it reveals, passed straight through to `CommonVideo`'s own `textDelay` prop. The video itself isn't held back by this. Falls back to 0 (no delay) when unset. */
     textDelay?: EntryFieldTypes.Number;
+    theme?: EntryFieldTypes.Symbol;
   },
   "dataVideo"
 >;
