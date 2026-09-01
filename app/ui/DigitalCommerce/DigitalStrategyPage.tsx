@@ -958,7 +958,7 @@ function RelatedCard({ k, title, body, href }: (typeof RELATED)[number]) {
   const cardRef = useCardHover<HTMLAnchorElement>({ y: -4 });
   return (
     <Link href={href} ref={cardRef} className="block rounded-[14px] border border-[#EDE5E9] bg-white p-[22px]">
-      <span className="text-[10px] uppercase tracking-[0.11em] text-[#817D9A]">{k}</span>
+      <span className="text-[10px] uppercase tracking-[0.11em] text-[#817D9A] block">{k}</span>
       <span className="mt-[9px] mb-[6px] text-[1rem] font-bold text-[#171122]">{title}</span>
       <p className="text-[0.85rem] leading-[1.55] text-[#5F647F]">{body}</p>
     </Link>
