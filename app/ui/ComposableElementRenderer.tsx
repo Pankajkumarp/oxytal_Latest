@@ -73,6 +73,9 @@ import RedMirchiCaseStudy from "./product/RedMirchiCaseStudy";
 import LoneRiverCaseStudy from "./product/LoneRiverCaseStudy";
 import InkJetWorldCaseStudy from "./product/InkJetWorldCaseStudy";
 import CastletownrocheCaseStudy from "./product/CastletownrocheCaseStudy";
+import BundabergRumCaseStudy from "./product/BundabergRumCaseStudy";
+import AviationGinCaseStudy from "./product/AviationGinCaseStudy";
+import JohnnieWalkerStyleCaseStudy from "./product/JohnnieWalkerStyleCaseStudy";
 import ProductsOverviewPage from "./product/ProductsOverviewPage";
 
 type PlainEntry<Skeleton extends EntrySkeletonType> = Entry<
@@ -164,6 +167,9 @@ const subtypeComponents: Record<
   loneRiver: LoneRiverCaseStudy,
   inkjetWorld: InkJetWorldCaseStudy,
   castletownroche: CastletownrocheCaseStudy,
+  bundabergRum: BundabergRumCaseStudy,
+  aviationGin: AviationGinCaseStudy,
+  johnnieWalkerStyle: JohnnieWalkerStyleCaseStudy,
   productsOverview: ProductsOverviewPage,
   DigitalCommerceHero: DigitalCommerce,
 };
