@@ -697,18 +697,17 @@ function Hero({ mainBanner }: { mainBanner?: string }) {
 
         <div
           ref={shotRef}
-          className="overflow-hidden rounded-t-[20px] border border-b-0 border-white/12 bg-[#1A0F13] shadow-[0_-20px_60px_-30px_rgba(0,0,0,0.75)]"
+          className="overflow-hidden rounded-t-[10px] aspect-[1672/941] shadow-[0_-20px_60px_-30px_rgba(0,0,0,0.75)]"
         >
           {/* eslint-disable-next-line @next/next/no-img-element -- matches the plain <img> convention this project already uses for external/hosted assets */}
           <img
             src={
               mainBanner ??
-              "https://www.johnniewalkerstyle.com/cdn/shop/files/1681747566_a98695df-17a5-4c13-9eff-7e0b10dc0045.png?v=1782897231&width=1600"
+              ""
             }
             alt="Johnnie Walker Style Thailand"
-            width={1600}
-            height={700}
-            className="block aspect-16/7 w-full object-contain p-6 sm:p-10 lg:p-14"
+            aria-hidden
+            className="h-full w-full object-cover"
           />
         </div>
       </div>
@@ -909,10 +908,10 @@ function BuiltRow({ row, image }: { row: BuiltRow; image?: string }) {
       {row.visual === "photo" && (
         <div
           ref={mediaRef}
-          className="overflow-hidden rounded-[18px] border border-[#EDE2E4] bg-[#F8F2F3] shadow-[0_20px_46px_-22px_rgba(22,13,16,0.24)]"
+          className="overflow-hidden rounded-[15px] shadow-[0_20px_46px_-22px_rgba(22,13,16,0.24)]"
         >
           {/* eslint-disable-next-line @next/next/no-img-element -- matches the plain <img> convention this project already uses for external/hosted assets */}
-          <img src={image ?? row.img} alt={row.alt} loading="lazy" className="block aspect-[1672/941] w-full object-cover" />
+          <img src={image ?? row.img} alt={row.alt} loading="lazy" className="block aspect-[600/700] w-full object-cover" />
         </div>
       )}
     </div>
