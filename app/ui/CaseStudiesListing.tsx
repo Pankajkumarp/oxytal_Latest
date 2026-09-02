@@ -1,6 +1,6 @@
 "use client";
 
-import { useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import Link from "next/link";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -111,6 +111,11 @@ const PLACEHOLDER_IMAGES = [
   "https://picsum.photos/seed/oxytal-case-listing-3/700/500",
   "https://picsum.photos/seed/oxytal-case-listing-4/700/500",
 ];
+
+/** Cards shown before any "Load more" click. */
+const INITIAL_VISIBLE_COUNT = 4;
+/** Additional cards revealed per "Load more" click. */
+const LOAD_MORE_COUNT = 4;
 
 /** Tag pill colors, assigned to categories in order of first appearance (see `useCategoryColors` below) — same 4-color rotation the reference mockup uses (amber/blue/emerald/pink). */
 const TAG_COLORS = [
@@ -232,11 +237,10 @@ function CaseStudyCard({
           className="h-full w-full object-cover"
         />
       </div>
-
       {study.clientName && (
         <p
           className={cx(
-            "mt-4 text-[12px] font-bold tracking-wide uppercase",
+            "mt-6 text-[12px] font-bold tracking-wide uppercase",
             theme?.accentText ?? "text-blue-600"
           )}
         >
@@ -256,7 +260,7 @@ function CaseStudyCard({
       {study.description && (
         <p
           className={cx(
-            "mt-2 flex-1 text-[13.5px] leading-relaxed",
+            "mt-2 flex-1 text-[15px] leading-[1.75]",
             theme?.body ?? "text-slate-500"
           )}
         >
@@ -373,10 +377,25 @@ export default function CaseStudiesListing({ entry }: Props) {
   const categories = Array.from(categoryColors.keys());
 
   const [activeFilter, setActiveFilter] = useState("all");
-  const visibleStudies =
+  const filteredStudies =
     activeFilter === "all"
       ? allStudies
       : allStudies.filter((study) => study.category === activeFilter);
+
+  // How many cards of the active filter are currently shown — starts at
+  // `INITIAL_VISIBLE_COUNT` and grows by `LOAD_MORE_COUNT` per "Load more"
+  // click, resetting back to the initial count whenever the filter changes
+  // (below) so switching tabs doesn't carry over a deeper page from the
+  // previous filter.
+  const [visibleCount, setVisibleCount] = useState(INITIAL_VISIBLE_COUNT);
+
+  const handleFilterChange = (filter: string) => {
+    setActiveFilter(filter);
+    setVisibleCount(INITIAL_VISIBLE_COUNT);
+  };
+
+  const visibleStudies = filteredStudies.slice(0, visibleCount);
+  const hasMoreStudies = visibleCount < filteredStudies.length;
 
   // Resolves `themeColor` (e.g. "dark", "blue", "emerald" — see
   // app/lib/theme.ts) to this section's colors. `undefined` for an unset
@@ -476,6 +495,33 @@ export default function CaseStudiesListing({ entry }: Props) {
     return () => ctx.revert();
   }, [activeFilter]);
 
+  /* =========================================================
+     LOAD MORE SCROLL — after a "Load more" click adds cards past what
+     was already on screen, nudge the page so the newly revealed row
+     isn't left half-cut-off at the bottom of the viewport. Tracks the
+     previous `visibleCount` in a ref so this only fires on an actual
+     increase (a "Load more" click), not on mount or on a filter change
+     (which resets `visibleCount` back down via `handleFilterChange`).
+  ========================================================= */
+  const previousVisibleCountRef = useRef(visibleCount);
+  useEffect(() => {
+    const previousVisibleCount = previousVisibleCountRef.current;
+    previousVisibleCountRef.current = visibleCount;
+
+    if (visibleCount <= previousVisibleCount || !gridRef.current) {
+      return;
+    }
+
+    const firstNewCard = gridRef.current.children[previousVisibleCount] as
+      | HTMLElement
+      | undefined;
+
+    firstNewCard?.scrollIntoView({
+      behavior: prefersReducedMotion() ? "auto" : "smooth",
+      block: "nearest",
+    });
+  }, [visibleCount]);
+
   return (
     <section
       ref={sectionRef}
@@ -571,7 +617,7 @@ export default function CaseStudiesListing({ entry }: Props) {
           <div className="mt-16 flex flex-wrap gap-2.5 md:mt-20">
             <button
               type="button"
-              onClick={() => setActiveFilter("all")}
+              onClick={() => handleFilterChange("all")}
               className={cx(
                 "rounded-full border px-4.5 py-2 text-[13.5px] font-semibold transition-colors",
                 activeFilter === "all"
@@ -591,7 +637,7 @@ export default function CaseStudiesListing({ entry }: Props) {
               <button
                 key={category}
                 type="button"
-                onClick={() => setActiveFilter(category)}
+                onClick={() => handleFilterChange(category)}
                 className={cx(
                   "rounded-full border px-4.5 py-2 text-[13.5px] font-semibold transition-colors",
                   activeFilter === category
@@ -611,8 +657,8 @@ export default function CaseStudiesListing({ entry }: Props) {
         )}
 
         <p className={cx("mt-6 text-[14px] font-semibold", theme?.body ?? "text-slate-500")}>
-          <span className={theme?.heading ?? "text-slate-900"}>{visibleStudies.length}</span>{" "}
-          case {visibleStudies.length === 1 ? "study" : "studies"}
+          <span className={theme?.heading ?? "text-slate-900"}>{filteredStudies.length}</span>{" "}
+          case {filteredStudies.length === 1 ? "study" : "studies"}
         </p>
 
         {/* =================================================
@@ -621,7 +667,7 @@ export default function CaseStudiesListing({ entry }: Props) {
         {visibleStudies.length > 0 && (
           <div
             ref={gridRef}
-            className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3"
+            className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-2"
           >
             {visibleStudies.map((study, index) => (
               <CaseStudyCard
@@ -635,6 +681,28 @@ export default function CaseStudiesListing({ entry }: Props) {
                 theme={theme}
               />
             ))}
+          </div>
+        )}
+
+        {/* =================================================
+            LOAD MORE
+        ================================================= */}
+        {hasMoreStudies && (
+          <div className="mt-10 flex justify-center">
+            <button
+              type="button"
+              onClick={() =>
+                setVisibleCount((count) => count + LOAD_MORE_COUNT)
+              }
+              className={cx(
+                "inline-flex relative z-2 w-fit min-w-[185px] justify-center cursor-pointer items-center gap-2 rounded-full px-7 py-3.5 text-[15px] font-semibold shadow-lg transition-all duration-300 hover:-translate-y-0.5",
+                theme?.buttonBg ?? "bg-slate-50",
+                theme?.buttonText ?? "border-slate-200",
+                theme?.buttonHoverBg ?? "border-slate-200",
+              )}
+            >
+              Load more
+            </button>
           </div>
         )}
       </div>

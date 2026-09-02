@@ -377,7 +377,7 @@ export default function AboutMissionVision({ entry }: Props) {
                     null
                   )}
                 </div>
-                <div className="p-9">
+                <div className="p-9 px-12 md:px-20">
                 <p
                   data-mv-label
                   className={cx(
@@ -397,7 +397,7 @@ export default function AboutMissionVision({ entry }: Props) {
                 </p>
                 <p
                   className={cx(
-                    "mt-3 text-[14px] leading-relaxed",
+                    "mt-3 text-[15px] leading-[1.75]",
                     theme?.body ?? "text-gray-500"
                   )}
                 >

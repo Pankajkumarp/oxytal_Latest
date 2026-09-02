@@ -661,7 +661,7 @@ export default function Footer({ entry }: Props) {
         {copyright?(
         <div
           className={cx(
-            "flex flex-col items-center gap-4 border-t py-7 sm:flex-row sm:justify-between",
+            "flex flex-col items-center gap-4 border-t py-7 sm:flex-row sm:justify-center",
             theme?.cardBorder ?? "border-gray-100"
           )}
         >

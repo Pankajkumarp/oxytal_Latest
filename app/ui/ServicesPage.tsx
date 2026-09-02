@@ -22,6 +22,7 @@ import {
 } from "../types/contentful";
 import ThemePattern from "./ThemePattern";
 import styles from "./ServicesPage.module.css";
+import Link from "next/link";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger, SplitText);
@@ -232,11 +233,11 @@ function contentDetailToService(
       proofLink && resolveLinkHref(proofLink)
         ? {
           type: "link",
-          label: "Recent work",
+          label: "",
           href: resolveLinkHref(proofLink)!,
           text: proofLink.fields.label,
         }
-        : { type: "empty", text: "Case study in preparation" },
+        : { type: "empty", text: "" },
     ctaHref:
       (primaryLink && resolveLinkHref(primaryLink)) ??
       `${SITE_URL}/contact`,
@@ -390,9 +391,13 @@ export default function ServicesPage({ entry }: Props) {
      scroll-in (same GSAP split-text treatment as
      HomeAI/HomeServices/ServicesAiLayer). Skipped entirely under
      prefers-reduced-motion.
+
+     `gsap.context()`'s scope is passed as `introRef.current` (the
+     resolved element), not the ref object itself — see the same note
+     on CommonVideo's reveal effect for why.
   ========================================================= */
   useLayoutEffect(() => {
-    if (!headingRef.current) {
+    if (!headingRef.current || !introRef.current) {
       return;
     }
 
@@ -423,7 +428,7 @@ export default function ServicesPage({ entry }: Props) {
             },
           }),
       });
-    }, introRef);
+    }, introRef.current);
 
     return () => {
       ctx.revert();
@@ -717,7 +722,7 @@ export default function ServicesPage({ entry }: Props) {
             </ol>
           </aside>
 
-          <div className={cx(styles.panels, "border", cardBorderClass)}>
+          <div className={cx(styles.panels, "", cardBorderClass)}>
             {services.map((service) => (
               <article
                 key={service.id}
@@ -794,9 +799,9 @@ export default function ServicesPage({ entry }: Props) {
                   {service.proof.type === "link" ? (
                     <p className={cx(styles.panelProof, mutedClass)}>
                       {service.proof.label}{" "}
-                      <a href={service.proof.href} className={headingClass}>
+                      <Link href={service.proof.href} className={cx("hover:!text-sky-600 hover:underline", headingClass)}>
                         {service.proof.text}
-                      </a>
+                      </Link>
                     </p>
                   ) : (
                     <p
@@ -809,13 +814,13 @@ export default function ServicesPage({ entry }: Props) {
                       {service.proof.text}
                     </p>
                   )}
-                  <a
+                  <Link
                     className={cx(styles.panelCta, headingClass)}
                     href={service.ctaHref}
                   >
                     Explore this service
                     <ArrowIcon />
-                  </a>
+                  </Link>
                 </div>
               </article>
             ))}

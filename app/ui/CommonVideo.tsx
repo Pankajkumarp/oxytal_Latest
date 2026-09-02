@@ -269,6 +269,14 @@ export default function CommonVideo({
      browser paints — otherwise, if this section is already near/within
      the ScrollTrigger threshold on load, content flashes fully visible
      for a frame and then snaps to hidden.
+
+     `gsap.context()`'s scope is passed as `sectionRef.current` (the
+     resolved element), not the ref object itself — already
+     null-checked above, and passing the concrete element means GSAP
+     never needs to dereference `.current` itself later. That
+     dereference is what its own `Invalid scope` console warning comes
+     from, seen intermittently on this page alongside a sibling
+     ScrollTrigger/SplitText section's crash.
   ========================================================= */
   useLayoutEffect(() => {
     if (!hasContent || !sectionRef.current) {
@@ -365,7 +373,7 @@ export default function CommonVideo({
         });
       }
 
-    }, sectionRef);
+    }, sectionRef.current);
 
     return () => {
       ctx.revert();

@@ -1130,7 +1130,7 @@ function TechnologySection() {
 
 type RelatedItem = (typeof RELATED)[number];
 
-const RELATED_DESCRIPTION_MAX_LENGTH = 150;
+const RELATED_DESCRIPTION_MAX_LENGTH = 400;
 
 /**
  * Truncates to at most `max` characters, trimmed back to the nearest word
@@ -1204,7 +1204,7 @@ function RelatedSection({ related }: { related?: RelatedItem[] }) {
           <SectionHead eyebrow="More of our work" title="Related case studies." headingLevel="h4" narrow={false} />
         </div>
 
-        <div ref={gridRef} className="mt-9 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <div ref={gridRef} className="mt-9 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-2">
           {items.map((item) => (
             <Link
               key={item.href}
@@ -1215,8 +1215,8 @@ function RelatedSection({ related }: { related?: RelatedItem[] }) {
               <img src={item.img} alt={item.alt} loading="lazy" className="aspect-[1672/941] block w-full object-cover" />
               <div className="p-5.5">
                 <span className="text-[12px] text-[#2C87CC] font-semibold uppercase">{item.k}</span>
-                <span className="mt-2 mb-1.5 text-[17px] font-extrabold text-[#0B1B2B] block">{item.title}</span>
-                <p className="text-[13.5px] leading-[1.55] text-[#546A7E]">{item.text}</p>
+                <span className="mt-2 mb-1.5 text-[20px] font-extrabold text-[#0B1B2B] block">{item.title}</span>
+                <p className="text-[15px] leading-[1.75] text-[#546A7E]">{item.text}</p>
               </div>
             </Link>
           ))}
@@ -1247,7 +1247,7 @@ export default function KaneffCaseStudy({ entry }: Props) {
   // start at `[1]`. `resolveRelatedItem` drops any that don't resolve
   // (missing entry, or no `heroImage`), and `RelatedSection` falls back
   // to its own static list whenever none of the three do.
-  const relatedItems = [contentDetailEntries[1], contentDetailEntries[2], contentDetailEntries[3]]
+  const relatedItems = [contentDetailEntries[1], contentDetailEntries[2]]
     .map(resolveRelatedItem)
     .filter((item): item is RelatedItem => Boolean(item));
 
