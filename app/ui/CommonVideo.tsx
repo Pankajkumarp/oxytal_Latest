@@ -528,7 +528,7 @@ export default function CommonVideo({
               )}
 
               {description && (
-                <p
+                <h2
                   ref={descriptionRef}
                   className={cx(
                     "text-[15.5px] leading-relaxed md:text-[17px]",
@@ -536,7 +536,7 @@ export default function CommonVideo({
                   )}
                 >
                   {description}
-                </p>
+                </h2>
               )}
 
               {hasCta && (
