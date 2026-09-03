@@ -52,7 +52,7 @@ import {
   useSplitReveal,
   useStaggerReveal,
 } from "./useReveal";
-import { ComposableElementSkeleton, DataImageSkeleton } from "@/app/types/contentful";
+import { ComposableElementSkeleton, ContentDetailSkeleton, DataImageSkeleton } from "@/app/types/contentful";
 import { Entry, EntrySkeletonType } from "contentful";
 import { getAssetUrl } from "@/app/lib/contentfulAsset";
 import type { HeadingLevel } from "@/app/lib/headingLevel";
@@ -241,7 +241,7 @@ function Hero({ backgroundUrl }: { backgroundUrl?: string }) {
         >
           <span className="text-[10.5px] font-semibold uppercase tracking-[0.14em] text-[#8D8E9E]">Commerce clients</span>
           <ul className="flex flex-wrap gap-x-9 gap-y-4">
-            {["Aviation Gin", "Bundaberg Rum", "Lone River", "Casa Famosa", "Taffer's Mixologist"].map((name) => (
+            {["Bundaberg Rum", "Johnnie Walker Style", "Taffer's Mixologist"].map((name) => (
               <li key={name} className="text-[0.98rem] font-semibold text-[#95919F]">
                 {name}
               </li>
@@ -738,35 +738,6 @@ const STATS = [
   { value: "—", label: "Years supporting live stores" },
 ];
 
-const WORK = [
-  {
-    brand: "Placeholder — replace with real client",
-    title: "DTC launch with compliant age gating",
-    body: "Age verification, restricted-region logic and carrier rules enforced at checkout rather than bolted on afterwards — so compliance stopped being a manual review step.",
-    outputs: [
-      { value: "—", label: "Conversion lift" },
-      { value: "—", label: "Weeks to launch" },
-    ],
-  },
-  {
-    brand: "Placeholder — replace with real client",
-    title: "Replatform without losing rankings",
-    body: "Catalogue, customer accounts and a decade of order history migrated, with organic search equity held through cutover and trading uninterrupted.",
-    outputs: [
-      { value: "—", label: "Downtime" },
-      { value: "—", label: "Orders migrated" },
-    ],
-  },
-  {
-    brand: "Placeholder — replace with real client",
-    title: "Order operations, automated",
-    body: "ERP and 3PL integration that removed manual re-keying from every order — the team stopped growing headcount to keep pace with volume.",
-    outputs: [
-      { value: "—", label: "Manual steps removed" },
-      { value: "—", label: "Hours saved monthly" },
-    ],
-  },
-];
 
 function StatTile({ value, label }: (typeof STATS)[number]) {
   return (
@@ -779,31 +750,64 @@ function StatTile({ value, label }: (typeof STATS)[number]) {
   );
 }
 
-function WorkCard({ brand, title, body, outputs }: (typeof WORK)[number]) {
-  const cardRef = useCardHover<HTMLDivElement>({ y: -4 });
+
+/** A `contentDetail` entry, mapped to what `RelatedWorkCard` needs — reusing `contentDetail` (title/category/shortDescription/heroImage/slug) the same way `HomeCaseStudies`' `contentDetailToCaseStudyItem` does, rather than inventing a dedicated content type just for this grid. */
+interface RelatedWorkItem {
+  id: string;
+  title: string;
+  category?: string;
+  description?: string;
+  /** Blank until an editor sets `heroImage` — no placeholder photo, same convention `HomeCaseStudies` uses. */
+  imageUrl?: string;
+  href: string;
+}
+
+function contentDetailToRelatedWorkItem(
+  entry: PlainEntry<ContentDetailSkeleton>
+): RelatedWorkItem {
+  const heroImageEntry = entry.fields.heroImage;
+  const imageUrl = isEntry(heroImageEntry)
+    ? getAssetUrl(
+      (heroImageEntry as unknown as PlainEntry<DataImageSkeleton>).fields.image
+    )
+    : undefined;
+
+  return {
+    id: entry.sys.id,
+    title: entry.fields.title ?? "",
+    category: entry.fields.category,
+    description: entry.fields.shortDescription,
+    imageUrl,
+    href: entry.fields.slug ? entry.fields.slug : "#",
+  };
+}
+
+function RelatedWorkCard({ title, category, description, imageUrl, href }: RelatedWorkItem) {
+  const cardRef = useCardHover<HTMLAnchorElement>({ y: -4 });
   return (
-    <div ref={cardRef} className="flex flex-col overflow-hidden rounded-2xl border border-[#EDE5E9] bg-white">
-      <div aria-hidden className="h-[6px] bg-[linear-gradient(90deg,#fe7f52,#ffb1c8)]" />
-      <div className="flex flex-1 flex-col p-[26px]">
-        <span className="mb-[13px] text-[10.5px] uppercase tracking-[0.12em] text-[#8D8E9E]">{brand}</span>
-        <span className="mb-[10px] text-[1.06rem] font-bold leading-[1.32] text-[#1A1220] block">{title}</span>
-        <p className="flex-1 text-[0.89rem] leading-[1.6] text-[#5C6072]">{body}</p>
-        <div className="mt-[18px] flex gap-6 border-t border-[#EDE5E9] pt-[15px]">
-          {outputs.map((o) => (
-            <div key={o.label}>
-              <div className="text-[1.25rem] font-bold tracking-[-0.02em] text-[#fe7f52]">{o.value}</div>
-              <div className="mt-[3px] text-[9.5px] uppercase tracking-[0.08em] text-[#8D8E9E]">{o.label}</div>
-            </div>
-          ))}
-        </div>
+    <Link
+      ref={cardRef}
+      href={href}
+      className="block overflow-hidden rounded-2xl border border-[#EDE5E9] bg-white"
+    >
+      {imageUrl && (
+        <img src={imageUrl} alt={title} loading="lazy" className="aspect-[1672/941] block w-full object-cover" />
+      )}
+      <div className="p-[22px]">
+        {category && (
+          <span className="text-[12px] font-semibold uppercase text-[#5b4be0]">{category}</span>
+        )}
+        <span className="mt-2 mb-1.5 block text-[20px] font-extrabold text-[#0D1B2A]">{title}</span>
+        {description && <p className="text-[15px] leading-[1.75] text-[#55677f]">{description}</p>}
       </div>
-    </div>
+    </Link>
   );
 }
 
-function EvidenceSection() {
+function EvidenceSection({ related }: { related?: PlainEntry<ContentDetailSkeleton>[] }) {
   const statsRef = useStaggerReveal<HTMLDivElement>();
-  const workRef = useStaggerReveal<HTMLDivElement>();
+  const relatedRef = useStaggerReveal<HTMLDivElement>();
+   const items = related?.length ? related.map(contentDetailToRelatedWorkItem) : [];
 
   return (
     <section id="work" className={SECTION}>
@@ -820,12 +824,13 @@ function EvidenceSection() {
             <StatTile key={s.label} {...s} />
           ))}
         </div>
-
-        <div ref={workRef} className="mt-6 grid grid-cols-1 gap-[22px] lg:grid-cols-3">
-          {WORK.map((w) => (
-            <WorkCard key={w.title} {...w} />
-          ))}
-        </div>
+        {items.length > 0 && (
+          <div ref={relatedRef} className="mt-9 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-2">
+            {items.map((item) => (
+              <RelatedWorkCard key={item.id} {...item} />
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );
@@ -998,6 +1003,11 @@ export default function DigitalCommercePage({ entry }: Props) {
     )
     : undefined;
 
+      const elements = entry?.fields.elements ?? [];
+      const relatedItems = elements.filter(
+        (element): element is PlainEntry<ContentDetailSkeleton> =>
+          isEntry(element) && element.sys.contentType.sys.id === "contentDetail"
+      );
   return (
     <main className="bg-[#FDFBFC]">
       <Hero backgroundUrl={backgroundUrl} />
@@ -1005,7 +1015,7 @@ export default function DigitalCommercePage({ entry }: Props) {
       <CapabilitySection />
       <PlatformsSection />
       <WhySection />
-      <EvidenceSection />
+      <EvidenceSection related={relatedItems}/>
       <EngagementSection />
       <FaqSection />
       <RelatedAndCtaSection />

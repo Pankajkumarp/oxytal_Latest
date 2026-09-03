@@ -54,7 +54,7 @@ import {
   useSplitReveal,
   useStaggerReveal,
 } from "./useReveal";
-import { ComposableElementSkeleton, DataImageSkeleton } from "@/app/types/contentful";
+import { ComposableElementSkeleton, ContentDetailSkeleton, DataImageSkeleton } from "@/app/types/contentful";
 import { Entry, EntrySkeletonType } from "contentful";
 import { getAssetUrl } from "@/app/lib/contentfulAsset";
 import type { HeadingLevel } from "@/app/lib/headingLevel";
@@ -732,36 +732,6 @@ const STATS = [
   { value: "—", label: "Years supporting live software" },
 ];
 
-const WORK = [
-  {
-    brand: "Placeholder — replace with real client",
-    title: "Enterprise platform, built and run",
-    body: "A workforce platform serving tens of thousands of employees, taken from first conversation to live and supported ever since — with the same team on it throughout.",
-    outputs: [
-      { value: "—", label: "Users served" },
-      { value: "—", label: "Uptime" },
-    ],
-  },
-  {
-    brand: "Placeholder — replace with real client",
-    title: "Legacy content estate modernised",
-    body: "Years of accumulated documents migrated and reorganised with AI assistance, with every record traceable to where it came from and nothing lost along the way.",
-    outputs: [
-      { value: "—", label: "Records migrated" },
-      { value: "—", label: "Manual effort saved" },
-    ],
-  },
-  {
-    brand: "Placeholder — replace with real client",
-    title: "From quarterly releases to weekly",
-    body: "Automated testing and release processes introduced around a fragile system, turning going live from a scheduled event requiring sign-off into something the team does on an ordinary Tuesday.",
-    outputs: [
-      { value: "—", label: "Release frequency" },
-      { value: "—", label: "Issues after release" },
-    ],
-  },
-];
-
 function StatTile({ value, label }: (typeof STATS)[number]) {
   return (
     <div className="bg-white p-[28px_24px]">
@@ -773,31 +743,65 @@ function StatTile({ value, label }: (typeof STATS)[number]) {
   );
 }
 
-function WorkCard({ brand, title, body, outputs }: (typeof WORK)[number]) {
-  const cardRef = useCardHover<HTMLDivElement>({ y: -4 });
+
+
+/** A `contentDetail` entry, mapped to what `RelatedWorkCard` needs — reusing `contentDetail` (title/category/shortDescription/heroImage/slug) the same way `HomeCaseStudies`' `contentDetailToCaseStudyItem` does, rather than inventing a dedicated content type just for this grid. */
+interface RelatedWorkItem {
+  id: string;
+  title: string;
+  category?: string;
+  description?: string;
+  /** Blank until an editor sets `heroImage` — no placeholder photo, same convention `HomeCaseStudies` uses. */
+  imageUrl?: string;
+  href: string;
+}
+
+function contentDetailToRelatedWorkItem(
+  entry: PlainEntry<ContentDetailSkeleton>
+): RelatedWorkItem {
+  const heroImageEntry = entry.fields.heroImage;
+  const imageUrl = isEntry(heroImageEntry)
+    ? getAssetUrl(
+      (heroImageEntry as unknown as PlainEntry<DataImageSkeleton>).fields.image
+    )
+    : undefined;
+
+  return {
+    id: entry.sys.id,
+    title: entry.fields.title ?? "",
+    category: entry.fields.category,
+    description: entry.fields.shortDescription,
+    imageUrl,
+    href: entry.fields.slug ? entry.fields.slug : "#",
+  };
+}
+
+function RelatedWorkCard({ title, category, description, imageUrl, href }: RelatedWorkItem) {
+  const cardRef = useCardHover<HTMLAnchorElement>({ y: -4 });
   return (
-    <div ref={cardRef} className="flex flex-col overflow-hidden rounded-2xl border border-[#EDE5E9] bg-white">
-      <div aria-hidden className="h-[6px] bg-[linear-gradient(90deg,#1651f5,#ffb199)]" />
-      <div className="flex flex-1 flex-col p-[26px]">
-        <span className="mb-[13px] text-[10.5px] uppercase tracking-[0.12em] text-[#8D8E9E]">{brand}</span>
-        <span className="mb-[10px] text-[1.06rem] font-bold leading-[1.32] text-[#0D1B2A] block">{title}</span>
-        <p className="flex-1 text-[0.89rem] leading-[1.6] text-[#55677f]">{body}</p>
-        <div className="mt-[18px] flex gap-6 border-t border-[#EDE5E9] pt-[15px]">
-          {outputs.map((o) => (
-            <div key={o.label}>
-              <div className="text-[1.25rem] font-bold tracking-[-0.02em] text-[#1651f5]">{o.value}</div>
-              <div className="mt-[3px] text-[9.5px] uppercase tracking-[0.08em] text-[#8D8E9E]">{o.label}</div>
-            </div>
-          ))}
-        </div>
+    <Link
+      ref={cardRef}
+      href={href}
+      className="block overflow-hidden rounded-2xl border border-[#EDE5E9] bg-white"
+    >
+      {imageUrl && (
+        <img src={imageUrl} alt={title} loading="lazy" className="aspect-[1672/941] block w-full object-cover" />
+      )}
+      <div className="p-[22px]">
+        {category && (
+          <span className="text-[12px] font-semibold uppercase text-[#5b4be0]">{category}</span>
+        )}
+        <span className="mt-2 mb-1.5 block text-[20px] font-extrabold text-[#0D1B2A]">{title}</span>
+        {description && <p className="text-[15px] leading-[1.75] text-[#55677f]">{description}</p>}
       </div>
-    </div>
+    </Link>
   );
 }
 
-function EvidenceSection() {
+function EvidenceSection({ related }: { related?: PlainEntry<ContentDetailSkeleton>[] }) {
   const statsRef = useStaggerReveal<HTMLDivElement>();
-  const workRef = useStaggerReveal<HTMLDivElement>();
+  const relatedRef = useStaggerReveal<HTMLDivElement>();
+  const items = related?.length ? related.map(contentDetailToRelatedWorkItem) : [];
 
   return (
     <section id="work" className={SECTION}>
@@ -815,11 +819,13 @@ function EvidenceSection() {
           ))}
         </div>
 
-        <div ref={workRef} className="mt-6 grid grid-cols-1 gap-[22px] lg:grid-cols-3">
-          {WORK.map((w) => (
-            <WorkCard key={w.title} {...w} />
-          ))}
-        </div>
+        {items.length > 0 && (
+          <div ref={relatedRef} className="mt-9 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-2">
+            {items.map((item) => (
+              <RelatedWorkCard key={item.id} {...item} />
+            ))}
+          </div>
+        )}
       </div>
     </section>
   );
@@ -1035,6 +1041,11 @@ export default function SoftwareDevelopmentPage({ entry }: Props) {
     )
     : undefined;
 
+          const elements = entry?.fields.elements ?? [];
+          const relatedItems = elements.filter(
+            (element): element is PlainEntry<ContentDetailSkeleton> =>
+              isEntry(element) && element.sys.contentType.sys.id === "contentDetail"
+          );
   return (
     <main className="bg-[#FDFBFC]">
       <Hero backgroundUrl={backgroundUrl} />
@@ -1042,7 +1053,7 @@ export default function SoftwareDevelopmentPage({ entry }: Props) {
       <CapabilitySection />
       <TwoShapesSection />
       <WhySection />
-      <EvidenceSection />
+      <EvidenceSection related={relatedItems}/>
       <StackSection />
       <EngagementSection />
       <FaqSection />
