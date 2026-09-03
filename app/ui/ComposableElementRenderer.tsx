@@ -22,8 +22,7 @@ import AboutGlobal from "@/app/ui/AboutGlobal";
 import AboutMissionVision from "@/app/ui/AboutMissionVision";
 import AboutWhy from "@/app/ui/AboutWhy";
 import ContactHero from "@/app/ui/ContactHero";
-import ContactInfoCards from "@/app/ui/ContactInfoCards";
-import ContactForm from "@/app/ui/ContactForm";
+import ContactFormInfo from "@/app/ui/ContactFormInfo";
 import ContactStats from "@/app/ui/ContactStats";
 import ContactProcess from "@/app/ui/ContactProcess";
 import ContactFaq from "@/app/ui/ContactFaq";
@@ -119,8 +118,11 @@ const subtypeComponents: Record<
   aboutMissionVision: AboutMissionVision,
   aboutWhy: AboutWhy,
   contactHero: ContactHero,
-  contactInfo: ContactInfoCards,
-  contactForm: ContactForm,
+  // Both subtypes render the same combined routing + intake-form + aside
+  // section now (see `ContactFormInfo`'s own doc comment) — only one such
+  // `composableElement` entry should be left on the `/contact` page.
+  contactInfo: ContactFormInfo,
+  contactForm: ContactFormInfo,
   contactStats: ContactStats,
   contactProcess: ContactProcess,
   contactFaq: ContactFaq,

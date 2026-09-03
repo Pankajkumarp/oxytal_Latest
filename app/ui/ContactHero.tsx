@@ -115,7 +115,6 @@ export default function ContactHero({ entry }: Props) {
       isEntry(element) && element.sys.contentType.sys.id === "dataText"
   );
   const copy = dataTextEntries[0];
-  const secondParagraphEntry = dataTextEntries[1];
 
   const links = elements.filter(
     (element): element is PlainEntry<DataLinkSkeleton> =>
@@ -129,9 +128,6 @@ export default function ContactHero({ entry }: Props) {
     copy?.fields.heading ;
   const description: ReactNode = copy?.fields.text
     ? documentToReactComponents(copy.fields.text)
-    : null;
-  const secondDescription: ReactNode = secondParagraphEntry?.fields.text
-    ? documentToReactComponents(secondParagraphEntry.fields.text)
     : null;
 
   const primaryHref =
@@ -208,7 +204,7 @@ export default function ContactHero({ entry }: Props) {
     <section
       ref={sectionRef}
       className={cx(
-        "relative overflow-hidden lg:flex lg:min-h-screen lg:items-center",
+        "relative overflow-hidden lg:flex  lg:items-center",
         backgroundUrl
           ? "bg-cover bg-center"
           : (theme?.sectionBg ?? "bg-gradient-to-b from-emerald-50/70 to-white")
@@ -229,7 +225,7 @@ export default function ContactHero({ entry }: Props) {
       </div>
 
 
-      <div className="container relative z-2 mx-auto grid gap-12 px-5 py-16 md:px-10 md:py-20 lg:grid-cols-2 lg:items-center lg:py-24">
+      <div className="container relative z-2 mx-auto grid gap-12 px-5 py-16 md:px-10 md:py-20 lg:grid-cols-2 lg:items-center lg:py-24 lg:pt-26">
         <div className="flex flex-col gap-6">
           <span
             className={cx(
@@ -245,30 +241,23 @@ export default function ContactHero({ entry }: Props) {
           <DynamicHeading level={resolveHeadingLevel(copy?.fields.headingLevel, "h1")}
             ref={headingRef}
             className={cx(
-              "max-w-4xl text-[32px] leading-[1.3] font-extrabold tracking-tight sm:text-[52px] md:text-[62px]",
+              "max-w-xl text-[28px] leading-[1.2] font-extrabold tracking-tight sm:text-[34px] md:text-[42px] lg:text-[52px]",
               theme?.heading ?? "text-gray-900"
             )}
           >
             {heading}
           </DynamicHeading>
-
+          {description && (
           <p
             className={cx(
-              "rich-text max-w-2xl text-[15.5px] leading-relaxed md:text-[17px]",
+              "rich-text max-w-2xl text-[15px] leading-relaxed md:text-[17px]",
               theme?.body ?? "text-gray-500"
             )}
           >
             {description}
           </p>
-          <p
-            className={cx(
-              "rich-text max-w-md text-[15.5px] leading-relaxed md:text-[17px]",
-              theme?.body ?? "text-gray-500"
-            )}
-          >
-            {secondDescription}
-          </p>
-
+          )}
+          {(primaryLink && primaryLabel) || (secondaryLink && secondaryLabel) ? (
           <div className="mt-2 flex flex-wrap items-center gap-4">
             {primaryLink && primaryLabel && (
               <a
@@ -298,14 +287,8 @@ export default function ContactHero({ entry }: Props) {
               </a>
             )}
           </div>
+          ) : null}
         </div>
-
-        {/* RIGHT — empty spacer. The photo (when `backgroundImage` is
-            set) is the whole section's own background above, so this
-            column just reserves space on large screens, keeping the copy
-            to the left half where the scrim is strongest — same pattern
-            HomeTalkToUs's background-photo mode uses. */}
-        <div aria-hidden className="hidden lg:block" />
       </div>
     </section>
   );
