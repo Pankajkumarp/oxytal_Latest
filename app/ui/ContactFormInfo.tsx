@@ -594,9 +594,9 @@ export default function ContactFormInfo() {
         className="container relative mx-auto grid gap-6 px-5 md:px-10 lg:grid-cols-2 lg:items-start"
       >
         <div className="rounded-2xl border border-[#E3ECF2] bg-white p-7 shadow-xs md:p-9">
-          <h2 ref={formHeadingRef} className="text-[21px] font-extrabold leading-[1.2] tracking-tight sm:text-[26px] md:text-[32px] text-[#0B1B2B]">
+          <h3 ref={formHeadingRef} className="text-[21px] font-extrabold leading-[1.2] tracking-tight sm:text-[26px] md:text-[32px] text-[#0B1B2B]">
             Start a conversation.
-          </h2>
+          </h3>
           <p className="mt-2 max-w-md text-[14.5px] leading-relaxed text-[#546A7E]">
             A few lines is plenty. We&apos;d rather hear the problem in your own words than have you
             fill in fields describing it.
