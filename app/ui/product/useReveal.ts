@@ -1,16 +1,17 @@
-import { useLayoutEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef } from "react";
 import gsap from "gsap";
 import { SplitText } from "gsap/SplitText";
 
 /**
- * Shared scroll-reveal hooks for every component in `app/ui/product`
- * (`SamVaultCaseStudy`, `ActionPulseCaseStudy`, …) — this folder's own
- * copy of the `DigitalCommerce/useReveal.ts` vocabulary, split out once
- * a second case-study page needed the same word-split heading treatment
- * and whole-block/list scroll reveals rather than re-declaring them
- * per file. `ScrollTrigger`/`SplitText` are registered once, in each
- * page component's own module scope (mirroring how every other section
- * in this app registers them), so this file only imports what it calls
+ * Shared scroll-reveal + hover hooks for every component in
+ * `app/ui/product` (`SamVaultCaseStudy`, `ActionPulseCaseStudy`,
+ * `CareersOverviewPage`, …) — this folder's own copy of the
+ * `DigitalCommerce/useReveal.ts` vocabulary, split out once a second
+ * case-study page needed the same word-split heading treatment and
+ * whole-block/list scroll reveals rather than re-declaring them per
+ * file. `ScrollTrigger`/`SplitText` are registered once, in each page
+ * component's own module scope (mirroring how every other section in
+ * this app registers them), so this file only imports what it calls
  * directly.
  */
 export const prefersReducedMotion = () =>
@@ -94,6 +95,44 @@ export function useFadeUp<T extends HTMLElement>() {
 
     return () => ctx.revert();
   }, []);
+
+  return ref;
+}
+
+/**
+ * GSAP hover lift + shadow for a card — a springier stand-in for a
+ * reference page's CSS `:hover` translate/shadow, same hook
+ * `DigitalCommerce/useReveal.ts` shares across its own card grids
+ * (`ProblemCard`/`CapabilityCard`/`GovernanceCard`/…). Skips straight to
+ * the settled (no shadow) state under `prefers-reduced-motion`.
+ */
+export function useCardHover<T extends HTMLElement>(
+  options: { y?: number; shadow?: string } = {}
+) {
+  const { y = -6, shadow = "0 20px 40px -20px rgba(11,27,43,.18)" } = options;
+  const ref = useRef<T>(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || prefersReducedMotion()) {
+      return;
+    }
+
+    const rest = "0 0px 0px 0px rgba(11,27,43,0)";
+    gsap.set(el, { boxShadow: rest });
+
+    const onEnter = () =>
+      gsap.to(el, { y, boxShadow: shadow, duration: 0.35, ease: "power2.out" });
+    const onLeave = () =>
+      gsap.to(el, { y: 0, boxShadow: rest, duration: 0.45, ease: "power3.out" });
+
+    el.addEventListener("pointerenter", onEnter);
+    el.addEventListener("pointerleave", onLeave);
+    return () => {
+      el.removeEventListener("pointerenter", onEnter);
+      el.removeEventListener("pointerleave", onLeave);
+    };
+  }, [y, shadow]);
 
   return ref;
 }

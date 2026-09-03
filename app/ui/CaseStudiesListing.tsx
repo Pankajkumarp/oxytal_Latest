@@ -550,7 +550,7 @@ export default function CaseStudiesListing({ entry }: Props) {
             {eyebrow}
           </span>
         )}
-
+{(heading || description) && (
         <div className="mt-6 flex flex-col gap-6 border-b border-slate-100 pb-11 lg:flex-row lg:items-end lg:justify-between lg:gap-12">
           {heading && (
             <h1
@@ -575,7 +575,7 @@ export default function CaseStudiesListing({ entry }: Props) {
             </div>
           )}
         </div>
-
+)}
         {/* =================================================
             STAT STRIP
         ================================================= */}
@@ -614,7 +614,14 @@ export default function CaseStudiesListing({ entry }: Props) {
             FILTERS
         ================================================= */}
         {categories.length > 0 && (
-          <div className="mt-16 flex flex-wrap gap-2.5 md:mt-20">
+          <div 
+          className={cx(
+      "flex flex-wrap gap-2.5",
+      (heading || description)
+        ? "mt-16 md:mt-20"
+        : "mt-0"
+    )}
+    >
             <button
               type="button"
               onClick={() => handleFilterChange("all")}

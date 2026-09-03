@@ -359,15 +359,15 @@ export default function AISolutionsDifferentiators({ entry }: Props) {
                 {LETTERS[index % LETTERS.length]}
               </div>
 
-              <h3
+              <span
                 data-diff-title
                 className={cx(
-                  "text-[17.6px] font-bold tracking-tight",
+                  "text-[17.6px] font-bold tracking-tight block",
                   theme?.heading ?? "text-[#0B1730]"
                 )}
               >
                 {item.title}
-              </h3>
+              </span>
 
               <p
                 className={cx(

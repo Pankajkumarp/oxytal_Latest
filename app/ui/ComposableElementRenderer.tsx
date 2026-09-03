@@ -76,6 +76,7 @@ import BundabergRumCaseStudy from "./product/BundabergRumCaseStudy";
 import AviationGinCaseStudy from "./product/AviationGinCaseStudy";
 import JohnnieWalkerStyleCaseStudy from "./product/JohnnieWalkerStyleCaseStudy";
 import ProductsOverviewPage from "./product/ProductsOverviewPage";
+import CareersOverviewPage from "./product/CareersOverviewPage";
 
 type PlainEntry<Skeleton extends EntrySkeletonType> = Entry<
   Skeleton,
@@ -173,6 +174,7 @@ const subtypeComponents: Record<
   aviationGin: AviationGinCaseStudy,
   johnnieWalkerStyle: JohnnieWalkerStyleCaseStudy,
   productsOverview: ProductsOverviewPage,
+  careersOverview: CareersOverviewPage,
   DigitalCommerceHero: DigitalCommerce,
 };
 

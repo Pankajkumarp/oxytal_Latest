@@ -425,14 +425,14 @@ export default function AISolutionsHero({ entry }: Props) {
                 </div>
 
                 <div className="p-6 pt-2">
-                  <h3
+                  <span
                     className={cx(
-                      "text-[15px] font-bold",
+                      "text-[15px] font-bold block",
                       theme?.heading ?? "text-[#0B1730]"
                     )}
                   >
                     {step.title}
-                  </h3>
+                  </span>
 
                   {step.description && (
                     <p

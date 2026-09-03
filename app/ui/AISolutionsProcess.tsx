@@ -354,9 +354,9 @@ export default function AISolutionsProcess({ entry }: Props) {
                   {String(index + 1).padStart(2, "0")}
                 </div>
 
-                <h3 className={cx("text-[17.5px] font-bold", theme.heading)}>
+                <span className={cx("text-[17.5px] font-bold block", theme.heading)}>
                   {step.title}
-                </h3>
+                </span>
 
                 <p className={cx("mt-2.5 text-[14px] leading-relaxed font-medium", theme.body)}>
                   {step.description}

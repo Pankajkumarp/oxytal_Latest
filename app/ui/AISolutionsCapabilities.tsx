@@ -406,14 +406,14 @@ export default function AISolutionsCapabilities({ entry }: Props) {
                   )}
                 </div>
 
-                <h3
+                <span
                   className={cx(
-                    "text-[17.5px] font-bold tracking-tight",
+                    "text-[17.5px] font-bold tracking-tight block",
                     theme?.heading ?? "text-[#0B1730]"
                   )}
                 >
                   {capability.title}
-                </h3>
+                </span>
 
                 <p
                   className={cx(
