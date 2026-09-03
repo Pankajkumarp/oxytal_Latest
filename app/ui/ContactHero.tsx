@@ -225,7 +225,7 @@ export default function ContactHero({ entry }: Props) {
       </div>
 
 
-      <div className="container relative z-2 mx-auto grid gap-12 px-5 py-16 md:px-10 md:py-20 lg:grid-cols-2 lg:items-center lg:py-24 lg:pt-26">
+      <div className="container relative z-2 mx-auto grid gap-12 px-5 py-16 md:px-10 md:py-20 md:pt-24 lg:grid-cols-2 lg:items-center lg:py-24 lg:pt-28">
         <div className="flex flex-col gap-6">
           <span
             className={cx(
@@ -241,7 +241,7 @@ export default function ContactHero({ entry }: Props) {
           <DynamicHeading level={resolveHeadingLevel(copy?.fields.headingLevel, "h1")}
             ref={headingRef}
             className={cx(
-              "max-w-xl text-[28px] leading-[1.2] font-extrabold tracking-tight sm:text-[34px] md:text-[42px] lg:text-[52px]",
+              "max-w-xl text-[28px] leading-[1.2] font-extrabold tracking-tight sm:text-[34px] md:text-[42px] lg:text-[50px]",
               theme?.heading ?? "text-gray-900"
             )}
           >
