@@ -517,7 +517,7 @@ export default function AIPipelineDemo() {
         </div>
 
         <aside className={styles.log}>
-          <h4>Audit trail</h4>
+          <span className="block text-[14px] uppercase font-bold">Audit trail</span>
           <div className={styles.lines}>
             {logs.map((l) => (
               <div

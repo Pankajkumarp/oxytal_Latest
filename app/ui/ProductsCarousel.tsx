@@ -875,12 +875,12 @@ export default function ProductsCarousel({ entry }: Props) {
             </div>
           )}
             </div>
-            <h3 className={cx(
-              "text-[20px] leading-[1.15] font-extrabold tracking-tight sm:text-[26px] md:text-[30px] z-2",
+            <span className={cx(
+              "text-[20px] leading-[1.15] font-extrabold tracking-tight sm:text-[26px] md:text-[30px] z-2 block",
               theme?.heading ?? "text-gray-900"
             )}>
               {String(current + 1).padStart(2, "0")} / {String(total).padStart(2, "0")}
-            </h3>
+            </span>
           </div>
 
           <div className={styles.dots}>
