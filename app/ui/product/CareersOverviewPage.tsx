@@ -26,6 +26,8 @@ type PlainEntry<Skeleton extends EntrySkeletonType> = Entry<Skeleton, undefined>
 
 interface Props {
   entry?: PlainEntry<ComposableElementSkeleton>;
+  /** Which tag the hero's own heading renders as (`h1`–`h6` — see app/lib/headingLevel.ts). Defaults to `"h1"`; pass a lower level when this page is embedded somewhere its heading shouldn't be the document's only `<h1>`. */
+  headingLevel?: HeadingLevel;
 }
 
 
@@ -51,9 +53,15 @@ interface Props {
  * a highlighted note), a dark "everything happens in the portal" handoff
  * with a feature checklist, and a plain equal-opportunity statement.
  *
- * Not registered under any composableElement subtype yet — add it to
- * `ComposableElementRenderer`'s `subtypeComponents` map (e.g. as
- * `careersOverview`) once a page should render it.
+ * Registered in `ComposableElementRenderer` as subtype `careersOverview`.
+ *
+ * Accepts an optional `headingLevel` prop (`h1`–`h6` — see
+ * app/lib/headingLevel.ts) that sets the hero's own `<h1>` tag, defaulting
+ * to `"h1"` when unset. Passed through by whoever renders this page (a
+ * caller embedding it lower in a document's heading outline can override
+ * it), same "level is a prop the parent controls" idiom every
+ * Contentful-driven hero in this app already uses via
+ * `resolveHeadingLevel` — this one just isn't reading it off a CMS field.
  *
  * Shares `useSplitReveal`/`useFadeUp`/`useCardHover` (from `./useReveal`)
  * with its siblings, same reveal-role split as `ProductsOverviewPage`:
@@ -293,7 +301,7 @@ const BTN_GHOST = cx(BTN_BASE, "border border-white/[0.26] bg-white/[0.06] text-
    HERO
 ========================================================= */
 
-function Hero() {
+function Hero({ headingLevel = "h1" }: { headingLevel?: HeadingLevel }) {
   const copyRef = useFadeUp<HTMLDivElement>();
   const titleRef = useSplitReveal<HTMLHeadingElement>();
   const locRef = useFadeUp<HTMLDivElement>();
@@ -307,12 +315,13 @@ function Hero() {
       />
       <div ref={copyRef} className="container relative mx-auto px-5 md:px-10">
         <span className="mb-3 block text-[12px] font-bold text-[#16B9E8] uppercase">Careers</span>
-        <h1
+        <DynamicHeading
+          level={headingLevel}
           ref={titleRef}
           className="mb-[22px] max-w-[18ch] text-[clamp(32px,4.7vw,50px)] leading-[1.2] font-extrabold text-white"
         >
           Most agency work ends at launch. Ours doesn&apos;t.
-        </h1>
+        </DynamicHeading>
         <p className="mb-8 max-w-[60ch] text-[clamp(16px,1.35vw,15px)] leading-[1.8] text-[#A9BACE]">
           We&apos;re still running platforms we built in 2019. Which means the decisions you make here have
           consequences you&apos;ll personally live with — and that is the best argument we know for making them
@@ -352,7 +361,7 @@ function HonestCard({ n, title, body }: (typeof HONEST)[number]) {
   return (
     <div ref={cardRef} className="bg-white p-7">
       <span className="mb-3.5 block text-[11px] font-bold text-[#0E9BC4]">{n}</span>
-      <h3 className="mb-2.5 text-[18px] leading-[1.32] font-bold text-[#0B1B2B]">{title}</h3>
+      <span className="mb-2.5 text-[18px] leading-[1.32] font-bold text-[#0B1B2B] block">{title}</span>
       <p className="text-[14px] leading-[1.75] text-[#546A7E]">{body}</p>
     </div>
   );
@@ -403,13 +412,14 @@ function FitSection() {
           <SectionHead
             eyebrow="Honestly"
             title="Who this suits, and who it doesn't."
+            headingLevel="h2"
             lede="We'd rather you worked this out now than three months in. Nobody wins from a mismatch discovered late."
           />
         </div>
 
         <div ref={gridRef} className="mt-9 grid grid-cols-1 gap-4 md:grid-cols-2 md:gap-6.5">
           <div ref={goodCardRef} className="rounded-2xl border border-[#E3ECF2] bg-white p-7">
-            <h3 className="mb-[18px] text-[10.5px] font-bold tracking-[0.12em] text-[#12A67C] uppercase">A good fit if you</h3>
+            <span className="mb-[18px] text-[10.5px] font-bold tracking-[0.12em] text-[#12A67C] uppercase block">A good fit if you</span>
             <ul className="list-none">
               {FIT_GOOD.map((line, i) => (
                 <li
@@ -426,7 +436,7 @@ function FitSection() {
             </ul>
           </div>
           <div ref={badCardRef} className="rounded-2xl border border-[#E3ECF2] bg-white p-7">
-            <h3 className="mb-[18px] text-[10.5px] font-bold tracking-[0.12em] text-[#D9820A] uppercase">Probably not if you</h3>
+            <span className="mb-[18px] text-[10.5px] font-bold tracking-[0.12em] text-[#D9820A] uppercase block">Probably not if you</span>
             <ul className="list-none">
               {FIT_BAD.map((line, i) => (
                 <li
@@ -448,52 +458,6 @@ function FitSection() {
   );
 }
 
-/* =========================================================
-   WHERE YOU'D WORK
-========================================================= */
-
-function OfficeCard({ Flag, country, city, role, body }: (typeof OFFICES)[number]) {
-  const cardRef = useCardHover<HTMLDivElement>({ y: -4, shadow: "0 20px 40px -20px rgba(0,0,0,.45)" });
-  return (
-    <div ref={cardRef} className="bg-[#061223] p-8">
-      <div className="mb-4 flex items-center gap-2.5">
-        <Flag />
-        <span className="text-[10px] font-semibold tracking-[0.12em] text-[#16B9E8] uppercase">{country}</span>
-      </div>
-      <h3 className="mb-1.5 text-[19px] font-bold text-white">{city}</h3>
-      <p className="mb-3.5 text-[13.5px] font-medium text-[#16B9E8]">{role}</p>
-      <p className="text-[14px] leading-[1.68] text-[#A9BACE]">{body}</p>
-    </div>
-  );
-}
-
-function OfficesSection() {
-  const introRef = useFadeUp<HTMLDivElement>();
-  const gridRef = useFadeUp<HTMLDivElement>();
-
-  return (
-    <section className="bg-[#FBFDFE] px-5 py-14 sm:px-8 sm:py-16 lg:py-20">
-      <div className="container relative mx-auto px-5 md:px-10">
-        <div ref={introRef}>
-          <SectionHead
-            eyebrow="Where you'd work"
-            title="Three offices, and none of them is a back office."
-            lede="Worth saying plainly, because in this industry it usually isn't true."
-          />
-        </div>
-
-        <div
-          ref={gridRef}
-          className="mt-9 grid grid-cols-1 gap-px overflow-hidden rounded-2xl border border-[#22334A] bg-[#22334A] sm:grid-cols-2 lg:grid-cols-3"
-        >
-          {OFFICES.map((office) => (
-            <OfficeCard key={office.city} {...office} />
-          ))}
-        </div>
-      </div>
-    </section>
-  );
-}
 
 /* =========================================================
    WHAT YOU'D WORK ON
@@ -504,7 +468,7 @@ function WorkCard({ label, title, body, tags }: (typeof WORK)[number]) {
   return (
     <div ref={cardRef} className="bg-white p-8">
       <span className="mb-3.5 block text-[10.5px] font-bold tracking-[0.1em] text-[#0E9BC4] uppercase">{label}</span>
-      <h3 className="mb-3 text-[18px] leading-[1.3] font-bold text-[#0B1B2B]">{title}</h3>
+      <span className="mb-3 text-[18px] leading-[1.3] font-bold text-[#0B1B2B] block">{title}</span>
       <p className="text-[14.5px] leading-[1.7] text-[#546A7E]">{body}</p>
       <ul className="mt-4 flex flex-wrap gap-1.75 list-none">
         {tags.map((tag) => (
@@ -525,7 +489,7 @@ function WorkSection() {
     <section className="bg-[linear-gradient(170deg,#F1F7FB,#FBFDFE_62%)] px-5 py-14 sm:px-8 sm:py-16 lg:py-20">
       <div className="container relative mx-auto px-5 md:px-10">
         <div ref={introRef}>
-          <SectionHead eyebrow="What you'd work on" title="Two kinds of work, and most people do both." />
+          <SectionHead eyebrow="What you'd work on" title="Two kinds of work, and most people do both." headingLevel="h4"/>
         </div>
 
         <div ref={gridRef} className="mt-9 grid grid-cols-1 gap-px overflow-hidden rounded-2xl border border-[#E3ECF2] bg-[#E3ECF2] md:grid-cols-2">
@@ -555,6 +519,7 @@ function HowWeHireSection() {
             eyebrow="How we hire"
             title="Four steps, and we'll tell you where you stand at each one."
             lede="No unexplained silences, no take-home that eats your weekend, no puzzle questions about manhole covers."
+            headingLevel="h4"
             narrow={false}
           />
         </div>
@@ -570,7 +535,7 @@ function HowWeHireSection() {
             >
               <span className="pt-0.5 text-[11px] font-bold tracking-[0.1em] text-[#0E9BC4]">{phase.n}</span>
               <div>
-                <h3 className="mb-1.75 text-[16.5px] font-bold text-[#0B1B2B]">{phase.title}</h3>
+                <span className="mb-1.75 text-[16.5px] font-bold text-[#0B1B2B] block">{phase.title}</span>
                 <p className="text-[14.5px] leading-[1.65] text-[#546A7E]">{phase.body}</p>
               </div>
             </div>
@@ -606,7 +571,7 @@ function PortalSection() {
       />
       <div className="container relative mx-auto px-5 md:px-10 grid grid-cols-1 items-center gap-9 lg:grid-cols-[1.05fr_0.95fr] lg:gap-14">
         <div ref={copyRef}>
-          <SectionHead eyebrow="Applications" title="Everything happens in the candidate portal." dark narrow={false} />
+          <SectionHead eyebrow="Applications" title="Everything happens in the candidate portal." dark narrow={false} headingLevel="h5"/>
           <p className="mt-4 mb-2 text-[16px] leading-[1.72] text-[#A9BACE]">
             Open roles, applications, interview scheduling and your documents all live in one place, and you can
             sign in whenever you want to see where things stand. We built the portal ourselves, which means when
@@ -687,11 +652,11 @@ function EeoSection() {
    PAGE
 ========================================================= */
 
-export default function CareersOverviewPage({ entry }: Props) {
+export default function CareersOverviewPage({ entry, headingLevel }: Props) {
   return (
     <div className="relative overflow-hidden bg-[#FBFDFE]">
       <div data-nav-contrast="dark">
-        <Hero />
+        <Hero headingLevel={headingLevel} />
       </div>
       <HonestSection />
       <FitSection />

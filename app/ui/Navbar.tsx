@@ -806,7 +806,6 @@ export default function Navbar({ entry }: Props) {
                 {navOpen ? '' : <Menu size={24} />}
               </button>
             )}
-            <h1>
             <Link
               href="/"
               className={cx(
@@ -820,7 +819,6 @@ export default function Navbar({ entry }: Props) {
             >
               Oxytal
             </Link>
-            </h1>
           </div>
 
           {/* =================================================
