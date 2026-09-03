@@ -10,10 +10,24 @@ import { cx } from "@/app/lib/cx";
 import { useSplitReveal, useFadeUp, useCardHover } from "./useReveal";
 import type { HeadingLevel } from "@/app/lib/headingLevel";
 import DynamicHeading from "@/app/ui/DynamicHeading";
+import { ComposableElementSkeleton} from "@/app/types/contentful";
+import { Entry, EntrySkeletonType } from "contentful";
+import AboutGlobal from "@/app/ui/AboutGlobal";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger, SplitText);
 }
+
+
+// Contentful wiring — same shape as `DigitalCommerce.tsx`'s hero: the page
+// only reads a `backgroundImage` field off the composable-element entry, so
+// this is a trimmed copy of that file's `PlainEntry`/`AnyEntry`/`isEntry`.
+type PlainEntry<Skeleton extends EntrySkeletonType> = Entry<Skeleton, undefined>;
+
+interface Props {
+  entry?: PlainEntry<ComposableElementSkeleton>;
+}
+
 
 /**
  * `CareersOverviewPage` — a standalone, static one-pager ported from
@@ -223,7 +237,7 @@ function Eyebrow({ children, dark, center }: { children: ReactNode; dark?: boole
   const color = dark ? "#16B9E8" : "#0E9BC4";
   return (
     <span
-      className={cx("mb-3.5 flex items-center gap-2.5 text-[12px] font-bold tracking-[0.16em] uppercase", center && "justify-center")}
+      className={cx("mb-3.5 flex items-center gap-2.5 text-[12px] font-bold uppercase", center && "justify-center")}
       style={{ color }}
     >
       <span aria-hidden className="h-0.5 w-[22px] rounded-sm" style={{ backgroundColor: color }} />
@@ -257,7 +271,7 @@ function SectionHead({
         level={headingLevel}
         ref={titleRef}
         className={cx(
-          "max-w-[22ch] text-[clamp(27px,3vw,38px)] leading-[1.1] font-extrabold tracking-[-0.03em]",
+          "max-w-[22ch] text-[28px] leading-[1.2] font-extrabold tracking-tight sm:text-[34px] md:text-[40px]",
           dark ? "text-white" : "text-[#0B1B2B]"
         )}
       >
@@ -271,7 +285,7 @@ function SectionHead({
 }
 
 const BTN_BASE =
-  "inline-flex items-center gap-2 rounded-[10px] px-[26px] py-[14px] text-[0.96rem] font-semibold transition duration-150";
+  "inline-flex items-center gap-2 rounded-full px-7 py-3.5 text-[15px] font-semibold transition duration-150";
 const BTN_PRIMARY = cx(BTN_BASE, "border border-transparent bg-[#0E9BC4] text-white hover:-translate-y-px hover:bg-[#0B87AC]");
 const BTN_GHOST = cx(BTN_BASE, "border border-white/[0.26] bg-white/[0.06] text-white hover:-translate-y-px hover:border-[#16B9E8] hover:bg-[rgba(22,185,232,0.12)]");
 
@@ -285,21 +299,21 @@ function Hero() {
   const locRef = useFadeUp<HTMLDivElement>();
 
   return (
-    <header className="relative overflow-hidden bg-[linear-gradient(160deg,#061223,#0C2138)] px-5 py-16 text-[#EAF2F8] sm:px-8 sm:py-20 lg:py-[110px]">
+    <header className="relative overflow-hidden bg-[linear-gradient(160deg,#061223,#0C2138)] min-h-screen px-5 py-16 text-[#EAF2F8] sm:px-8 sm:py-20 lg:py-[110px] lg:pt-[150px]">
       <div
         aria-hidden
         className="pointer-events-none absolute -top-[44%] -right-[18%] h-[860px] w-[860px] rounded-full"
         style={{ background: "radial-gradient(circle, rgba(22,185,232,.22), transparent 64%)" }}
       />
       <div ref={copyRef} className="container relative mx-auto px-5 md:px-10">
-        <span className="mb-5 block text-[11px] font-bold tracking-[0.2em] text-[#16B9E8] uppercase">Careers</span>
+        <span className="mb-3 block text-[12px] font-bold text-[#16B9E8] uppercase">Careers</span>
         <h1
           ref={titleRef}
-          className="mb-[22px] max-w-[18ch] text-[clamp(32px,4.7vw,56px)] leading-[1.03] font-extrabold tracking-[-0.036em] text-white"
+          className="mb-[22px] max-w-[18ch] text-[clamp(32px,4.7vw,50px)] leading-[1.2] font-extrabold text-white"
         >
           Most agency work ends at launch. Ours doesn&apos;t.
         </h1>
-        <p className="mb-8 max-w-[58ch] text-[clamp(16px,1.35vw,18.5px)] leading-[1.72] text-[#A9BACE]">
+        <p className="mb-8 max-w-[60ch] text-[clamp(16px,1.35vw,15px)] leading-[1.8] text-[#A9BACE]">
           We&apos;re still running platforms we built in 2019. Which means the decisions you make here have
           consequences you&apos;ll personally live with — and that is the best argument we know for making them
           carefully. If that sounds like a weight, this probably isn&apos;t the place. If it sounds like how the
@@ -318,7 +332,7 @@ function Hero() {
           {["London · Client & growth", "Dublin · Headquarters", "Chandigarh · Engineering & AI R&D"].map((loc) => (
             <span
               key={loc}
-              className="rounded-full border border-white/[0.18] px-[15px] py-2 text-[11px] font-medium tracking-[0.05em] text-[#C3D3DF] uppercase"
+              className="rounded-full border border-white/[0.18] px-[15px] py-2 text-[11px] font-medium  text-[#C3D3DF] uppercase"
             >
               {loc}
             </span>
@@ -337,9 +351,9 @@ function HonestCard({ n, title, body }: (typeof HONEST)[number]) {
   const cardRef = useCardHover<HTMLDivElement>({ y: -4 });
   return (
     <div ref={cardRef} className="bg-white p-7">
-      <span className="mb-3.5 block text-[10.5px] font-bold tracking-[0.1em] text-[#0E9BC4]">{n}</span>
-      <h3 className="mb-2.5 text-[17px] leading-[1.32] font-bold text-[#0B1B2B]">{title}</h3>
-      <p className="text-[14px] leading-[1.68] text-[#546A7E]">{body}</p>
+      <span className="mb-3.5 block text-[11px] font-bold text-[#0E9BC4]">{n}</span>
+      <h3 className="mb-2.5 text-[18px] leading-[1.32] font-bold text-[#0B1B2B]">{title}</h3>
+      <p className="text-[14px] leading-[1.75] text-[#546A7E]">{body}</p>
     </div>
   );
 }
@@ -673,7 +687,7 @@ function EeoSection() {
    PAGE
 ========================================================= */
 
-export default function CareersOverviewPage() {
+export default function CareersOverviewPage({ entry }: Props) {
   return (
     <div className="relative overflow-hidden bg-[#FBFDFE]">
       <div data-nav-contrast="dark">
@@ -681,7 +695,7 @@ export default function CareersOverviewPage() {
       </div>
       <HonestSection />
       <FitSection />
-      <OfficesSection />
+      <AboutGlobal entry={entry}/>
       <WorkSection />
       <HowWeHireSection />
       <div data-nav-contrast="dark">
