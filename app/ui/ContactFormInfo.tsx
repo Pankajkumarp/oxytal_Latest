@@ -22,6 +22,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { cx } from "@/app/lib/cx";
+import { API_URL } from "@/app/lib/apiUrl";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger, SplitText);
@@ -137,14 +138,14 @@ function fieldClasses(hasError?: boolean) {
   );
 }
 
-type FieldName = "name" | "email" | "phone" | "message" | "consent";
+type FieldName = "fullName" | "email" | "phoneNo" | "description" | "terms";
 
 const ERROR_MESSAGES: Record<FieldName, string> = {
-  name: "Please enter your name.",
+  fullName: "Please enter your name.",
   email: "Please enter a valid work email address.",
-  phone: "Phone number should be 7–15 digits, numbers only.",
-  message: "Tell us a little about what you need — this field can't be empty.",
-  consent: "Please accept the privacy policy to continue.",
+  phoneNo: "Phone number should be 7–15 digits, numbers only.",
+  description: "Tell us a little about what you need — this field can't be empty.",
+  terms: "Please accept the privacy policy to continue.",
 };
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -160,9 +161,9 @@ function handlePhoneChange(event: React.ChangeEvent<HTMLInputElement>) {
 function validateForm(data: FormData): Partial<Record<FieldName, string>> {
   const errors: Partial<Record<FieldName, string>> = {};
 
-  const name = String(data.get("name") ?? "").trim();
-  if (!name) {
-    errors.name = ERROR_MESSAGES.name;
+  const fullName = String(data.get("fullName") ?? "").trim();
+  if (!fullName) {
+    errors.fullName = ERROR_MESSAGES.fullName;
   }
 
   const email = String(data.get("email") ?? "").trim();
@@ -171,60 +172,78 @@ function validateForm(data: FormData): Partial<Record<FieldName, string>> {
   }
 
   // Phone is optional — only validated once something's actually been typed.
-  const phone = String(data.get("phone") ?? "").trim();
-  if (phone && !PHONE_PATTERN.test(phone)) {
-    errors.phone = ERROR_MESSAGES.phone;
+  const phoneNo = String(data.get("phoneNo") ?? "").trim();
+  if (phoneNo && !PHONE_PATTERN.test(phoneNo)) {
+    errors.phoneNo = ERROR_MESSAGES.phoneNo;
   }
 
-  const message = String(data.get("message") ?? "").trim();
-  if (!message) {
-    errors.message = ERROR_MESSAGES.message;
+  const description = String(data.get("description") ?? "").trim();
+  if (!description) {
+    errors.description = ERROR_MESSAGES.description;
   }
 
-  if (!data.get("consent")) {
-    errors.consent = ERROR_MESSAGES.consent;
+  if (!data.get("terms")) {
+    errors.terms = ERROR_MESSAGES.terms;
   }
 
   return errors;
 }
 
-/** The intake form's submitted shape — everything `submitContactEnquiry` needs to send on. */
+/**
+ * The intake form's submitted shape — everything `submitContactEnquiry`
+ * needs to send on. Field names match the target API payload shape
+ * exactly (including `interstedIn`'s spelling), rather than this
+ * component's own naming conventions, since this is serialized straight
+ * through to whatever endpoint `submitContactEnquiry` ends up calling.
+ */
 interface ContactEnquiryPayload {
-  name: string;
-  organisation: string;
+  company: string;
+  fullName: string;
   email: string;
-  phone: string;
-  area: string;
-  message: string;
-  consent: boolean;
+  phoneNo: string;
+  description: string;
+  terms: boolean;
+  interstedIn: string;
 }
 
 /** Builds the typed payload from the submitted `FormData` — the one place field names/casts live, so `handleSubmit` and `submitContactEnquiry` both just deal with a plain `ContactEnquiryPayload`. */
 function buildPayload(data: FormData): ContactEnquiryPayload {
   return {
-    name: String(data.get("name") ?? "").trim(),
-    organisation: String(data.get("organisation") ?? "").trim(),
+    company: String(data.get("company") ?? "").trim(),
+    fullName: String(data.get("fullName") ?? "").trim(),
     email: String(data.get("email") ?? "").trim(),
-    phone: String(data.get("phone") ?? "").trim(),
-    area: String(data.get("area") ?? "").trim(),
-    message: String(data.get("message") ?? "").trim(),
-    consent: data.get("consent") === "on",
+    phoneNo: String(data.get("phoneNo") ?? "").trim(),
+    description: String(data.get("description") ?? "").trim(),
+    terms: data.get("terms") === "on",
+    interstedIn: String(data.get("interstedIn") ?? "").trim(),
   };
 }
 
 /**
- * The single place the form's payload actually gets submitted from. No
- * backend is wired up yet (see the component doc below), so this just
- * logs the payload and resolves successfully — swapping in a real call
- * (e.g. `fetch("/api/contact", { method: "POST", body: JSON.stringify(payload) })`)
- * is a one-function change once an endpoint exists; nothing else in this
- * component needs to know how submission actually happens.
+ * The single place the form's payload actually gets submitted from —
+ * `POST`s straight to the Oxytal API's `/jobs/contactus` endpoint from the
+ * browser (no Next.js API route in between), using `API_URL`
+ * (`app/lib/apiUrl.ts`, `NEXT_PUBLIC_API_URL`) as the origin. `ok` reflects
+ * both the request actually reaching the server and it responding with a
+ * successful status — a network failure (offline, CORS, DNS) is caught and
+ * treated the same as a non-2xx response, so `handleSubmit` only ever sees
+ * a plain success/failure boolean either way.
  */
 async function submitContactEnquiry(
   payload: ContactEnquiryPayload
 ): Promise<{ ok: boolean }> {
-  console.info("[contact-form] enquiry payload", payload);
-  return { ok: true };
+  try {
+    const response = await fetch(`${API_URL}/jobs/contactus`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    return { ok: response.ok };
+  } catch (error) {
+    console.error("[contact-form] enquiry submission failed", error);
+    return { ok: false };
+  }
 }
 
 /** A field's custom validation message, rendered in red under it — replaces the browser's own default validation bubble (the form carries `noValidate`). `id` lets the field itself point to this via `aria-describedby`. */
@@ -253,11 +272,12 @@ function FieldError({ id, message }: { id?: string; message?: string }) {
  * - a 4-up routing grid ("Four reasons people get in touch.") — each
  *   card links out (scroll to the form below, the external careers
  *   portal, or a `mailto:` address)
- * - the intake form (name/organisation/email/phone/area/message/consent)
- *   next to an aside with a "reach us directly" contact list and a fixed
- *   "what happens next" SLA note
+ * - the intake form (fullName/company/email/phoneNo/interstedIn/description/terms
+ *   — see `ContactEnquiryPayload`'s doc comment for why the field names
+ *   don't follow this component's own conventions) next to an aside with a
+ *   "reach us directly" contact list and a fixed "what happens next" SLA note
  *
- * Custom validation (name, work email, phone if entered, message, consent)
+ * Custom validation (full name, work email, phone if entered, description, terms)
  * runs on submit — see `validateForm` — instead of relying on the browser's
  * own bubbles (the form carries `noValidate`); a failing field gets a red
  * border and a red message underneath it, both clearing as soon as the
@@ -620,32 +640,32 @@ export default function ContactFormInfo() {
 
               <div className="grid gap-5 sm:grid-cols-2">
                 <div>
-                  <label htmlFor="name" className="mb-1.5 block text-[14px] font-medium text-[#0B1B2B]">
+                  <label htmlFor="fullName" className="mb-1.5 block text-[14px] font-medium text-[#0B1B2B]">
                     Name<span className="ml-0.5 text-[#0E9BC4]">*</span>
                   </label>
                   <div className="relative">
                     <User size={17} aria-hidden className="pointer-events-none absolute top-1/2 left-4 -translate-y-1/2 text-[#8598AA]" />
                     <input
-                      id="name"
-                      name="name"
+                      id="fullName"
+                      name="fullName"
                       type="text"
                       autoComplete="name"
                       placeholder="Full name"
-                      aria-invalid={Boolean(errors.name)}
-                      aria-describedby={errors.name ? "name-error" : undefined}
-                      onChange={() => clearError("name")}
-                      className={fieldClasses(Boolean(errors.name))}
+                      aria-invalid={Boolean(errors.fullName)}
+                      aria-describedby={errors.fullName ? "fullName-error" : undefined}
+                      onChange={() => clearError("fullName")}
+                      className={fieldClasses(Boolean(errors.fullName))}
                     />
                   </div>
-                  <FieldError id="name-error" message={errors.name} />
+                  <FieldError id="fullName-error" message={errors.fullName} />
                 </div>
                 <div>
-                  <label htmlFor="org" className="mb-1.5 block text-[14px] font-medium text-[#0B1B2B]">
+                  <label htmlFor="company" className="mb-1.5 block text-[14px] font-medium text-[#0B1B2B]">
                     Organisation
                   </label>
                   <div className="relative">
                     <Building2 size={17} aria-hidden className="pointer-events-none absolute top-1/2 left-4 -translate-y-1/2 text-[#8598AA]" />
-                    <input id="org" name="organisation" type="text" autoComplete="organization" placeholder="Company name" className={fieldClasses()} />
+                    <input id="company" name="company" type="text" autoComplete="organization" placeholder="Company name" className={fieldClasses()} />
                   </div>
                 </div>
               </div>
@@ -672,40 +692,40 @@ export default function ContactFormInfo() {
                   <FieldError id="email-error" message={errors.email} />
                 </div>
                 <div>
-                  <label htmlFor="phone" className="mb-1.5 block text-[14px] font-medium text-[#0B1B2B]">
+                  <label htmlFor="phoneNo" className="mb-1.5 block text-[14px] font-medium text-[#0B1B2B]">
                     Phone
                   </label>
                   <div className="relative">
                     <Phone size={17} aria-hidden className="pointer-events-none absolute top-1/2 left-4 -translate-y-1/2 text-[#8598AA]" />
                     <input
-                      id="phone"
-                      name="phone"
+                      id="phoneNo"
+                      name="phoneNo"
                       type="tel"
                       inputMode="numeric"
                       pattern="[0-9]*"
                       maxLength={15}
                       autoComplete="tel"
                       placeholder="Phone number"
-                      aria-invalid={Boolean(errors.phone)}
-                      aria-describedby={errors.phone ? "phone-error" : undefined}
+                      aria-invalid={Boolean(errors.phoneNo)}
+                      aria-describedby={errors.phoneNo ? "phoneNo-error" : undefined}
                       onChange={(event) => {
                         handlePhoneChange(event);
-                        clearError("phone");
+                        clearError("phoneNo");
                       }}
-                      className={fieldClasses(Boolean(errors.phone))}
+                      className={fieldClasses(Boolean(errors.phoneNo))}
                     />
                   </div>
-                  <FieldError id="phone-error" message={errors.phone} />
+                  <FieldError id="phoneNo-error" message={errors.phoneNo} />
                 </div>
               </div>
 
               <div>
-                <label htmlFor="area" className="mb-1.5 block text-[14px] font-medium text-[#0B1B2B]">
+                <label htmlFor="interstedIn" className="mb-1.5 block text-[14px] font-medium text-[#0B1B2B]">
                   What&apos;s this about?
                 </label>
                 <div className="relative">
                   <Layers size={17} aria-hidden className="pointer-events-none absolute top-1/2 left-4 -translate-y-1/2 text-[#8598AA]" />
-                  <select id="area" name="area" defaultValue="" className={cx(fieldClasses(), "appearance-none pr-10")}>
+                  <select id="interstedIn" name="interstedIn" defaultValue="" className={cx(fieldClasses(), "appearance-none pr-10")}>
                     <option value="">Not sure yet — I&apos;ll explain below</option>
                     {PROJECT_AREAS.map((area) => (
                       <option key={area} value={area}>
@@ -721,39 +741,39 @@ export default function ContactFormInfo() {
               </div>
 
               <div>
-                <label htmlFor="message" className="mb-1.5 block text-[14px] font-medium text-[#0B1B2B]">
+                <label htmlFor="description" className="mb-1.5 block text-[14px] font-medium text-[#0B1B2B]">
                   Tell us about it<span className="ml-0.5 text-[#0E9BC4]">*</span>
                 </label>
                 <div className="relative">
                   <FileText size={17} aria-hidden className="pointer-events-none absolute top-4 left-4 text-[#8598AA]" />
                   <textarea
-                    id="message"
-                    name="message"
+                    id="description"
+                    name="description"
                     rows={4}
                     placeholder="What are you trying to achieve, and what's getting in the way? Any deadline or constraint we should know about?"
-                    aria-invalid={Boolean(errors.message)}
-                    aria-describedby={errors.message ? "message-error" : undefined}
-                    onChange={() => clearError("message")}
-                    className={cx(fieldClasses(Boolean(errors.message)), "resize-none")}
+                    aria-invalid={Boolean(errors.description)}
+                    aria-describedby={errors.description ? "description-error" : undefined}
+                    onChange={() => clearError("description")}
+                    className={cx(fieldClasses(Boolean(errors.description)), "resize-none")}
                   />
                 </div>
-                <FieldError id="message-error" message={errors.message} />
+                <FieldError id="description-error" message={errors.description} />
               </div>
 
               <div>
                 <div className="flex items-start gap-2.5">
                   <input
                     type="checkbox"
-                    id="consent"
-                    name="consent"
-                    aria-invalid={Boolean(errors.consent)}
-                    aria-describedby={errors.consent ? "consent-error" : undefined}
-                    onChange={() => clearError("consent")}
+                    id="terms"
+                    name="terms"
+                    aria-invalid={Boolean(errors.terms)}
+                    aria-describedby={errors.terms ? "terms-error" : undefined}
+                    onChange={() => clearError("terms")}
                     className={cx(
                       "mt-0.5 h-[17px] w-[17px] shrink-0 accent-[#0E9BC4]"
                     )}
                   />
-                  <label htmlFor="consent" className="text-[13.6px] leading-relaxed font-normal text-[#546A7E]">
+                  <label htmlFor="terms" className="text-[13.6px] leading-relaxed font-normal text-[#546A7E]">
                     I agree that Oxytal may use these details to respond to my enquiry, as described in the{" "}
                     <Link href="/privacy-policy" className="text-[#0E9BC4]">
                       Privacy Policy
@@ -761,7 +781,7 @@ export default function ContactFormInfo() {
                     .<span className="ml-0.5 text-[#0E9BC4]">*</span>
                   </label>
                 </div>
-                <FieldError id="consent-error" message={errors.consent} />
+                <FieldError id="terms-error" message={errors.terms} />
               </div>
 
               <button

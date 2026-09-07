@@ -1,33 +1,37 @@
 "use client";
 
-import { Suspense, useEffect, useRef } from "react";
+import { Suspense, useEffect } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import { GTM_ID } from "@/app/lib/gtm";
 
 /**
- * Pushes a `page_view` event (with the new path + query string) to GTM's
- * `dataLayer` on every **client-side** route change.
+ * Pushes a `page_view` event (with the path + query string) to GTM's
+ * `dataLayer` on **every** page load — the very first one (including a
+ * hard refresh) and every client-side route change after it.
  *
  * Next.js App Router navigations (`<Link>`, `router.push`, etc.) use the
- * History API without a full page reload, so `gtm.js`'s own default
- * pageview handling — which only fires once, off the initial page load —
- * never sees any route change after that first one. Without this, a GTM
- * container whose tags trigger on the built-in "All Pages" (Page View)
- * trigger only ever fires for the very first page a visitor lands on, and
- * silently stops firing for every page they navigate to afterwards.
+ * History API without a full page reload, so a GTM container whose tags
+ * trigger on the built-in "All Pages" (Page View) trigger only ever fires
+ * once, for the very first page a visitor lands on, then silently stops
+ * firing for every page they navigate to afterwards.
  *
- * (`gtm.js` does patch `history.pushState`/`replaceState` itself and push a
- * `gtm.historyChange` event on every route change, but that only drives
- * tags in the container that use a **History Change** trigger — most
- * containers only have the default Page View trigger. Pushing an explicit
- * `page_view` event here is the reliable, container-config-independent
- * fix: point a GTM trigger at the custom event `page_view` — e.g. a Custom
- * Event trigger, or your GA4 configuration tag's trigger — to have it fire
- * on every route change.)
+ * This event is a *separate* signal from that built-in trigger, not a
+ * substitute limited to the routes it misses — so it has to fire on the
+ * initial load too, not just later route changes: a GTM trigger configured
+ * to match this custom `page_view` event (the standard SPA setup, and what
+ * this app's tags should use — see the "Required environment variables"
+ * section of CLAUDE.md) only ever hears about pages sent here. An earlier
+ * version of this component skipped the first push on the assumption that
+ * `gtm.js`'s own initial-load firing already covered it, which left a
+ * `page_view`-triggered tag never firing on a fresh visit or Ctrl+F5 at
+ * all — those two triggers don't share pageviews between them.
  *
- * Skips the very first pageview since `gtm.js`'s own initial load already
- * accounts for it (see `GoogleTagManagerScript` in `GoogleTagManager.tsx`);
- * pushing it here too would double-count that first page.
+ * (`gtm.js` does separately patch `history.pushState`/`replaceState` and
+ * push its own `gtm.historyChange` event on every route change, but that
+ * only drives tags using a **History Change** trigger, which most
+ * containers don't have configured. Point a GTM trigger at the custom
+ * event `page_view` pushed here instead — a Custom Event trigger, or your
+ * GA4 configuration tag's own trigger — to fire on every page reliably.)
  *
  * Renders nothing; a no-op when GTM isn't configured (`GTM_ID` unset, see
  * `app/lib/gtm.ts`). Wrapped in its own `Suspense` boundary because
@@ -39,14 +43,8 @@ import { GTM_ID } from "@/app/lib/gtm";
 function GTMPageViewTracker() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const isFirstPageview = useRef(true);
 
   useEffect(() => {
-    if (isFirstPageview.current) {
-      isFirstPageview.current = false;
-      return;
-    }
-
     if (typeof window === "undefined" || !window.dataLayer) return;
 
     const query = searchParams.toString();
