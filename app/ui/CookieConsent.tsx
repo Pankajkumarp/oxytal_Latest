@@ -4,13 +4,9 @@ import { useEffect } from "react";
 import * as CookieConsent from "vanilla-cookieconsent";
 import "vanilla-cookieconsent/dist/cookieconsent.css";
 import { COOKIE_CONSENT_ENABLED } from "@/app/lib/cookieConsent";
-
-declare global {
-  interface Window {
-    dataLayer?: unknown[];
-    gtag?: (...args: unknown[]) => void;
-  }
-}
+// Side-effect import only, for the `Window.dataLayer`/`Window.gtag` global
+// type augmentation `app/lib/gtm.ts` declares.
+import "@/app/lib/gtm";
 
 /**
  * Pushes the visitor's current "analytics" choice into Google Consent

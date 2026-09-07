@@ -5,6 +5,8 @@ import "../../globals.css";
 import { SITE_URL } from "@/app/lib/siteUrl";
 import CookieConsentBanner from "@/app/ui/CookieConsent";
 import { GoogleTagManagerScript, GoogleTagManagerNoScript } from "@/app/ui/GoogleTagManager";
+import GTMPageView from "@/app/ui/GTMPageView";
+import GTMLinkTracking from "@/app/ui/GTMLinkTracking";
 export const poppins = Poppins({
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700"],
@@ -71,6 +73,8 @@ export default async function RootLayout({
         {children}
         <CookieConsentBanner />
         <GoogleTagManagerScript />
+        <GTMPageView />
+        <GTMLinkTracking />
       </body>
     </html>
   );

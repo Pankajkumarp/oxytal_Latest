@@ -201,7 +201,7 @@ export default function Home404({ entry }: Props) {
         <p
           className={cx(
             "text-[80px] leading-none font-extrabold tracking-tight sm:text-[110px] md:text-[140px]",
-            theme?.accentText ?? "text-emerald-600"
+            theme?.accentText ?? "text-cyan-700"
           )}
         >
           404
@@ -211,8 +211,8 @@ export default function Home404({ entry }: Props) {
           <span
             className={cx(
               "inline-block w-fit rounded-full px-3 py-1.5 text-xs font-bold tracking-wide",
-              theme?.eyebrowBg ?? "bg-emerald-50",
-              theme?.eyebrowText ?? "text-emerald-700"
+              theme?.eyebrowBg ?? "bg-cyan-100",
+              theme?.eyebrowText ?? "text-cyan-700"
             )}
           >
             {eyebrow}
@@ -245,9 +245,9 @@ export default function Home404({ entry }: Props) {
               href={primaryHref}
               className={cx(
                 "inline-flex w-fit items-center gap-2 rounded-full px-7 py-3.5 text-[15px] font-semibold shadow-lg transition-all duration-300 hover:-translate-y-0.5",
-                theme?.buttonBg ?? "bg-emerald-600",
+                theme?.buttonBg ?? "bg-cyan-600",
                 theme?.buttonText ?? "text-white",
-                theme?.buttonHoverBg ?? "hover:bg-emerald-500"
+                theme?.buttonHoverBg ?? "hover:bg-cyan-500"
               )}
             >
               <HomeIcon size={16} aria-hidden />
@@ -259,7 +259,7 @@ export default function Home404({ entry }: Props) {
               href={secondaryHref}
               className={cx(
                 "group inline-flex w-fit items-center gap-1.5 text-[15px] font-semibold",
-                theme?.accentText ?? "text-emerald-600"
+                theme?.accentText ?? "text-cyan-700"
               )}
             >
               <Send size={16} aria-hidden />

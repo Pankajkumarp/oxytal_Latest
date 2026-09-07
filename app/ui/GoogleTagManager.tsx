@@ -29,6 +29,10 @@ import { GTM_ID } from "@/app/lib/gtm";
  * `app/(content)/[locale]/layout.tsx`, `app/(content)/page-not-found/layout.tsx`,
  * and `app/global-not-found.tsx` — see that component's doc comment for why
  * this app has three root layouts.
+ *
+ * `app/ui/GTMPageView.tsx` is mounted alongside these in the same three
+ * layouts and handles per-route-change pageview tracking, which this
+ * component's `gtm.js` load alone does not (see that file's doc comment).
  */
 export function GoogleTagManagerScript() {
   if (!GTM_ID) return null;

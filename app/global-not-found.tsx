@@ -12,6 +12,8 @@ import Home404 from "@/app/ui/Home404";
 import SkipToContent from "@/app/ui/SkipToContent";
 import CookieConsentBanner from "@/app/ui/CookieConsent";
 import { GoogleTagManagerScript, GoogleTagManagerNoScript } from "@/app/ui/GoogleTagManager";
+import GTMPageView from "@/app/ui/GTMPageView";
+import GTMLinkTracking from "@/app/ui/GTMLinkTracking";
 import { ComposableElementSkeleton } from "@/app/types/contentful";
 
 /**
@@ -143,6 +145,8 @@ export default async function GlobalNotFound(): Promise<ReactElement<any>> {
         <Footer entry={footer} />
         <CookieConsentBanner />
         <GoogleTagManagerScript />
+        <GTMPageView />
+        <GTMLinkTracking />
       </body>
     </html>
   );
