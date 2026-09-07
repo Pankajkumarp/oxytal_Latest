@@ -10,6 +10,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { cx } from "@/app/lib/cx";
+import OxytalPattern from "./OxytalPattern";
 import { getAssetUrl } from "../lib/contentfulAsset";
 import { resolveTheme, type SectionTheme } from "../lib/theme";
 import {
@@ -410,7 +411,7 @@ export default function Footer({ entry }: Props) {
     <footer
     data-nav-contrast="dark"
       className={cx(
-        "relative overflow-hidden border-t",
+        "relative overflow-hidden border-t isolate",
         theme?.cardBorder ?? "border-gray-100",
         !backgroundUrl && (theme?.sectionBg ?? "bg-white")
       )}
@@ -425,6 +426,7 @@ export default function Footer({ entry }: Props) {
           : undefined
       }
     >
+      <OxytalPattern color="#ffffff" opacity={0.015} strokeWidth={.85} className="patten-footer"/>
       {/* Light scrim over the background image so the text stays readable
           regardless of what's behind it — no-op when there's no image. */}
       {backgroundUrl && (
