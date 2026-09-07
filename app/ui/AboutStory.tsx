@@ -3,6 +3,7 @@
 import { useLayoutEffect, useRef } from "react";
 import { Entry, EntrySkeletonType } from "contentful";
 import { documentToReactComponents } from "@contentful/rich-text-react-renderer";
+import { type Document as RichTextDocument } from "@contentful/rich-text-types";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { SplitText } from "gsap/SplitText";
@@ -55,12 +56,18 @@ function isEntry(value: unknown): value is AnyEntry {
   );
 }
 
-type TimelineItem = { id: string; year: string; title: string; description: string };
+type TimelineItem = {
+  id: string;
+  year: string;
+  title: string;
+  /** Rich text (`contentDetail.fullDescription`) — rendered via `documentToReactComponents`, same as `copy.fields.text` below. `undefined` when an entry hasn't had this field filled in yet, in which case the timeline item simply shows no copy. */
+  description?: RichTextDocument;
+};
 
 /** Placeholder timeline, used only when `elements` has no `contentDetail` entries yet — the original mockup's 5-point history. */
 const DEFAULT_TIMELINE: TimelineItem[] = [];
 
-/** Maps a resolved `contentDetail` entry to one `TimelineItem` — `badge` as the year/era label, `title` as the item title, `shortDescription` as its copy. */
+/** Maps a resolved `contentDetail` entry to one `TimelineItem` — `badge` as the year/era label, `title` as the item title, `fullDescription` (rich text) as its copy. */
 function contentDetailToTimelineItem(
   entry: PlainEntry<ContentDetailSkeleton>
 ): TimelineItem {
@@ -68,7 +75,7 @@ function contentDetailToTimelineItem(
     id: entry.sys.id,
     year: entry.fields.badge ?? "",
     title: entry.fields.title ?? "",
-    description: entry.fields.shortDescription ?? "",
+    description: entry.fields.fullDescription,
   };
 }
 
@@ -85,7 +92,10 @@ function contentDetailToTimelineItem(
  *   `HomeTalkToUs`'s note use
  * - every `contentDetail` entry among `elements` becomes one timeline
  *   entry (via `contentDetailToTimelineItem`) — `badge` as the year/era
- *   label, `title` as the item title, `shortDescription` as its copy;
+ *   label, `title` as the item title, `fullDescription` (rich text,
+ *   rendered via `documentToReactComponents` same as the intro paragraph
+ *   above — not `shortDescription`, which is plain `Text` in Contentful)
+ *   as its copy;
  *   add/remove/reorder `contentDetail` entries in Contentful to change
  *   the timeline, nothing here needs to change
  *
@@ -371,33 +381,14 @@ export default function AboutStory({ entry }: Props) {
           >
             {description}
           </div>
-
-          {quote && (
-            <blockquote
-              ref={quoteRef}
-              className={cx(
-                "mt-6 rounded-r-xl border-l-4 px-6 py-5 text-[16px] leading-relaxed italic",
-                theme?.cardBorder ?? "border-blue-600",
-                theme?.cardBg ?? "bg-blue-50",
-                theme?.heading ?? "text-gray-700"
-              )}
-            >
-              {quote}
-              {citation && (
-                <cite
-                  className={cx(
-                    "mt-3 block text-[12px] font-bold tracking-wide uppercase not-italic",
-                    theme?.accentText ?? "text-blue-600"
-                  )}
-                >
-                  {citation}
-                </cite>
-              )}
-            </blockquote>
-          )}
         </div>
 
         <div className="lg:col-span-6 lg:col-start-7">
+          <span className={cx(
+              "block text-[21px] leading-[1.15] font-bold tracking-tight mb-5",
+              theme?.heading ?? "text-gray-900"
+            )} >{quote}
+            </span>
           <div className="relative">
             <span
               ref={lineRef}
@@ -433,14 +424,16 @@ export default function AboutStory({ entry }: Props) {
                   >
                     {item.title}
                   </p>
-                  <p
-                    className={cx(
-                      "mt-1 text-[13.5px] leading-relaxed",
-                      theme?.body ?? "text-gray-500"
-                    )}
-                  >
-                    {item.description}
-                  </p>
+                  {item.description && (
+                    <div
+                      className={cx(
+                        "rich-text mt-1 text-[13.5px] leading-relaxed",
+                        theme?.body ?? "text-gray-500"
+                      )}
+                    >
+                      {documentToReactComponents(item.description)}
+                    </div>
+                  )}
                 </li>
               ))}
             </ol>

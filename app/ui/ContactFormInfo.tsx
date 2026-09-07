@@ -624,7 +624,7 @@ export default function ContactFormInfo() {
 
           {submitted ? (
             <div className="mt-6 flex flex-col items-start gap-2 rounded-xl bg-[#E5F5FB] p-6 text-[#0B1B2B]">
-              <p className="text-[15px] font-bold">Thanks — got it!</p>
+              <p className="text-[26px] font-bold">Thanks — got it!</p>
               <p className="text-[14px] leading-relaxed">
                 Someone from our team will get back to you within one business day.
               </p>
