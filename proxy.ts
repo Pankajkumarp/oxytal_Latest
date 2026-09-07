@@ -30,12 +30,12 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  // Skip Next internals, the dedicated /404 page (the redirect target of
-  // not-found.tsx), requests for files (e.g. /favicon.ico, /globe.svg), and
-  // Next's code-generated metadata routes (app/icon.tsx, app/apple-icon.tsx,
-  // and any future opengraph-image.tsx/twitter-image.tsx) — these serve at
-  // a bare path with no file extension (e.g. /icon, not /icon.png), so the
-  // "has a dot" file check above doesn't catch them; without this they were
+  // Skip Next internals, requests for files (e.g. /favicon.ico,
+  // /globe.svg), and Next's code-generated metadata routes (app/icon.tsx,
+  // app/apple-icon.tsx, app/sitemap.ts, app/robots.ts, and any future
+  // opengraph-image.tsx/twitter-image.tsx) — these serve at a bare path
+  // with no file extension (e.g. /icon, not /icon.png), so the "has a
+  // dot" file check above doesn't catch them; without this they were
   // rewritten to /en-US/icon (which doesn't exist) and 404ed, breaking the
   // favicon site-wide.
   //
@@ -47,5 +47,20 @@ export const config = {
   // [locale]'s catch-all route, so Next silently fell through to its generic
   // app-level not-found handling (wrong title, no metadata) instead of this
   // route's own page/generateMetadata.
-  matcher: ["/((?!_next|api|404|page-not-found|icon|apple-icon|opengraph-image|twitter-image|.*\\..*).*)"],
+  //
+  // `404` is deliberately NOT excluded (unlike the two above): there is no
+  // dedicated `/404` route anymore (that page.tsx/layout.tsx were removed
+  // in favor of `/page-not-found` and `app/global-not-found.tsx`), so a
+  // bare `/404` request needs the same locale rewrite as any other path.
+  // Excluding it used to skip the rewrite entirely, which meant `/404`
+  // itself matched `[locale]/[[...slug]]` directly with `locale="404"`
+  // and an *empty* catch-all `slug` — indistinguishable from requesting
+  // the bare `/` home page, since this app hardcodes `"en-US"` for every
+  // Contentful query rather than reading the `locale` param (see
+  // app/(content)/[locale]/[[...slug]]/page.tsx). That silently served the
+  // full home page with a 200 status at `/404` instead of a real 404 —
+  // rewriting it to `/en-US/404` now makes it resolve through the normal
+  // `getPageBySlug("404", ...)` lookup and 404 boundary like any other
+  // unmatched slug.
+  matcher: ["/((?!_next|api|page-not-found|icon|apple-icon|opengraph-image|twitter-image|.*\\..*).*)"],
 };

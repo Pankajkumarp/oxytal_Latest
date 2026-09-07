@@ -3,6 +3,8 @@ import "../../globals.css";
 import type { ReactNode } from "react";
 import { Poppins } from "next/font/google";
 import { SITE_URL } from "@/app/lib/siteUrl";
+import CookieConsentBanner from "@/app/ui/CookieConsent";
+import { GoogleTagManagerScript, GoogleTagManagerNoScript } from "@/app/ui/GoogleTagManager";
 
 export const poppins = Poppins({
   subsets: ["latin"],
@@ -56,7 +58,12 @@ export default function RootLayout({
       lang="en"
       className={`${poppins.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <GoogleTagManagerNoScript />
+        {children}
+        <CookieConsentBanner />
+        <GoogleTagManagerScript />
+      </body>
     </html>
   );
 }

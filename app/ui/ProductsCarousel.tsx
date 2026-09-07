@@ -862,14 +862,14 @@ export default function ProductsCarousel({ entry }: Props) {
         >
 
           <div className={styles.topBar}>
-            <div>
+            <div className="max-w-[80%] sm:max-w-2xl">
             <span className={cx(
               "text-[28px] leading-[1.15] font-extrabold tracking-tight sm:text-[34px] md:text-[40px] z-2",
               theme?.heading ?? "text-gray-900"
             )}>{heading}</span>
             {description && (
             <div
-              className={cx("rich-text mt-1 max-w-2xl text-[15px] leading-relaxed", theme?.body ?? "text-[#565A57]")}
+              className={cx("rich-text mt-1 max-w-2xl sm:max-w-2xl text-[15px] leading-relaxed", theme?.body ?? "text-[#565A57]")}
             >
               {description}
             </div>

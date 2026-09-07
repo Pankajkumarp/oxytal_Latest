@@ -3,6 +3,8 @@ import type { Metadata } from "next";
 import { Poppins } from "next/font/google";
 import "../../globals.css";
 import { SITE_URL } from "@/app/lib/siteUrl";
+import CookieConsentBanner from "@/app/ui/CookieConsent";
+import { GoogleTagManagerScript, GoogleTagManagerNoScript } from "@/app/ui/GoogleTagManager";
 export const poppins = Poppins({
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700"],
@@ -65,7 +67,10 @@ export default async function RootLayout({
         <meta content="yes" name="mobile-web-app-capable" />
       </head>
       <body className="mx-auto w-full">
+        <GoogleTagManagerNoScript />
         {children}
+        <CookieConsentBanner />
+        <GoogleTagManagerScript />
       </body>
     </html>
   );

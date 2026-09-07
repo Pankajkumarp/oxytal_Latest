@@ -178,7 +178,7 @@ export default function LegalPage({ entry }: Props) {
         {backgroundUrl && <div className="absolute inset-0 bg-white/90" />}
       </div>
 
-      <div className="container mx-auto max-w-3xl px-5 py-16 md:px-10 md:py-24">
+      <div className="container mx-auto max-w-4xl px-5 py-16 md:px-10 md:py-24 pt-[120px] sm:pt-[150px]">
         {eyebrow && (
           <span
             className={cx(

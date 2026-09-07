@@ -408,6 +408,7 @@ export default function Footer({ entry }: Props) {
 
   return (
     <footer
+    data-nav-contrast="dark"
       className={cx(
         "relative overflow-hidden border-t",
         theme?.cardBorder ?? "border-gray-100",
@@ -449,175 +450,212 @@ export default function Footer({ entry }: Props) {
             neighbors grow to fill the freed width instead of leaving a
             blank gap.
         ================================================= */}
-        <div className="flex flex-wrap gap-x-8 gap-y-12 py-14 md:py-16">
+        <div className="flex flex-wrap gap-x-8 gap-y-8 sm:gap-y-12 py-14 md:py-16 text-center sm:text-left">
           {/* BRAND */}
-          <div className="flex basis-full flex-col gap-5 lg:basis-[260px] lg:shrink-0 lg:grow-0">
-            <Link
-              href="/"
-              className={cx(
-                "inline-flex w-fit items-center text-[30px] tracking-tight text-white"
-              )}
-            >
-              {logoUrl ? (
-                // eslint-disable-next-line @next/next/no-img-element -- matches the plain <img> convention already used for Contentful assets in this project
-                <img src={logoUrl} alt="Oxytal" className="h-8 w-auto object-contain" />
-              ) : (
-                <>
-                  Oxytal
-                </>
-              )}
-            </Link>
+          <div
+  className={cx(
+    "flex basis-full flex-col items-center gap-5 text-center",
+    "sm:items-start sm:text-left",
+    "lg:basis-[260px] lg:shrink-0 lg:grow-0"
+  )}
+>
+  <Link
+    href="/"
+    className={cx(
+      "inline-flex w-fit items-center text-[30px] tracking-tight text-white"
+    )}
+  >
+    {logoUrl ? (
+      // eslint-disable-next-line @next/next/no-img-element -- matches the plain <img> convention already used for Contentful assets in this project
+      <img
+        src={logoUrl}
+        alt="Oxytal"
+        className="h-8 w-auto object-contain"
+      />
+    ) : (
+      <>Oxytal</>
+    )}
+  </Link>
 
-            {description && (
-              <p
-                className={cx(
-                  "max-w-xs text-[14.5px] leading-relaxed",
-                  theme?.body ?? "text-gray-500"
-                )}
-              >
-                {description}
-              </p>
-            )}
+  {description && (
+    <p
+      className={cx(
+        "max-w-full text-[14.5px] leading-relaxed sm:max-w-xs",
+        theme?.body ?? "text-gray-500"
+      )}
+    >
+      {description}
+    </p>
+  )}
 
-            <div className="flex items-center gap-2.5">
-              {socialLinks.map((social) => (
-                <Link
-                  key={social.id}
-                  href={social.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label={social.label}
-                  className={cx(
-                    "flex h-9 w-9 items-center justify-center rounded-full text-[11px] font-bold transition-colors",
-                    theme?.iconBG ?? "bg-gray-100",
-                  )}
-                >
-                  {social.iconUrl ? (
-                    // eslint-disable-next-line @next/next/no-img-element -- matches the plain <img> convention already used for Contentful assets in this project
-                    <img src={social.iconUrl} alt="" aria-hidden className="h-4 w-4 object-contain" />
-                  ) : (
-                    social.label.slice(0, 2)
-                  )}
-                </Link>
-              ))}
-            </div>
-          </div>
+  <div className="flex items-center gap-2.5">
+    {socialLinks.map((social) => (
+      <Link
+        key={social.id}
+        href={social.href}
+        target="_blank"
+        rel="noopener noreferrer"
+        aria-label={social.label}
+        className={cx(
+          "flex h-9 w-9 items-center justify-center rounded-full text-[11px] font-bold transition-colors",
+          theme?.iconBG ?? "bg-gray-100"
+        )}
+      >
+        {social.iconUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element -- matches the plain <img> convention already used for Contentful assets in this project
+          <img
+            src={social.iconUrl}
+            alt=""
+            aria-hidden
+            className="h-4 w-4 object-contain"
+          />
+        ) : (
+          social.label.slice(0, 2)
+        )}
+      </Link>
+    ))}
+  </div>
+</div>
 
           {navColumns.map((column) => (
-            <div key={column.key} className="min-w-[130px] basis-[140px] flex-1">
+            <div key={column.key} className="min-w-full sm:min-w-[130px] sm:basis-[140px] flex-1">
               <FooterColumn title={column.title} links={column.links} theme={theme} />
             </div>
           ))}
 
           {/* CONTACT + OFFICES */}
-          {hasContactColumn && (
-            <div className="min-w-[170px] basis-[170px] flex-1 flex flex-col gap-6">
-              {contactLinks.length > 0 && (
-                <div>
-                  <span
-                    className={cx(
-                      "text-xs font-bold tracking-wide uppercase block",
-                      theme?.accentText ?? "text-emerald-700"
-                    )}
-                  >
-                    {contactTitle}
-                  </span>
-
-                  <ul className="mt-4 flex flex-col gap-3">
-                    {contactLinks.map((contact, index) => {
-                      const Icon = CONTACT_ICONS[index % CONTACT_ICONS.length];
-
-                      return (
-                        <li key={contact.id}>
-                          <Link
-                            href={contact.href}
-                            className={cx(
-                              "flex items-start gap-2 text-[13.5px] transition-colors",
-                              theme?.link ?? "text-gray-600",
-                            )}
-                          >
-                            {contact.iconUrl ? (
-                              // eslint-disable-next-line @next/next/no-img-element -- matches the plain <img> convention already used for Contentful assets in this project
-                              <img src={contact.iconUrl} alt="" aria-hidden className="mt-0.5 h-4 w-4 object-contain" />
-                            ) : (
-                              <Icon
-                                size={15}
-                                className={cx("mt-0.5 shrink-0", theme?.accentText ?? "text-emerald-600")}
-                                aria-hidden
-                              />
-                            )}
-                            {contact.label}
-                          </Link>
-                        </li>
-                      );
-                    })}
-                  </ul>
-                </div>
-              )}
-
-              {offices.length > 0 && (
-                <div
-                  className={
-                    contactLinks.length > 0
-                      ? cx("border-t pt-5", theme?.cardBorder ?? "border-gray-100")
-                      : ""
-                  }
-                >
-                  <span
-                    className={cx(
-                      "text-xs font-bold tracking-wide uppercase block",
-                      theme?.accentText ?? "text-emerald-700"
-                    )}
-                  >
-                    {officesTitle}
-                  </span>
-
-                  <ul className="mt-4 flex flex-col gap-4">
-                    {offices.map((office) => (
-                      <li key={office.id} className="flex items-start gap-2">
-                        {office.flagUrl ? (
-                          // eslint-disable-next-line @next/next/no-img-element -- matches the plain <img> convention already used for Contentful assets in this project
-                          <img
-                            src={office.flagUrl}
-                            alt=""
-                            aria-hidden
-                            className="mt-0.5 h-[22px] w-[20px] shrink-0 object-cover"
-                          />
-                        ) : (
-                          <MapPin
-                            size={15}
-                            className={cx("mt-0.5 shrink-0", theme?.accentText ?? "text-emerald-600")}
-                            aria-hidden
-                          />
-                        )}
-
-                        <div>
-                          <div
-                            className={cx(
-                              "text-[13.5px] font-bold",
-                              theme?.heading ?? "text-gray-900"
-                            )}
-                          >
-                            {office.city}
-                          </div>
-                          {office.description && (
-                            <div
-                              className={cx(
-                                "text-[12.5px]",
-                                theme?.body ?? "text-gray-500"
-                              )}
-                            >
-                              {office.description}
-                            </div>
-                          )}
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </div>
+{hasContactColumn && (
+  <div
+    className={cx(
+      "min-w-full flex flex-1 flex-col items-center gap-6 text-center",
+      "sm:min-w-[170px] sm:basis-[170px] sm:items-start sm:text-left"
+    )}
+  >
+    {contactLinks.length > 0 && (
+      <div>
+        <span
+          className={cx(
+            "block text-xs font-bold uppercase tracking-wide",
+            theme?.accentText ?? "text-emerald-700"
           )}
+        >
+          {contactTitle}
+        </span>
+
+        <ul className="mt-4 flex flex-col items-center gap-3 sm:items-start">
+          {contactLinks.map((contact, index) => {
+            const Icon = CONTACT_ICONS[index % CONTACT_ICONS.length];
+
+            return (
+              <li key={contact.id}>
+                <Link
+                  href={contact.href}
+                  className={cx(
+                    "flex items-start justify-center gap-2 text-[13.5px] transition-colors sm:justify-start",
+                    theme?.link ?? "text-gray-600"
+                  )}
+                >
+                  {contact.iconUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element -- matches the plain <img> convention already used for Contentful assets in this project
+                    <img
+                      src={contact.iconUrl}
+                      alt=""
+                      aria-hidden
+                      className="mt-0.5 h-4 w-4 shrink-0 object-contain"
+                    />
+                  ) : (
+                    <Icon
+                      size={15}
+                      className={cx(
+                        "mt-0.5 shrink-0",
+                        theme?.accentText ?? "text-emerald-600"
+                      )}
+                      aria-hidden
+                    />
+                  )}
+
+                  {contact.label}
+                </Link>
+              </li>
+            );
+          })}
+        </ul>
+      </div>
+    )}
+
+    {offices.length > 0 && (
+      <div
+        className={
+          contactLinks.length > 0
+            ? cx(
+                "border-t pt-5",
+                theme?.cardBorder ?? "border-gray-100"
+              )
+            : ""
+        }
+      >
+        <span
+          className={cx(
+            "block text-xs font-bold uppercase tracking-wide",
+            theme?.accentText ?? "text-emerald-700"
+          )}
+        >
+          {officesTitle}
+        </span>
+
+        <ul className="mt-4 flex flex-col items-center gap-4 sm:items-start">
+          {offices.map((office) => (
+            <li
+              key={office.id}
+              className="flex items-start justify-center gap-2 sm:justify-start"
+            >
+              {office.flagUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element -- matches the plain <img> convention already used for Contentful assets in this project
+                <img
+                  src={office.flagUrl}
+                  alt=""
+                  aria-hidden
+                  className="mt-0.5 h-[22px] w-[20px] shrink-0 object-cover"
+                />
+              ) : (
+                <MapPin
+                  size={15}
+                  className={cx(
+                    "mt-0.5 shrink-0",
+                    theme?.accentText ?? "text-emerald-600"
+                  )}
+                  aria-hidden
+                />
+              )}
+
+              <div className="text-center sm:text-left">
+                <div
+                  className={cx(
+                    "text-[13.5px] font-bold",
+                    theme?.heading ?? "text-gray-900"
+                  )}
+                >
+                  {office.city}
+                </div>
+
+                {office.description && (
+                  <div
+                    className={cx(
+                      "text-[12.5px]",
+                      theme?.body ?? "text-gray-500"
+                    )}
+                  >
+                    {office.description}
+                  </div>
+                )}
+              </div>
+            </li>
+          ))}
+        </ul>
+      </div>
+    )}
+  </div>
+)}
         </div>
 
         {/* =================================================

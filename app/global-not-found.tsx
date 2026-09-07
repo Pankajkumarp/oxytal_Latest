@@ -10,6 +10,8 @@ import PageBody from "@/app/ui/PageBody";
 import Footer from "@/app/ui/Footer";
 import Home404 from "@/app/ui/Home404";
 import SkipToContent from "@/app/ui/SkipToContent";
+import CookieConsentBanner from "@/app/ui/CookieConsent";
+import { GoogleTagManagerScript, GoogleTagManagerNoScript } from "@/app/ui/GoogleTagManager";
 import { ComposableElementSkeleton } from "@/app/types/contentful";
 
 /**
@@ -132,12 +134,15 @@ export default async function GlobalNotFound(): Promise<ReactElement<any>> {
   return (
     <html lang="en" className={`${poppins.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col">
+        <GoogleTagManagerNoScript />
         <SkipToContent />
         <Navbar entry={navigation} />
         <main id="main-content">
           {page ? <PageBody blocks={page.fields.body} /> : <Home404 entry={NOT_FOUND_FALLBACK_ENTRY} />}
         </main>
         <Footer entry={footer} />
+        <CookieConsentBanner />
+        <GoogleTagManagerScript />
       </body>
     </html>
   );

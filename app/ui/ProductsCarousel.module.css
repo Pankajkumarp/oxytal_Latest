@@ -706,3 +706,18 @@
     transition: none !important;
   }
 }
+@media (max-width: 575px) {
+  .topBar {
+  padding: 0px;
+  position: initial;
+}
+.left {
+  padding: 0px 0px 20px 0px;
+}
+  .slides {
+    padding-top: 35px;
+  }
+    .slide {
+    min-height: 500px;
+  }
+}

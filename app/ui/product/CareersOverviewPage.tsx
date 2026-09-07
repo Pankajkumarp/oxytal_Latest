@@ -307,7 +307,7 @@ function Hero({ headingLevel = "h1" }: { headingLevel?: HeadingLevel }) {
   const locRef = useFadeUp<HTMLDivElement>();
 
   return (
-    <header className="relative overflow-hidden bg-[linear-gradient(160deg,#061223,#0C2138)] min-h-screen px-5 py-16 text-[#EAF2F8] sm:px-8 sm:py-20 lg:py-[110px] lg:pt-[150px]">
+    <header className="relative overflow-hidden bg-[linear-gradient(160deg,#061223,#0C2138)] sm:min-h-screen px-0 py-16 text-[#EAF2F8] sm:px-8 sm:py-20 lg:py-[110px] pt-[120px] lg:pt-[150px]">
       <div
         aria-hidden
         className="pointer-events-none absolute -top-[44%] -right-[18%] h-[860px] w-[860px] rounded-full"
@@ -372,7 +372,7 @@ function HonestSection() {
   const gridRef = useFadeUp<HTMLDivElement>();
 
   return (
-    <section className="bg-[#FBFDFE] px-5 py-14 sm:px-8 sm:py-16 lg:py-20">
+    <section className="bg-[#FBFDFE] px-0 py-14 sm:px-8 sm:py-16 lg:py-20">
       <div className="container relative mx-auto px-5 md:px-10">
         <div ref={introRef}>
           <SectionHead
@@ -406,7 +406,7 @@ function FitSection() {
   const badCardRef = useCardHover<HTMLDivElement>();
 
   return (
-    <section className="bg-[linear-gradient(170deg,#F1F7FB,#FBFDFE_62%)] px-5 py-14 sm:px-8 sm:py-16 lg:py-20">
+    <section className="bg-[linear-gradient(170deg,#F1F7FB,#FBFDFE_62%)] px-0 py-14 sm:px-8 sm:py-16 lg:py-20">
       <div className="container relative mx-auto px-5 md:px-10">
         <div ref={introRef}>
           <SectionHead
@@ -486,7 +486,7 @@ function WorkSection() {
   const gridRef = useFadeUp<HTMLDivElement>();
 
   return (
-    <section className="bg-[linear-gradient(170deg,#F1F7FB,#FBFDFE_62%)] px-5 py-14 sm:px-8 sm:py-16 lg:py-20">
+    <section className="bg-[linear-gradient(170deg,#F1F7FB,#FBFDFE_62%)] px-0 py-14 sm:px-8 sm:py-16 lg:py-20">
       <div className="container relative mx-auto px-5 md:px-10">
         <div ref={introRef}>
           <SectionHead eyebrow="What you'd work on" title="Two kinds of work, and most people do both." headingLevel="h4"/>
@@ -563,7 +563,7 @@ function PortalSection() {
   const cardRef = useFadeUp<HTMLDivElement>();
 
   return (
-    <section className="relative overflow-hidden bg-[linear-gradient(160deg,#061223,#0C2138)] px-5 py-14 text-[#EAF2F8] sm:px-8 sm:py-16 lg:py-20">
+    <section className="relative overflow-hidden bg-[linear-gradient(160deg,#061223,#0C2138)] px-0 py-14 text-[#EAF2F8] sm:px-8 sm:py-16 lg:py-20">
       <div
         aria-hidden
         className="pointer-events-none absolute -bottom-[46%] -left-[16%] h-[820px] w-[820px] rounded-full"
