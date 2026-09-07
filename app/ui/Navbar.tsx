@@ -831,7 +831,7 @@ export default function Navbar({ entry }: Props) {
         ================================================= */}
           <ul
             ref={desktopNavRef}
-            className={`hidden items-center justify-center gap-1.5 ${navOpen ? "lg:flex" : "lg:hidden"
+            className={`hidden items-center justify-center gap-1.5 lg:gap-0  xl:gap-1.5 ${navOpen ? "lg:flex" : "lg:hidden"
               }`}
           >
             {menus.map((menu) => {
@@ -844,7 +844,7 @@ export default function Navbar({ entry }: Props) {
                     <Link
                       href={menu.href ?? "#"}
                       className={cx(
-                        "block rounded-lg px-3.5 py-2.5 text-[17px] font-medium transition-colors",
+                        "block rounded-lg px-3.5 py-2.5 text-[17px] lg:text-[13.6px] xl:text-[17px] font-medium transition-colors",
                         theme?.link ?? "text-gray-900",
                       )}
                     >
@@ -881,7 +881,7 @@ export default function Navbar({ entry }: Props) {
                   {menu.href ? (
                     <div
                       className={cx(
-                        "flex items-center gap-1 rounded-lg pl-3.5 pr-2 py-2.5 text-[17px] font-medium transition-colors",
+                        "flex items-center gap-1 rounded-lg pl-3.5 pr-2 py-2.5 text-[17px] lg:text-[13.6px] xl:text-[17px] font-medium transition-colors",
                         theme?.link ?? "text-gray-900",
                       )}
                     >
