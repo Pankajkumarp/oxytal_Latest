@@ -221,7 +221,7 @@ function buildPayload(data: FormData): ContactEnquiryPayload {
 
 /**
  * The single place the form's payload actually gets submitted from —
- * `POST`s straight to the Oxytal API's `/jobs/contactus` endpoint from the
+ * `POST`s straight to the Oxytal API's `/oxytal/contactus` endpoint from the
  * browser (no Next.js API route in between), using `API_URL`
  * (`app/lib/apiUrl.ts`, `NEXT_PUBLIC_API_URL`) as the origin. `ok` reflects
  * both the request actually reaching the server and it responding with a
@@ -233,7 +233,7 @@ async function submitContactEnquiry(
   payload: ContactEnquiryPayload
 ): Promise<{ ok: boolean }> {
   try {
-    const response = await fetch(`${API_URL}/jobs/contactus`, {
+    const response = await fetch(`${API_URL}/oxytal/contactus`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload),
