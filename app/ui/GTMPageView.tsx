@@ -51,6 +51,10 @@ function GTMPageViewTracker() {
     window.dataLayer.push({
       event: "page_view",
       page_path: query ? `${pathname}?${query}` : pathname,
+      page_location: window.location.href,
+      page_title: document.title,
+      page_referrer: document.referrer,
+      language: "en",
     });
   }, [pathname, searchParams]);
 
