@@ -32,6 +32,7 @@ import AISolutionsDifferentiators from "@/app/ui/AISolutionsDifferentiators";
 import AISolutionsProcess from "@/app/ui/AISolutionsProcess";
 import AISolutionsSpotlight from "@/app/ui/AISolutionsSpotlight";
 import AISolutionsTechStack from "@/app/ui/AISolutionsTechStack";
+import AISolutionsForgePipeline from "@/app/ui/AISolutionsForgePipeline";
 import CareersPage from "@/app/ui/CareersPage";
 import CareersBannerHorizon from "@/app/ui/CareersBannerHorizon";
 import ServiceDetailHero from "@/app/ui/ServiceDetailHero";
@@ -133,6 +134,7 @@ const subtypeComponents: Record<
   aiProcess: AISolutionsProcess,
   aiSpotlight: AISolutionsSpotlight,
   aiTechStack: AISolutionsTechStack,
+  aiForgePipeline: AISolutionsForgePipeline,
   careersPage: CareersPage,
   careersBanner: CareersBannerHorizon,
   serviceHero: ServiceDetailHero,
