@@ -442,7 +442,7 @@ export default function AISolutionsForgePipeline({ entry }: Props) {
               PIPELINE RAIL — static SVG diagram, horizontally scrollable
               on narrow viewports rather than shrinking illegibly.
           ================================================= */}
-          <div className="mt-9 overflow-x-auto rounded-[20px] border border-white/12 bg-white/[0.035] p-6 sm:mt-11 md:p-9">
+          <div className="mt-5 overflow-x-auto rounded-[20px] border border-white/12 bg-white/[0.035] p-6 sm:mt-5 md:p-9">
             <svg
               viewBox="0 0 1000 190"
               role="img"
@@ -459,7 +459,7 @@ export default function AISolutionsForgePipeline({ entry }: Props) {
               />
 
               {PIPELINE_NODES.filter((node) => !node.gate).map((node) => (
-                <circle key={node.label} cx={node.x} cy="86" r="13" fill="#a298f4" />
+                <circle key={node.label} cx={node.x} cy="86" r="13" fill="#11365d" />
               ))}
 
               {PIPELINE_NODES.filter((node) => node.gate).map((node) => (
@@ -508,7 +508,7 @@ export default function AISolutionsForgePipeline({ entry }: Props) {
                 fontSize="9.5"
                 textAnchor="middle"
               >
-                <text x="372" y="42" fill="#a298f4">
+                <text x="372" y="42" fill="#11365d">
                   CONFLUENCE → GITHUB
                 </text>
                 <text x="872" y="42" fill="#14b8a6">

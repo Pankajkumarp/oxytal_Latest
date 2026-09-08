@@ -21,8 +21,12 @@ import {
   User,
   type LucideIcon,
 } from "lucide-react";
+import { Entry, EntrySkeletonType } from "contentful";
 import { cx } from "@/app/lib/cx";
 import { API_URL } from "@/app/lib/apiUrl";
+import { getAssetUrl } from "../lib/contentfulAsset";
+import ThemePattern from "./ThemePattern";
+import { ComposableElementSkeleton, DataImageSkeleton } from "../types/contentful";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger, SplitText);
@@ -31,6 +35,34 @@ if (typeof window !== "undefined") {
 const prefersReducedMotion = () =>
   typeof window !== "undefined" &&
   window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+/**
+ * `Entry<Skeleton>` on its own leaves `Modifiers` unconstrained, which
+ * widens every field to also allow the `WITH_ALL_LOCALES` (locale-keyed
+ * object) shape. This app's Contentful client is created with no chain
+ * modifiers (see app/lib/contentful.ts), so pin `Modifiers` to `undefined`
+ * to get the plain, single-locale field shape it actually returns.
+ */
+type PlainEntry<Skeleton extends EntrySkeletonType> = Entry<
+  Skeleton,
+  undefined
+>;
+
+interface AnyEntry {
+  sys: { id: string; contentType: { sys: { id: string } } };
+  fields: Record<string, unknown>;
+}
+
+/** True for a resolved Contentful entry; false for an unresolved link (`{ sys: { type: "Link" } }`) or anything else. */
+function isEntry(value: unknown): value is AnyEntry {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "sys" in value &&
+    "fields" in value &&
+    typeof (value as { sys: unknown }).sys === "object"
+  );
+}
 
 interface RouteCard {
   title: string;
@@ -262,11 +294,19 @@ function FieldError({ id, message }: { id?: string; message?: string }) {
 /**
  * The `/contact` page's routing + project-intake section — a fully
  * static, hardcoded port of `Refrence/oxytal-contact-us.html`'s `.routes`
- * and `.formwrap` sections, deliberately **not** wired to Contentful (no
- * `entry` prop is read). Both the `contactInfo` and `contactForm`
+ * and `.formwrap` sections. Both the `contactInfo` and `contactForm`
  * `composableElement` subtypes render this same component (see
  * `ComposableElementRenderer`) — only one such entry needs to exist on
- * the `/contact` page; its own fields are ignored.
+ * the `/contact` page.
+ *
+ * `entry` is read for exactly two things — its `backgroundImage` (a
+ * full-bleed section photo replacing the plain `#FBFDFE` background
+ * outright, same "photo wins" treatment every other composableElement
+ * section uses) and its `pattern`/`patternColor` (the decorative
+ * `ThemePattern` backdrop, same convention too) — every other field
+ * (copy, theming, CTAs) stays deliberately ignored; this section's text
+ * content is still fully static/hardcoded, unlike a normal
+ * composableElement section.
  *
  * Sections, both static copy end to end:
  * - a 4-up routing grid ("Four reasons people get in touch.") — each
@@ -301,7 +341,11 @@ function FieldError({ id, message }: { id?: string; message?: string }) {
  * - each contact row's icon "pops" while its arrow glyph slides
  *   up-right on hover
  */
-export default function ContactFormInfo() {
+interface Props {
+  entry?: PlainEntry<ComposableElementSkeleton>;
+}
+
+export default function ContactFormInfo({ entry }: Props) {
   const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState<Partial<Record<FieldName, string>>>({});
@@ -337,6 +381,17 @@ export default function ContactFormInfo() {
       setSubmitted(true);
     }
   };
+
+  // `backgroundImage` links to a `dataImage` *entry*, not a raw asset —
+  // resolve that entry's own `image` field for the actual asset URL, same
+  // pattern every sibling composableElement section uses.
+  const backgroundImageEntry = entry?.fields.backgroundImage;
+  const backgroundUrl = isEntry(backgroundImageEntry)
+    ? getAssetUrl(
+        (backgroundImageEntry as unknown as PlainEntry<DataImageSkeleton>)
+          .fields.image
+      )
+    : undefined;
 
   const sectionRef = useRef<HTMLElement>(null);
   const routesHeadingRef = useRef<HTMLHeadingElement>(null);
@@ -545,9 +600,26 @@ export default function ContactFormInfo() {
   };
 
   return (
-    <section ref={sectionRef} className="relative bg-[#FBFDFE] py-16 md:py-20">
+    <section
+      ref={sectionRef}
+      className={cx(
+        "relative overflow-hidden pt-16 md:pt-20 pb-0",
+        !backgroundUrl && "bg-[#FBFDFE]"
+      )}
+      style={
+        backgroundUrl
+          ? {
+              backgroundImage: `url(${backgroundUrl})`,
+              backgroundSize: "cover",
+              backgroundRepeat: "no-repeat",
+              backgroundPosition: "center",
+            }
+          : undefined
+      }
+    >
+
       {/* ═══ ROUTING GRID — "Four reasons people get in touch." ═══ */}
-      <div className="container relative mx-auto px-5 pb-12 md:px-10 md:pb-16">
+      <div className="container relative z-2 mx-auto px-5 pb-12 md:px-10 md:pb-16">
         <span className="inline-flex items-center gap-2 text-[12px] text-[#0E9BC4] font-semibold uppercase before:h-[2px] before:w-[22px] before:rounded-full before:bg-[#0E9BC4] before:content-['']">
           Start here
         </span>
@@ -611,16 +683,72 @@ export default function ContactFormInfo() {
       <div
         id="contact-form"
         ref={cardsRef}
-        className="container relative mx-auto grid gap-6 px-5 md:px-10 lg:grid-cols-2 lg:items-start"
+        className="bg-[#dfeefbab] py-16 relative"
       >
-        <div className="rounded-2xl border border-[#E3ECF2] bg-white p-7 shadow-xs md:p-9">
+              {/* Decorative pattern backdrop — see `entry`'s doc comment above.
+          No `theme` here (this section deliberately isn't color-themed),
+          so it only ever renders when an editor sets both `pattern` and
+          `patternColor` explicitly — same "arm the pattern" rule
+          `ThemePattern` itself documents. */}
+      <div aria-hidden className="pointer-events-none absolute inset-0 z-1">
+        <ThemePattern
+          pattern={entry?.fields.pattern}
+          patternColor={entry?.fields.patternColor}
+        />
+      </div>
+      <div
+        className="container relative z-2 mx-auto grid gap-6 px-5 md:px-10 lg:grid-cols-2 lg:items-start"
+      >
+      <aside className="flex flex-col gap-4">
+          <div className="rounded-2xl bg-white p-6 md:p-6.5 shadow-xs">
+            <p className="text-[21px] font-bold text-[#0B1B2B] mb-5">Or reach us directly</p>
+            <div ref={rowsRef} className="mt-3">
+              {CONTACT_ROWS.map((row) => (
+                <div
+                  key={row.label}
+                  onMouseEnter={handleRowEnter}
+                  onMouseLeave={handleRowLeave}
+                  className="flex items-center gap-3 border-t border-[#F1F6F9] py-4 first:border-t-0 first:pt-0"
+                >
+                  <div data-row-icon className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#E5F5FB] text-[#0E9BC4]">
+                    <row.icon size={15} aria-hidden />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <span className="block font-semibold text-[11px] text-[#8598AA] uppercase">{row.label}</span>
+                    <a
+                      href={row.href}
+                      target={row.href.startsWith("http") ? "_blank" : undefined}
+                      rel={row.href.startsWith("http") ? "noopener" : undefined}
+                      className="text-[14px] font-bold text-[#0B1B2B] transition-colors hover:text-[#0E9BC4]"
+                    >
+                      {row.value}
+                    </a>
+                  </div>
+                  <ArrowUpRight data-row-arrow size={14} aria-hidden className="shrink-0 text-[#C9D6DE]" />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="rounded-2xl  bg-white p-6 md:p-6.5 shadow-xs min-h-[230px]">
+            <p className="text-[21px] font-bold text-[#0B1B2B]">What happens next</p>
+            <div className="mt-3 flex items-center gap-2.5">
+              <span aria-hidden className="inline-block h-2 w-2 shrink-0 rounded-full bg-[#12A67C] shadow-[0_0_0_3px_rgba(18,166,124,0.16)]" />
+              <p className="text-[13.5px] leading-relaxed text-[#546A7E]">
+                A person replies within <strong className="text-[#0B1B2B]">one business day</strong> — not an
+                automated acknowledgement.
+              </p>
+            </div>
+            <p className="mt-3 text-[13px] leading-relaxed text-[#8598AA]">
+              If it looks like a fit, we&apos;ll suggest a call to understand the problem properly. If it isn&apos;t,
+              we&apos;ll say so and point you somewhere better. Neither costs you anything.
+            </p>
+          </div>
+        </aside>
+        <div className="rounded-2xl bg-white p-7 shadow-xs md:p-9">
           <h3 ref={formHeadingRef} className="text-[21px] font-extrabold leading-[1.2] tracking-tight sm:text-[26px] md:text-[32px] text-[#0B1B2B]">
-            Start a conversation.
+            Let&apos;s Bring Your Vision to Life
           </h3>
-          <p className="mt-2 max-w-md text-[14.5px] leading-relaxed text-[#546A7E]">
-            A few lines is plenty. We&apos;d rather hear the problem in your own words than have you
-            fill in fields describing it.
-          </p>
 
           {submitted ? (
             <div className="mt-6 flex flex-col items-start gap-2 rounded-xl bg-[#E5F5FB] p-6 text-[#0B1B2B]">
@@ -638,11 +766,25 @@ export default function ContactFormInfo() {
                 <input type="text" id="company-website" name="company_website" tabIndex={-1} autoComplete="off" />
               </div>
 
+              <div>
+                <div className="relative">
+                  <Layers size={17} aria-hidden className="pointer-events-none absolute top-1/2 left-4 -translate-y-1/2 text-[#8598AA]" />
+                  <select id="interstedIn" name="interstedIn" defaultValue="" className={cx(fieldClasses(), "appearance-none pr-10")}>
+                    <option value="">Not sure yet — I&apos;ll explain below</option>
+                    {PROJECT_AREAS.map((area) => (
+                      <option key={area} value={area}>
+                        {area}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown size={16} aria-hidden className="pointer-events-none absolute top-1/2 right-4 -translate-y-1/2 text-[#8598AA]" />
+                </div>
+                <p className="mt-1.5 text-[12.5px] text-[#8598AA]">
+                  &ldquo;Not sure yet&rdquo; is a perfectly good answer — working that out is often the first piece of work.
+                </p>
+              </div>
               <div className="grid gap-5 sm:grid-cols-2">
                 <div>
-                  <label htmlFor="fullName" className="mb-1.5 block text-[14px] font-medium text-[#0B1B2B]">
-                    Name<span className="ml-0.5 text-[#0E9BC4]">*</span>
-                  </label>
                   <div className="relative">
                     <User size={17} aria-hidden className="pointer-events-none absolute top-1/2 left-4 -translate-y-1/2 text-[#8598AA]" />
                     <input
@@ -660,9 +802,6 @@ export default function ContactFormInfo() {
                   <FieldError id="fullName-error" message={errors.fullName} />
                 </div>
                 <div>
-                  <label htmlFor="company" className="mb-1.5 block text-[14px] font-medium text-[#0B1B2B]">
-                    Organisation
-                  </label>
                   <div className="relative">
                     <Building2 size={17} aria-hidden className="pointer-events-none absolute top-1/2 left-4 -translate-y-1/2 text-[#8598AA]" />
                     <input id="company" name="company" type="text" autoComplete="organization" placeholder="Company name" className={fieldClasses()} />
@@ -672,9 +811,6 @@ export default function ContactFormInfo() {
 
               <div className="grid gap-5 sm:grid-cols-2">
                 <div>
-                  <label htmlFor="email" className="mb-1.5 block text-[14px] font-medium text-[#0B1B2B]">
-                    Work email<span className="ml-0.5 text-[#0E9BC4]">*</span>
-                  </label>
                   <div className="relative">
                     <Mail size={17} aria-hidden className="pointer-events-none absolute top-1/2 left-4 -translate-y-1/2 text-[#8598AA]" />
                     <input
@@ -689,12 +825,12 @@ export default function ContactFormInfo() {
                       className={fieldClasses(Boolean(errors.email))}
                     />
                   </div>
+                  <p className="mt-1.5 text-[12.5px] text-[#8598AA]">
+                  We&apos;ll never share your email with anyone else.
+                </p>
                   <FieldError id="email-error" message={errors.email} />
                 </div>
                 <div>
-                  <label htmlFor="phoneNo" className="mb-1.5 block text-[14px] font-medium text-[#0B1B2B]">
-                    Phone
-                  </label>
                   <div className="relative">
                     <Phone size={17} aria-hidden className="pointer-events-none absolute top-1/2 left-4 -translate-y-1/2 text-[#8598AA]" />
                     <input
@@ -719,31 +855,8 @@ export default function ContactFormInfo() {
                 </div>
               </div>
 
-              <div>
-                <label htmlFor="interstedIn" className="mb-1.5 block text-[14px] font-medium text-[#0B1B2B]">
-                  What&apos;s this about?
-                </label>
-                <div className="relative">
-                  <Layers size={17} aria-hidden className="pointer-events-none absolute top-1/2 left-4 -translate-y-1/2 text-[#8598AA]" />
-                  <select id="interstedIn" name="interstedIn" defaultValue="" className={cx(fieldClasses(), "appearance-none pr-10")}>
-                    <option value="">Not sure yet — I&apos;ll explain below</option>
-                    {PROJECT_AREAS.map((area) => (
-                      <option key={area} value={area}>
-                        {area}
-                      </option>
-                    ))}
-                  </select>
-                  <ChevronDown size={16} aria-hidden className="pointer-events-none absolute top-1/2 right-4 -translate-y-1/2 text-[#8598AA]" />
-                </div>
-                <p className="mt-1.5 text-[12.5px] text-[#8598AA]">
-                  &ldquo;Not sure yet&rdquo; is a perfectly good answer — working that out is often the first piece of work.
-                </p>
-              </div>
 
               <div>
-                <label htmlFor="description" className="mb-1.5 block text-[14px] font-medium text-[#0B1B2B]">
-                  Tell us about it<span className="ml-0.5 text-[#0E9BC4]">*</span>
-                </label>
                 <div className="relative">
                   <FileText size={17} aria-hidden className="pointer-events-none absolute top-4 left-4 text-[#8598AA]" />
                   <textarea
@@ -796,52 +909,7 @@ export default function ContactFormInfo() {
           )}
         </div>
 
-        <aside className="flex flex-col gap-4">
-          <div className="rounded-2xl border border-[#E3ECF2] bg-white p-6 md:p-6.5 shadow-xs">
-            <p className="text-[21px] font-bold text-[#0B1B2B] mb-5">Or reach us directly</p>
-            <div ref={rowsRef} className="mt-3">
-              {CONTACT_ROWS.map((row) => (
-                <div
-                  key={row.label}
-                  onMouseEnter={handleRowEnter}
-                  onMouseLeave={handleRowLeave}
-                  className="flex items-center gap-3 border-t border-[#F1F6F9] py-4 first:border-t-0 first:pt-0"
-                >
-                  <div data-row-icon className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#E5F5FB] text-[#0E9BC4]">
-                    <row.icon size={15} aria-hidden />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <span className="block font-semibold text-[11px] text-[#8598AA] uppercase">{row.label}</span>
-                    <a
-                      href={row.href}
-                      target={row.href.startsWith("http") ? "_blank" : undefined}
-                      rel={row.href.startsWith("http") ? "noopener" : undefined}
-                      className="text-[14px] font-bold text-[#0B1B2B] transition-colors hover:text-[#0E9BC4]"
-                    >
-                      {row.value}
-                    </a>
-                  </div>
-                  <ArrowUpRight data-row-arrow size={14} aria-hidden className="shrink-0 text-[#C9D6DE]" />
-                </div>
-              ))}
-            </div>
-          </div>
-
-          <div className="rounded-2xl border border-[#E3ECF2] bg-white p-6 md:p-6.5 shadow-xs">
-            <p className="text-[21px] font-bold text-[#0B1B2B]">What happens next</p>
-            <div className="mt-3 flex items-center gap-2.5">
-              <span aria-hidden className="inline-block h-2 w-2 shrink-0 rounded-full bg-[#12A67C] shadow-[0_0_0_3px_rgba(18,166,124,0.16)]" />
-              <p className="text-[13.5px] leading-relaxed text-[#546A7E]">
-                A person replies within <strong className="text-[#0B1B2B]">one business day</strong> — not an
-                automated acknowledgement.
-              </p>
-            </div>
-            <p className="mt-3 text-[13px] leading-relaxed text-[#8598AA]">
-              If it looks like a fit, we&apos;ll suggest a call to understand the problem properly. If it isn&apos;t,
-              we&apos;ll say so and point you somewhere better. Neither costs you anything.
-            </p>
-          </div>
-        </aside>
+      </div>
       </div>
     </section>
   );

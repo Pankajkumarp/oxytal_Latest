@@ -411,7 +411,7 @@ export default function Footer({ entry }: Props) {
     <footer
     data-nav-contrast="dark"
       className={cx(
-        "relative overflow-hidden border-t isolate",
+        "relative border-t isolate",
         theme?.cardBorder ?? "border-gray-100",
         !backgroundUrl && (theme?.sectionBg ?? "bg-white")
       )}
