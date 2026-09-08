@@ -197,7 +197,7 @@ export default function AISolutionsHero({ entry }: Props) {
     });
   const flowSteps: FlowStep[] = flowStepEntries;
 
-  const eyebrow = copy?.fields.eyebrow ?? "AI SOLUTIONS";
+  const eyebrow = copy?.fields.eyebrow ?? "";
   const heading = copy?.fields.heading;
   const description: ReactNode = copy?.fields.text
     ? documentToReactComponents(copy.fields.text)
@@ -269,7 +269,7 @@ export default function AISolutionsHero({ entry }: Props) {
       split?.revert();
     };
   }, []);
-
+const hasIntroContent = Boolean(eyebrow || heading || description);
   return (
     <section
       ref={sectionRef}
@@ -298,6 +298,7 @@ export default function AISolutionsHero({ entry }: Props) {
             reference mockup's own bordered/mono-font treatment — kept
             consistent with the rest of the site rather than this one
             page's source mockup. */}
+        {eyebrow && (
         <span
           className={cx(
             "inline-flex w-fit items-center gap-2 rounded-full px-3 py-1.5 text-xs font-bold tracking-wide relative z-2",
@@ -314,6 +315,7 @@ export default function AISolutionsHero({ entry }: Props) {
           />
           {eyebrow}
         </span>
+        )}
 
         {heading && (
           <DynamicHeading level={resolveHeadingLevel(copy?.fields.headingLevel, "h1")}
@@ -381,7 +383,12 @@ export default function AISolutionsHero({ entry }: Props) {
             one `serviceCard` entry exists.
         ================================================= */}
         {flowSteps.length > 0 && (
-        <div className="relative z-2 mt-14 flex flex-col gap-6 lg:flex-row lg:items-stretch lg:gap-0">
+        <div
+    className={cx(
+      "relative z-2 flex flex-col gap-6 lg:flex-row lg:items-stretch lg:gap-0",
+      hasIntroContent && "mt-14"
+    )}
+  >
           {flowSteps.flatMap((step, index) => {
             const FallbackIcon = FLOW_FALLBACK_ICONS[index % FLOW_FALLBACK_ICONS.length];
 
