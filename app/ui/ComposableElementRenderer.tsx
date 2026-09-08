@@ -39,6 +39,8 @@ import ServiceDetailHero from "@/app/ui/ServiceDetailHero";
 import ServiceDetailProof from "@/app/ui/ServiceDetailProof";
 import ServiceDetailOthers from "@/app/ui/ServiceDetailOthers";
 import LegalPage from "@/app/ui/LegalPage";
+import TermsOfUsePage from "@/app/ui/TermsOfUsePage";
+import PrivacyPolicyPage from "@/app/ui/PrivacyPolicyPage";
 import LandingHero from "@/app/ui/LandingHero";
 import LandingProcess from "@/app/ui/LandingProcess";
 import LandingCards from "@/app/ui/LandingCards";
@@ -141,6 +143,8 @@ const subtypeComponents: Record<
   serviceProof: ServiceDetailProof,
   serviceOthers: ServiceDetailOthers,
   legalPage: LegalPage,
+  termsOfUse: TermsOfUsePage,
+  privacyPolicy: PrivacyPolicyPage,
   landingHero: LandingHero,
   landingProcess: LandingProcess,
   landingCards: LandingCards,
