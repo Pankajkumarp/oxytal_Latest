@@ -426,7 +426,7 @@ export default function Footer({ entry }: Props) {
           : undefined
       }
     >
-      <OxytalPattern color="#ffffff" opacity={0.015} strokeWidth={.85} className="patten-footer"/>
+      <OxytalPattern color="#ffffff" opacity={0.035} strokeWidth={.85} className="patten-footer"/>
       {/* Light scrim over the background image so the text stays readable
           regardless of what's behind it — no-op when there's no image. */}
       {backgroundUrl && (
