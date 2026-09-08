@@ -212,17 +212,8 @@ function Hero({ backgroundUrl }: { backgroundUrl?: string }) {
 
       <div className="container relative mx-auto px-5 md:px-10">
         <div ref={copyRef} className="relative z-10 max-w-[720px] pt-4 md:pt-6">
-          <Eyebrow>Cloud &amp; Digital Transformation</Eyebrow>
-          <h1
-            ref={titleRef}
-            className="max-w-[680px] text-[28px] font-extrabold leading-[1.1] tracking-[-0.045em] sm:text-[34px] md:text-[46px] lg:text-[50px] mb-3 text-[#0D1B2A]"
-          >
-            Move off legacy. Without taking the mess with you.
-          </h1>
-          <p className="mb-4 max-w-[620px] text-[19px] font-semibold leading-[1.35] sm:text-[21px] text-[#2c87cc]">
-            A migration is your one chance to fix what you&rsquo;re carrying. Most organisations waste it.
-          </p>
-          <p className="mb-8 max-w-[620px] text-[16px] leading-[1.9] text-[#55677f]">
+          
+          <p className="mb-8 max-w-[620px] text-[16px] leading-[1.9] text-[#55677f] mt-[120px]">
             We move systems, data and documents from on-premise infrastructure to the cloud &mdash; and use AI to
             clean, classify and govern everything that moves. You land on something genuinely better, not the same
             problems at a higher monthly cost.
