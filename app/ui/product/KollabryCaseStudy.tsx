@@ -982,7 +982,7 @@ function ExploreSection({ related }: { related?: RelatedItem[] }) {
             <Link
               key={item.href}
               href={item.href}
-              className="block overflow-hidden rounded-2xl border border-[#E7E5F3] bg-white transition-all duration-200 hover:-translate-y-1 hover:border-[#d8d5ec] hover:shadow-[0_12px_34px_-14px_rgba(79,70,229,0.22)]"
+              className="block overflow-hidden rounded-2xl border border-[#E7E5F3] bg-white hover:-translate-y-1 hover:border-[#d8d5ec] hover:shadow-[0_12px_34px_-14px_rgba(79,70,229,0.22)]"
             >
               {item.img ? (
                 // eslint-disable-next-line @next/next/no-img-element -- matches the plain <img> convention this project already uses for external/hosted assets
