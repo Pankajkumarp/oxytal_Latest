@@ -1,6 +1,6 @@
 "use client";
 
-import { useLayoutEffect, useRef, useState, type SubmitEvent } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type SubmitEvent } from "react";
 import Link from "next/link";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -170,10 +170,11 @@ function fieldClasses(hasError?: boolean) {
   );
 }
 
-type FieldName = "fullName" | "email" | "phoneNo" | "description" | "terms";
+type FieldName = "fullName" | "company" | "email" | "phoneNo" | "description" | "terms";
 
 const ERROR_MESSAGES: Record<FieldName, string> = {
   fullName: "Please enter your name.",
+  company: "Please enter your company name.",
   email: "Please enter a valid work email address.",
   phoneNo: "Phone number should be 7–15 digits, numbers only.",
   description: "Tell us a little about what you need — this field can't be empty.",
@@ -196,6 +197,11 @@ function validateForm(data: FormData): Partial<Record<FieldName, string>> {
   const fullName = String(data.get("fullName") ?? "").trim();
   if (!fullName) {
     errors.fullName = ERROR_MESSAGES.fullName;
+  }
+
+  const company = String(data.get("company") ?? "").trim();
+  if (!company) {
+    errors.company = ERROR_MESSAGES.company;
   }
 
   const email = String(data.get("email") ?? "").trim();
@@ -275,6 +281,36 @@ async function submitContactEnquiry(
   } catch (error) {
     console.error("[contact-form] enquiry submission failed", error);
     return { ok: false };
+  }
+}
+
+/**
+ * Triggers the two SES notification emails (see `app/lib/ses.ts`'s own
+ * doc comment) via this app's own `/api/contact` route — called *after*
+ * `submitContactEnquiry` above has already succeeded, never instead of
+ * it; that POST to the Oxytal API stays the source of truth for whether
+ * an enquiry was received at all.
+ *
+ * Deliberately doesn't affect the success screen either way: this is a
+ * best-effort side effect (SES might not be configured yet, or the send
+ * could fail transiently), so a failure here is only logged, never
+ * surfaced to someone whose enquiry has already been accepted.
+ */
+async function sendContactNotificationEmails(
+  payload: ContactEnquiryPayload
+): Promise<void> {
+  try {
+    const response = await fetch("/api/contact", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    if (!response.ok) {
+      console.error("[contact-form] notification email request failed", response.status);
+    }
+  } catch (error) {
+    console.error("[contact-form] notification email request failed", error);
   }
 }
 
@@ -374,13 +410,36 @@ export default function ContactFormInfo({ entry }: Props) {
     }
 
     setSubmitting(true);
-    const { ok } = await submitContactEnquiry(buildPayload(data));
+    const payload = buildPayload(data);
+    const { ok } = await submitContactEnquiry(payload);
     setSubmitting(false);
 
     if (ok) {
       setSubmitted(true);
+      // Fire-and-forget: the success screen above doesn't wait on this,
+      // and never reverts if it fails — see this function's own doc
+      // comment for why.
+      void sendContactNotificationEmails(payload);
     }
   };
+
+  /**
+   * Auto-reset — after the success screen has been showing for 10
+   * seconds, swap back to a fresh (empty) form rather than leaving the
+   * visitor stuck on "Thanks — got it!" with no way back short of
+   * reloading the page, in case they want to send a second enquiry.
+   * `submitted`'s own conditional render below unmounts the `<form>`
+   * entirely while the success screen is up, so remounting it here
+   * naturally comes back empty — no separate manual reset needed.
+   */
+  useEffect(() => {
+    if (!submitted) {
+      return;
+    }
+
+    const timer = setTimeout(() => setSubmitted(false), 10_000);
+    return () => clearTimeout(timer);
+  }, [submitted]);
 
   // `backgroundImage` links to a `dataImage` *entry*, not a raw asset —
   // resolve that entry's own `image` field for the actual asset URL, same
@@ -804,8 +863,19 @@ export default function ContactFormInfo({ entry }: Props) {
                 <div>
                   <div className="relative">
                     <Building2 size={17} aria-hidden className="pointer-events-none absolute top-1/2 left-4 -translate-y-1/2 text-[#8598AA]" />
-                    <input id="company" name="company" type="text" autoComplete="organization" placeholder="Company name" className={fieldClasses()} />
+                    <input
+                      id="company"
+                      name="company"
+                      type="text"
+                      autoComplete="organization"
+                      placeholder="Company name"
+                      aria-invalid={Boolean(errors.company)}
+                      aria-describedby={errors.company ? "company-error" : undefined}
+                      onChange={() => clearError("company")}
+                      className={fieldClasses(Boolean(errors.company))}
+                    />
                   </div>
+                  <FieldError id="company-error" message={errors.company} />
                 </div>
               </div>
 

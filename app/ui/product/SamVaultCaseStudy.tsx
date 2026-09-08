@@ -10,6 +10,9 @@ import { prefersReducedMotion, useSplitReveal, useFadeUp, useListStagger } from 
 import CountUpNumber from "./CountUpNumber";
 import type { HeadingLevel } from "@/app/lib/headingLevel";
 import DynamicHeading from "@/app/ui/DynamicHeading";
+import { Entry, EntrySkeletonType } from "contentful";
+import { ComposableElementSkeleton, ContentDetailSkeleton, DataLinkSkeleton } from "@/app/types/contentful";
+import { getAssetUrl } from "@/app/lib/contentfulAsset";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger, SplitText);
@@ -18,10 +21,15 @@ if (typeof window !== "undefined") {
 /**
  * `SamVaultCaseStudy` — a standalone, static case-study one-pager ported
  * from `Refrence/samvault_oxytal.html`. Unlike every `composableElement`
- * section elsewhere in `app/ui`, this isn't wired to Contentful (no
- * `entry` prop, no `subType` in `ComposableElementRenderer`) — it's a
- * fixed page, same "no CMS wiring requested" treatment as `AboutPage`/
- * `CareersPage` before their own Contentful wiring existed.
+ * section elsewhere in `app/ui`, this page's own body isn't wired to
+ * Contentful — it's fixed content, same "no CMS wiring requested"
+ * treatment as `AboutPage`/`CareersPage` before their own Contentful
+ * wiring existed. `entry` (from `ComposableElementRenderer`'s
+ * `samVaultProduct` registration) is read for exactly one thing: the
+ * "Explore other products" section at the bottom (see `ExploreSection`/
+ * `resolveRelatedItem` near the end of this file) — same narrow,
+ * related-items-only Contentful usage `ForgePipelineCaseStudy` added for
+ * its own equivalent section.
  *
  * Deliberately keeps the reference's own dark/gold identity (`--dark`
  * `#09090d`, `--panel` `#0f1018`, `--card` `#13141f`, `--gold` `#c9a84c`)
@@ -55,6 +63,34 @@ if (typeof window !== "undefined") {
  * (badge/pill/card/link hover) is a plain Tailwind `hover:` transition,
  * same as the reference's own CSS `:hover` rules.
  */
+
+type PlainEntry<Skeleton extends EntrySkeletonType> = Entry<Skeleton, undefined>;
+
+interface Props {
+  entry?: PlainEntry<ComposableElementSkeleton>;
+}
+
+interface AnyEntry {
+  sys: {
+    id: string;
+    contentType: {
+      sys: {
+        id: string;
+      };
+    };
+  };
+  fields: Record<string, unknown>;
+}
+
+function isEntry(value: unknown): value is AnyEntry {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "sys" in value &&
+    "fields" in value &&
+    typeof (value as { sys: unknown }).sys === "object"
+  );
+}
 
 /* =========================================================
    CONTENT — transcribed 1:1 from Refrence/samvault_oxytal.html
@@ -1058,10 +1094,188 @@ function CtaSection() {
 }
 
 /* =========================================================
+   RELATED PRODUCTS
+========================================================= */
+
+interface RelatedItem {
+  href: string;
+  /** A real Contentful `heroImage` asset URL — set once an editor adds one, via `resolveRelatedItem` below. */
+  img?: string;
+  /**
+   * Fallback tile background for `RELATED_PRODUCTS`' own static entries,
+   * which (unlike a Contentful-sourced item) have no `heroImage` asset to
+   * show — each sibling product's own real brand gradient rather than a
+   * fabricated photo URL that might not actually exist. Same convention
+   * `ForgePipelineCaseStudy`'s own `RELATED_PRODUCTS` uses.
+   */
+  tileBg?: string;
+  alt: string;
+  k: string;
+  title: string;
+  text: string;
+}
+
+/**
+ * Falls back to this static list of Oxytal's other 3 products when
+ * `entry.fields.elements` has no `contentDetail` entries set yet (see
+ * `resolveRelatedItem` below) — the other products, since `SamVault` is
+ * itself a product page (`/products/sam-vault`), not a client case
+ * study. No `img` on any of these: there's no existing photographed
+ * asset for the other 3 products anywhere in this codebase to link to
+ * honestly, so each card shows a plain gradient tile (in that product's
+ * own real brand colors, matching the identity each one's own file
+ * establishes) with its name instead of guessing at an asset URL that
+ * might 404.
+ */
+const RELATED_PRODUCTS: RelatedItem[] = [
+  {
+    href: "/products/forgepipeline",
+    tileBg: "linear-gradient(135deg,#06061A,#1B1B4D)",
+    alt: "ForgePipeline",
+    k: "Product · Engineering",
+    title: "ForgePipeline",
+    text: "Eight AI agents take a requirement from Confluence through to a reviewed pull request — with human approval gates at every critical step.",
+  },
+  {
+    href: "/products/action-pulse",
+    tileBg: "linear-gradient(135deg,#0D0B1F,#241D4F)",
+    alt: "ActionPulse",
+    k: "Product · Analytics",
+    title: "ActionPulse",
+    text: "Enterprise action intelligence built for scale — turning raw activity into decisions leaders can act on.",
+  },
+  {
+    href: "/products/kollabry",
+    tileBg: "linear-gradient(135deg,#141127,#2C2459)",
+    alt: "Kollabry",
+    k: "Product · Delivery",
+    title: "Kollabry",
+    text: "Issues, sprints and retros in the same workspace as your knowledge base — track the work, capture the knowledge.",
+  },
+];
+
+const RELATED_DESCRIPTION_MAX_LENGTH = 400;
+
+/**
+ * Truncates to at most `max` characters, trimmed back to the nearest word
+ * boundary so a cut never lands mid-word, and suffixed with "…". Text
+ * already at or under the limit passes through unchanged, no ellipsis
+ * added. Same helper `TaffersCaseStudy`/`ForgePipelineCaseStudy`'s own
+ * related-section each use.
+ */
+function truncate(text: string, max: number): string {
+  if (text.length <= max) {
+    return text;
+  }
+
+  const cut = text.slice(0, max);
+  const lastSpace = cut.lastIndexOf(" ");
+  return `${(lastSpace > 0 ? cut.slice(0, lastSpace) : cut).trimEnd()}…`;
+}
+
+/**
+ * Maps one `contentDetail` entry from `entry.fields.elements` to one
+ * `ExploreSection` card — same field convention `ForgePipelineCaseStudy`/
+ * `TaffersCaseStudy` each use: `heroImage` for the photo, `category` for
+ * the small tag, `title`/`shortDescription` for the copy (capped at
+ * `RELATED_DESCRIPTION_MAX_LENGTH` via `truncate`), and a link resolved
+ * from `cta` (preferred) or else `/case-studies/<slug>`. Returns
+ * `undefined` for a missing entry or one with no `heroImage` — a related
+ * card with no photo would look broken here, so it's dropped rather than
+ * shown empty (the static `RELATED_PRODUCTS` fallback handles the "no
+ * photo yet" case differently, via `tileBg`, precisely because those are
+ * hand-authored literals rather than editor-supplied CMS entries).
+ */
+function resolveRelatedItem(entry: PlainEntry<ContentDetailSkeleton> | undefined): RelatedItem | undefined {
+  if (!entry) {
+    return undefined;
+  }
+
+  const heroImageEntry = entry.fields.heroImage;
+  const img = heroImageEntry && "fields" in heroImageEntry ? getAssetUrl(heroImageEntry.fields.image) : undefined;
+
+  if (!img) {
+    return undefined;
+  }
+
+  const ctaEntry = entry.fields.cta?.find((link) => link && "fields" in link) as
+    | PlainEntry<DataLinkSkeleton>
+    | undefined;
+  const ctaHref = ctaEntry
+    ? ctaEntry.fields.externalUrl || (ctaEntry.fields.linkedPage ? `/${ctaEntry.fields.linkedPage}` : undefined)
+    : undefined;
+
+  return {
+    href: ctaHref ?? (entry.fields.slug ? `/case-studies/${entry.fields.slug}` : "#"),
+    img,
+    alt: entry.fields.title ?? "",
+    k: entry.fields.category ?? entry.fields.clientName ?? "",
+    title: entry.fields.title ?? "",
+    text: entry.fields.shortDescription ? truncate(entry.fields.shortDescription, RELATED_DESCRIPTION_MAX_LENGTH) : "",
+  };
+}
+
+/** Falls back to `RELATED_PRODUCTS` when `related` is unset or empty — i.e. until this page's `composableElement` entry actually has `contentDetail` entries set (see `resolveRelatedItem`/the default export below). */
+function ExploreSection({ related }: { related?: RelatedItem[] }) {
+  const gridRef = useListStagger<HTMLDivElement>("y", 20);
+  const items = related?.length ? related : RELATED_PRODUCTS;
+
+  return (
+    <section className="relative z-10 border-t border-[rgba(255,255,255,0.07)] bg-[#0f1018] px-6 py-24">
+      <div className="mx-auto max-w-[1100px]">
+        <SectionHeading eyebrow="More of our work" title="Related case studies." headingLevel="h4"/>
+
+        <div ref={gridRef} className="mt-10 grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-2">
+          {items.map((item) => (
+            <Link
+              key={item.href}
+              href={item.href}
+              className="block overflow-hidden rounded-2xl border border-[rgba(255,255,255,0.07)] bg-[#13141f] transition-all duration-200 hover:-translate-y-1 hover:border-[rgba(201,168,76,0.4)]"
+            >
+              {item.img ? (
+                // eslint-disable-next-line @next/next/no-img-element -- matches the plain <img> convention this project already uses for external/hosted assets
+                <img src={item.img} alt={item.alt} loading="lazy" className="aspect-[1672/941] block w-full object-cover" />
+              ) : (
+                <div
+                  aria-hidden
+                  className="flex aspect-[1672/941] items-center justify-center"
+                  style={{ background: item.tileBg ?? "linear-gradient(135deg,#111,#222)" }}
+                >
+                  <span className="text-[22px] font-black tracking-tight text-white/90">{item.title}</span>
+                </div>
+              )}
+              <div className="p-5.5">
+                <span className="text-[12px] font-semibold text-[#c9a84c] uppercase">{item.k}</span>
+                <span className="mt-2 mb-1.5 block text-[20px] font-extrabold text-[#f0ede8]">{item.title}</span>
+                <p className="text-[15px] leading-[1.75] text-[#6b7280]">{item.text}</p>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* =========================================================
    PAGE
 ========================================================= */
 
-export default function SamVaultCaseStudy() {
+export default function SamVaultCaseStudy({ entry }: Props) {
+  // Up to 3 related-product cards, one per `contentDetail` entry among
+  // `entry.fields.elements` — same convention `ForgePipelineCaseStudy`
+  // uses for its own equivalent section. `resolveRelatedItem` drops any
+  // that don't resolve (missing entry, or no `heroImage`), and
+  // `ExploreSection` falls back to `RELATED_PRODUCTS` whenever none of
+  // them do.
+  const contentDetailEntries = (entry?.fields.elements ?? []).filter(
+    (element): element is PlainEntry<ContentDetailSkeleton> =>
+      isEntry(element) && element.sys.contentType.sys.id === "contentDetail"
+  );
+  const relatedItems = [contentDetailEntries[0], contentDetailEntries[1]]
+    .map(resolveRelatedItem)
+    .filter((item): item is RelatedItem => Boolean(item));
+
   return (
     <div className="relative overflow-hidden bg-[#09090d] text-[#f0ede8]" data-nav-contrast="dark">
       <div
@@ -1083,6 +1297,7 @@ export default function SamVaultCaseStudy() {
       <StackSection />
       <TimelineSection />
       <CtaSection />
+      <ExploreSection related={relatedItems} />
     </div>
   );
 }
