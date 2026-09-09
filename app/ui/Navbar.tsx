@@ -439,7 +439,7 @@ function MegaPanel({ menu, theme }: { menu: MegaMenu; theme?: SectionTheme }) {
           >
             {menu.cta.desc}
           </p>
-
+{menu.cta?.linkLabel && (
           <Link
             href={menu.cta.href ?? "#"}
             className={cx(
@@ -454,6 +454,7 @@ function MegaPanel({ menu, theme }: { menu: MegaMenu; theme?: SectionTheme }) {
               className="transition-transform group-hover:translate-x-1"
             />
           </Link>
+)}
         </div>
       )}
     </div>

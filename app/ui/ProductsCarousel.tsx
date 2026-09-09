@@ -183,7 +183,7 @@ const SLIDES: ProductSlide[] = [
     dotColor: "#818CF8",
     namePlain: "Forge",
     nameAccent: "Pipeline",
-    accentColor: "#6366F1",
+    accentColor: "#5F61F2",
     tagline:
       "Autonomous software development lifecycle platform. Requirements from Confluence become a reviewed GitHub PR — through 8 specialised AI agents, with human approval gates at every critical step.",
     metrics: [
@@ -198,11 +198,11 @@ const SLIDES: ProductSlide[] = [
     ],
     ctas: [
       { label: "Visit forgepipeline.ai ↗", href: "https://forgepipeline.ai", primary: true, external: true },
-      { label: "Case study", href: "https://oxytal-latest.vercel.app/products/forgepipeline" },
+      { label: "View More", href: "/products/forgepipeline" },
     ],
     visual: {
       kind: "pipeline",
-      logoBg: "linear-gradient(135deg,#6366F1,#8B5CF6)",
+      logoBg: "linear-gradient(135deg,#5F61F2,#8B5CF6)",
       logoText: "F",
       title: "ForgePipeline",
       sub: "RUN-003 · In progress · 00:09 elapsed",
@@ -216,6 +216,13 @@ const SLIDES: ProductSlide[] = [
       ],
     },
   },
+  /* Only ForgePipeline should show for now — the rest of the product
+     roster stays here, commented out rather than deleted, so it's a
+     one-line uncomment to bring the full six-slide carousel back. See
+     the "more than one slide" guards around the dots/arrows below,
+     which only render when `total > 1` — restoring these slides also
+     restores that navigation UI automatically. */
+  /*
   {
     id: "examverge",
     eyebrow: "EdTech · UK Exam Preparation",
@@ -435,6 +442,7 @@ const SLIDES: ProductSlide[] = [
       ],
     },
   },
+  */
 ];
 
 /** Renders the one visual mockup card matching a slide's `visual.kind` — the reference's own `.mock-card` variants (pipeline steps / exam stats / kanban board / vault grid / action rows / oxyem stats + roster). */
@@ -873,25 +881,33 @@ export default function ProductsCarousel({ entry }: Props) {
             </div>
           )}
             </div>
-            <span className={cx(
-              "text-[20px] leading-[1.15] font-extrabold tracking-tight sm:text-[26px] md:text-[30px] z-2 block",
-              theme?.heading ?? "text-gray-900"
-            )}>
-              {String(current + 1).padStart(2, "0")} / {String(total).padStart(2, "0")}
-            </span>
+            {/* "01 / 01" is a no-op with a single slide — only show the
+                counter once there's more than one to count through. */}
+            {total > 1 && (
+              <span className={cx(
+                "text-[20px] leading-[1.15] font-extrabold tracking-tight sm:text-[26px] md:text-[30px] z-2 block",
+                theme?.heading ?? "text-gray-900"
+              )}>
+                {String(current + 1).padStart(2, "0")} / {String(total).padStart(2, "0")}
+              </span>
+            )}
           </div>
 
-          <div className={styles.dots}>
-            {SLIDES.map((slide, i) => (
-              <button
-                key={slide.id}
-                type="button"
-                aria-label={`Product ${i + 1}: ${slide.namePlain}${slide.nameAccent}`}
-                className={cx(styles.dot, i === current && styles.dotActive)}
-                onClick={() => goTo(i)}
-              />
-            ))}
-          </div>
+          {/* Nothing to jump between with a single slide — only render
+              the dots once there's more than one to navigate. */}
+          {total > 1 && (
+            <div className={styles.dots}>
+              {SLIDES.map((slide, i) => (
+                <button
+                  key={slide.id}
+                  type="button"
+                  aria-label={`Product ${i + 1}: ${slide.namePlain}${slide.nameAccent}`}
+                  className={cx(styles.dot, i === current && styles.dotActive)}
+                  onClick={() => goTo(i)}
+                />
+              ))}
+            </div>
+          )}
 
           <div className={styles.slides}>
             {SLIDES.map((slide, i) => (
@@ -904,17 +920,20 @@ export default function ProductsCarousel({ entry }: Props) {
                 )}
               >
                 <div className={styles.left}>
-                  <div className={styles.productNum}>
-                    {String(i + 1).padStart(2, "0")} / {String(total).padStart(2, "0")}
-                  </div>
+                  {/* Same "01 / 01" no-op reasoning as the top bar counter above. */}
+                  {total > 1 && (
+                    <div className={styles.productNum}>
+                      {String(i + 1).padStart(2, "0")} / {String(total).padStart(2, "0")}
+                    </div>
+                  )}
                   <div className="inline-block w-fit text-xs font-bold tracking-wide z-2 mb-2 uppercase">
                     <span style={{ color: slide.eyebrowColor }}>{slide.eyebrow}</span>
                   </div>
-                  <span className="block text-[28px] leading-[1.15] font-extrabold tracking-tight sm:text-[34px] md:text-[40px] mb-3">
+                  <span className="block text-[26px] leading-[1.15] font-extrabold tracking-tight sm:text-[30px] md:text-[30px] mb-3">
                     {slide.namePlain}
                     <span style={{ color: slide.accentColor }}>{slide.nameAccent}</span>
                   </span>
-                  <p className="text-[15.5px] leading-relaxed mb-5 font-normal">{slide.tagline}</p>
+                  <p className="text-[15px] leading-[1.75] mb-5 font-normal">{slide.tagline}</p>
 
                   <div className={styles.metrics}>
                     {slide.metrics.map((metric) => (
@@ -976,35 +995,40 @@ export default function ProductsCarousel({ entry }: Props) {
             ))}
           </div>
 
-          <div className={styles.arrows}>
-            <button
-              type="button"
-              className={styles.arrowBtn}
-              aria-label="Previous product"
-              onClick={() => navigate(-1)}
-              disabled={current === 0}
-            >
-              ‹
-            </button>
-            <div className={styles.progressPips}>
-              {SLIDES.map((slide, i) => (
-                <div
-                  key={slide.id}
-                  className={cx(styles.pip, i === current && styles.pipActive)}
-                  onClick={() => goTo(i)}
-                />
-              ))}
+          {/* Same "nothing to navigate" reasoning as the dots above —
+              the prev/next arrows and progress pips only make sense once
+              there's more than one slide to move between. */}
+          {total > 1 && (
+            <div className={styles.arrows}>
+              <button
+                type="button"
+                className={styles.arrowBtn}
+                aria-label="Previous product"
+                onClick={() => navigate(-1)}
+                disabled={current === 0}
+              >
+                ‹
+              </button>
+              <div className={styles.progressPips}>
+                {SLIDES.map((slide, i) => (
+                  <div
+                    key={slide.id}
+                    className={cx(styles.pip, i === current && styles.pipActive)}
+                    onClick={() => goTo(i)}
+                  />
+                ))}
+              </div>
+              <button
+                type="button"
+                className={styles.arrowBtn}
+                aria-label="Next product"
+                onClick={() => navigate(1)}
+                disabled={current === total - 1}
+              >
+                ›
+              </button>
             </div>
-            <button
-              type="button"
-              className={styles.arrowBtn}
-              aria-label="Next product"
-              onClick={() => navigate(1)}
-              disabled={current === total - 1}
-            >
-              ›
-            </button>
-          </div>
+          )}
         </div>
       </div>
     </section>

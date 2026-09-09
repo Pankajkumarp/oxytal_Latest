@@ -23,7 +23,7 @@
   overflow: hidden;
   width: 100%;
   height: auto;
-  min-height: 100vh;
+  min-height: 725px;
   color: #fff;
 }
 
@@ -534,7 +534,7 @@
 /* ── TOP BAR (scoped to the stage, not the browser window) ── */
 .topBar {
   position: absolute;
-  top: 55px;
+  top: 100px;
   left: 20px;
   right: 0;
   z-index: 10;
@@ -715,9 +715,15 @@
   padding: 0px 0px 20px 0px;
 }
   .slides {
-    padding-top: 35px;
+    padding-top: 50px;
   }
     .slide {
     min-height: 500px;
+  }
+  .right {
+    display: block;
+  }
+  .rightVisual{
+    padding: 30px 0px;
   }
 }

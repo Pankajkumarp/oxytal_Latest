@@ -86,14 +86,14 @@ function isEntry(value: unknown): value is AnyEntry {
 ========================================================= */
 
 const HERO_TAGS: { label: string; dot: string }[] = [
-  { label: "Live at forgepipeline.ai", dot: "#4ADE80" },
-  { label: "Oxytal AI Lab — 2024", dot: "#A5B4FC" },
+  { label: "Live at forgepipeline.ai", dot: "#198641" },
+  { label: "Oxytal AI Lab — 2024", dot: "#4564FC" },
   { label: "8 AI agents", dot: "#67E8F9" },
 ];
 
 const STATS: { target: number; suffix: string; label: string; color: string }[] = [
-  { target: 8, suffix: "", label: "AI agents in pipeline", color: "#A5B4FC" },
-  { target: 14, suffix: "min", label: "Requirement to PR", color: "#4ADE80" },
+  { target: 8, suffix: "", label: "AI agents in pipeline", color: "#4564FC" },
+  { target: 14, suffix: "min", label: "Requirement to PR", color: "#198641" },
   { target: 7, suffix: "", label: "Stories auto-extracted", color: "#FFFFFF" },
   { target: 100, suffix: "%", label: "Audit trail coverage", color: "#F472B6" },
 ];
@@ -273,7 +273,7 @@ const RESULTS: { topGradient: string; value: string; suffix: string; color: stri
     topGradient: "linear-gradient(90deg,#6366F1,#8B5CF6)",
     value: "14",
     suffix: "min",
-    color: "#A5B4FC",
+    color: "#4564FC",
     label: "Requirement to pull request",
     desc: "From a single Confluence page to an open GitHub PR with reviewed, committed code — in one automated pipeline run.",
   },
@@ -281,7 +281,7 @@ const RESULTS: { topGradient: string; value: string; suffix: string; color: stri
     topGradient: "linear-gradient(90deg,#22C55E,#06B6D4)",
     value: "0",
     suffix: "",
-    color: "#4ADE80",
+    color: "#198641",
     label: "Critical security findings",
     desc: "Code Review Agent powered by Claude Opus analyses every PR for SQL injection, auth bypass, hardcoded secrets, and OWASP vulnerabilities.",
   },
@@ -289,7 +289,7 @@ const RESULTS: { topGradient: string; value: string; suffix: string; color: stri
     topGradient: "linear-gradient(90deg,#8B5CF6,#EC4899)",
     value: "100",
     suffix: "%",
-    color: "#C084FC",
+    color: "#9E41FB",
     label: "Audit trail coverage",
     desc: "Every agent decision, token cost, and handoff is logged and traceable. Every critical stage requires explicit human approval before proceeding.",
   },
@@ -501,7 +501,7 @@ function Hero() {
           </span>
           <span
             ref={gradientRef}
-            className="animate-text-shimmer inline-block bg-[linear-gradient(90deg,#A5B4FC,#818CF8,#C084FC,#67E8F9)] bg-clip-text text-transparent [background-size:200%_100%]"
+            className="animate-text-shimmer inline-block bg-[linear-gradient(90deg,#4564FC,#818CF8,#9E41FB,#67E8F9)] bg-clip-text text-transparent [background-size:200%_100%]"
           >
             SDLC
           </span>
@@ -566,7 +566,7 @@ function StatsBar() {
             <CountUpNumber
               target={stat.target}
               suffix={stat.suffix}
-              className="text-[36px] leading-none font-black tracking-[-1px]"
+              className="text-[36px] leading-none font-black tracking-[-1px] text-[rgba(255,255,255,0.82)]"
             />
             <div className="mt-1.5 text-[12px] tracking-[0.08em] text-[rgba(248,248,255,0.28)] uppercase">{stat.label}</div>
           </div>
@@ -633,7 +633,7 @@ function PipelineDemo() {
                 {status === "done" ? (
                   <div className="flex h-4 w-4 items-center justify-center rounded-full bg-[rgba(34,197,94,0.18)]">
                     <svg width="9" height="9" viewBox="0 0 9 9" aria-hidden>
-                      <path d="M1.5 4.5l2 2L7.5 2" stroke="#4ADE80" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+                      <path d="M1.5 4.5l2 2L7.5 2" stroke="#198641" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round" />
                     </svg>
                   </div>
                 ) : status === "run" ? (
@@ -794,7 +794,7 @@ function PipelineSection() {
             {agent.tags.map((tag) => (
               <span
                 key={tag}
-                className="rounded-full border border-[rgba(99,102,241,0.2)] bg-[rgba(99,102,241,0.12)] px-3 py-1.5 text-[12px] font-medium text-[#A5B4FC]"
+                className="rounded-full border border-[rgba(99,102,241,0.2)] bg-[rgba(99,102,241,0.12)] px-3 py-1.5 text-[12px] font-medium text-[#4564FC]"
               >
                 {tag}
               </span>
@@ -1189,9 +1189,6 @@ export default function ForgePipelineCaseStudy({ entry }: Props) {
   return (
     <div className="relative overflow-hidden bg-white">
       <div data-nav-contrast="dark">
-      <Hero />
-      </div>
-      <div data-nav-contrast="dark">
       <StatsBar />
       </div>
       <AboutSection />
@@ -1208,7 +1205,9 @@ export default function ForgePipelineCaseStudy({ entry }: Props) {
       <ResultsSection />
       <CtaSection />
     </div>
+    {relatedItems.length > 0 && (
     <ExploreSection related={relatedItems} />
+    )}
     </div>
   );
 }
