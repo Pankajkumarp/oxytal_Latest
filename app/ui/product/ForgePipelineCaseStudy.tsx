@@ -964,7 +964,7 @@ function CtaSection() {
   const titleRef = useSplitReveal<HTMLHeadingElement>();
 
   return (
-    <section className="relative z-10 overflow-hidden bg-[linear-gradient(135deg,#06061A_0%,#0D0D28_50%,#06061A_100%)] px-6 py-24">
+    <section className="relative z-0 overflow-hidden bg-[linear-gradient(135deg,#06061A_0%,#0D0D28_50%,#06061A_100%)] px-6 py-24">
       <div aria-hidden className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_60%_60%_at_50%_50%,rgba(99,102,241,0.12),transparent_70%)]" />
       <div className="relative z-10 mx-auto max-w-[700px] text-center">
         <h4 ref={titleRef} className="mb-4 text-[clamp(32px,5vw,52px)] leading-[1.1] font-black tracking-[-2px] text-white">
