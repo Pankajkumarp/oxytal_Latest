@@ -326,7 +326,6 @@ const SLIDES: ProductSlide[] = [
     tagline:
       "Zero-knowledge encrypted document vault. AES-256 encrypted, biometric protected, with expiry intelligence, secure sharing via one-time codes, and team vault collaboration.",
     metrics: [
-      { value: "50K+", color: "#F5C842", label: "Users" },
       { value: "AES-256", label: "Encryption" },
       { value: "Zero", color: "#4ADE80", label: "Knowledge" },
     ],
@@ -405,8 +404,7 @@ const SLIDES: ProductSlide[] = [
     tagline:
       "Modern workforce management platform covering HR, payroll, attendance, and employee engagement. Built for compliance-driven businesses that need clarity at scale.",
     metrics: [
-      { value: "500+", color: "#004D95", label: "Companies" },
-      { value: "50K+", label: "Employees" },
+      { value: "15", color: "#004D95", label: "Modules" },
       { value: "99.9%", color: "#004D95", label: "Uptime" },
     ],
     tags: [
