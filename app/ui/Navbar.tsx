@@ -552,11 +552,27 @@ export default function Navbar({ entry }: Props) {
   // before that effect has had a chance to run.
   const [navContrast, setNavContrast] = useState<"dark" | "light">("light");
 
+  // Whether real text is actually rendered right behind the logo /
+  // mobile hamburger *at this exact moment* — see the SCRIM OVERLAP
+  // effect below for how this gets sampled. The collapsed nav has no
+  // background, so a small blurred scrim behind these two spots (see
+  // their className below) keeps them legible when something's directly
+  // behind them, but there's no need to blur anything when it's just
+  // empty space/plain background — so each only turns on when there's
+  // text to actually hide.
+  const [logoOverlapsText, setLogoOverlapsText] = useState(false);
+
+  const [mobileToggleOverlapsText, setMobileToggleOverlapsText] = useState(false);
+
   const [mobileExpanded, setMobileExpanded] = useState<string | null>(null);
 
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const navRef = useRef<HTMLElement>(null);
+
+  const logoRef = useRef<HTMLAnchorElement>(null);
+
+  const mobileToggleRef = useRef<HTMLButtonElement>(null);
 
   const desktopNavRef = useRef<HTMLUListElement>(null);
 
@@ -636,7 +652,23 @@ export default function Navbar({ entry }: Props) {
      with no composableElement yet, or a bare `dataText`/`dataImage`
      body block, which doesn't carry this attribute) — same "assume
      light unless told otherwise" reasoning `resolveNavContrast`'s own
-     doc comment uses. */
+     doc comment uses.
+
+     SCRIM OVERLAP — separately from the dark/light sample above, this
+     also checks whether real text happens to be rendered directly
+     behind the logo and the mobile hamburger right now, so their small
+     blurred scrim (see their className below) only shows up when
+     there's actually something to hide behind it. `elementFromPoint`
+     can't be used for this one — it hit-tests the topmost element at a
+     point, which here would just be the logo/button itself (or `<nav>`)
+     since they sit above the page — so this uses `elementsFromPoint`
+     instead, which returns every element stacked at that point
+     regardless of what's on top, and skips past any that are part of
+     `<nav>` itself to find the real page content underneath. Only that
+     matched element's own direct text (not its full `.textContent`
+     subtree — see `hasTextBehind`'s own comment) counts, so an empty
+     patch of a section that happens to have copy elsewhere inside it
+     doesn't get treated as "text behind" here. */
   useEffect(() => {
     lastScrollYRef.current = window.scrollY;
 
@@ -651,6 +683,51 @@ export default function Navbar({ entry }: Props) {
       const section = elementBelowNav?.closest<HTMLElement>("[data-nav-contrast]");
 
       setNavContrast(section?.dataset.navContrast === "dark" ? "dark" : "light");
+    }
+
+    // True when real, non-empty text is rendered at (x, y) underneath
+    // `<nav>` — see the SCRIM OVERLAP doc comment above. Deliberately
+    // checks only the matched element's own *direct* text-node children,
+    // not `.textContent` — `.textContent` pulls in every descendant's
+    // text from anywhere in that element's subtree, so a large section
+    // wrapper with a heading somewhere else inside it would read as
+    // "text behind" even when the sampled point itself lands on empty
+    // background/padding with nothing directly there.
+    function hasTextBehind(x: number, y: number): boolean {
+      if (typeof document === "undefined" || !document.elementsFromPoint) {
+        return false;
+      }
+
+      const stack = document.elementsFromPoint(x, y);
+      const contentEl = stack.find(
+        (el) => !navRef.current?.contains(el)
+      );
+
+      if (!contentEl) {
+        return false;
+      }
+
+      return Array.from(contentEl.childNodes).some(
+        (node) => node.nodeType === Node.TEXT_NODE && Boolean(node.textContent?.trim())
+      );
+    }
+
+    function updateOverlapScrims() {
+      if (logoRef.current) {
+        const rect = logoRef.current.getBoundingClientRect();
+
+        setLogoOverlapsText(
+          hasTextBehind(rect.left + rect.width / 2, rect.top + rect.height / 2)
+        );
+      }
+
+      if (mobileToggleRef.current) {
+        const rect = mobileToggleRef.current.getBoundingClientRect();
+
+        setMobileToggleOverlapsText(
+          hasTextBehind(rect.left + rect.width / 2, rect.top + rect.height / 2)
+        );
+      }
     }
 
     function onScroll() {
@@ -676,6 +753,7 @@ export default function Navbar({ entry }: Props) {
         scrollTickingRef.current = false;
 
         updateNavContrast();
+        updateOverlapScrims();
       });
     }
 
@@ -683,13 +761,19 @@ export default function Navbar({ entry }: Props) {
     // dark hero at scrollY 0) wouldn't get picked up until the user's
     // first scroll event.
     updateNavContrast();
+    updateOverlapScrims();
+
+    function handleResize() {
+      updateNavContrast();
+      updateOverlapScrims();
+    }
 
     window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", updateNavContrast, { passive: true });
+    window.addEventListener("resize", handleResize, { passive: true });
 
     return () => {
       window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", updateNavContrast);
+      window.removeEventListener("resize", handleResize);
     };
   }, []);
 
@@ -787,7 +871,25 @@ export default function Navbar({ entry }: Props) {
           {/* =================================================
             LOGO
         ================================================= */}
-          <div className="flex items-center gap-4">
+          <div
+            className={cx(
+              "flex items-center gap-4",
+              // Collapsed nav has no background of its own, so page
+              // content can scroll directly underneath and visually
+              // collide with the logo/toggle. Rather than always
+              // showing a scrim, this only turns on once
+              // `logoOverlapsText` (set by the SCRIM OVERLAP effect
+              // above) confirms there's actually text behind it right
+              // now — plain background/empty space behind stays fully
+              // transparent, unscrimmed.
+              !navOpen &&
+                logoOverlapsText &&
+                "-mx-3 -my-1.5 rounded-full px-3 py-1.5 backdrop-blur-md",
+              !navOpen &&
+                logoOverlapsText &&
+                (navContrast === "dark" ? "bg-black/25" : "bg-white/55")
+            )}
+          >
             {/* =================================================
             NAV TOGGLE — visible at every breakpoint. Below lg it opens the
             full-screen mobile menu; on lg+ it reveals the inline desktop
@@ -808,6 +910,7 @@ export default function Navbar({ entry }: Props) {
             )}
             <Link
               href="/"
+              ref={logoRef}
               className={cx(
                 "flex items-center text-[30px]  tracking-tight",
                 navOpen
@@ -990,8 +1093,16 @@ export default function Navbar({ entry }: Props) {
 
           <button
             type="button"
+            ref={mobileToggleRef}
             className={cx(
               "flex items-center justify-center rounded-lg p-2 block lg:hidden",
+              // Same scoped, text-aware scrim as the logo above — only
+              // shown when `mobileToggleOverlapsText` confirms there's
+              // actually text behind this button right now.
+              !navOpen && mobileToggleOverlapsText && "backdrop-blur-md",
+              !navOpen &&
+                mobileToggleOverlapsText &&
+                (navContrast === "dark" ? "bg-black/25" : "bg-white/55"),
               navOpen
                 ? (theme?.heading ?? "text-gray-900")
                 : navContrast === "dark"
