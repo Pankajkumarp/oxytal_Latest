@@ -634,7 +634,7 @@ export default function ServicesPage({ entry }: Props) {
                     // seam. The pop lives on the number/label below
                     // instead, same "flush grid → pop, not lift"
                     // treatment `AISolutionsHero`'s own stat strip uses.
-                    "group transition-colors duration-200 hover:brightness-125 focus-visible:brightness-125",
+                    "group transition-colors duration-200",
                     activeId === stage.id
                       ? cx(styles.isActive, activeBgClass)
                       : cardBgClass
