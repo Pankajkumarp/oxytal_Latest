@@ -261,7 +261,7 @@ function serviceCardEntryToCard(
     (ctaLink &&
       resolveLinkHref(ctaLink)) ??
     (entry.fields.slug
-      ? `/service/${entry.fields.slug}`
+      ? `/services/${entry.fields.slug}`
       : "/services");
 
   return {
@@ -477,7 +477,7 @@ export default function HomeServices({
       resolveLinkHref(
         ctaLinkEntry
       )) ??
-    "/service";
+    "/services";
 
   const ctaLabel =
     ctaLinkEntry?.fields.label;

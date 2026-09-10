@@ -81,8 +81,8 @@ type MegaMenu = {
  * types straight into) to an absolute path. Without this, an editor
  * typing "about-us" instead of "/about-us" renders as a *relative*
  * `<Link>` href — the browser then resolves it against the current
- * page's own path, so clicking it from `/service/digital-strategy`
- * lands on `/service/about-us` instead of `/about-us`. Leaves absolute
+ * page's own path, so clicking it from `/services/digital-strategy`
+ * lands on `/services/about-us` instead of `/about-us`. Leaves absolute
  * URLs (`http(s)://`, `mailto:`, `tel:`), in-page anchors (`#...`), and
  * already-absolute paths (`/...`) untouched.
  */

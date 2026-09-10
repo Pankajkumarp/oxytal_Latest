@@ -934,10 +934,10 @@ function FaqSection() {
 
 // ───────────────────────── related + final CTA ─────────────────────────
 const RELATED = [
-  { k: "05", title: "Enterprise Integration", body: "ERP, PIM and 3PL connected to the storefront.", href: "/service/enterprise-system-integrations" },
-  { k: "07", title: "AI & Agentic Engineering", body: "Automating the operational work behind each order.", href: "/service/ai-and-intelligent-automation" },
-  { k: "04", title: "Cloud & Transformation", body: "Infrastructure that holds through peak trading.", href: "/service/cloud-digital-transformation" },
-  { k: "02", title: "Experience Design", body: "The research behind why people don't convert.", href: "/service/ui-ux-design" },
+  { k: "05", title: "Enterprise Integration", body: "ERP, PIM and 3PL connected to the storefront.", href: "/services/enterprise-system-integrations" },
+  { k: "07", title: "AI & Agentic Engineering", body: "Automating the operational work behind each order.", href: "/services/ai-and-intelligent-automation" },
+  { k: "04", title: "Cloud & Transformation", body: "Infrastructure that holds through peak trading.", href: "/services/cloud-digital-transformation" },
+  { k: "02", title: "Experience Design", body: "The research behind why people don't convert.", href: "/services/ui-ux-design" },
 ];
 
 function RelatedCard({ k, title, body, href }: (typeof RELATED)[number]) {

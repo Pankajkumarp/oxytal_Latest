@@ -951,10 +951,10 @@ function FaqSection() {
 
 // ───────────────────────── related + final CTA ─────────────────────────
 const RELATED = [
-  { k: "01", title: "Digital Strategy", body: "Deciding what's worth designing in the first place.", href: "/service/digital-strategy" },
-  { k: "03", title: "Software Engineering", body: "Building it exactly as it was designed.", href: "/service/software-development" },
-  { k: "06", title: "Digital Commerce", body: "Where design decisions become revenue.", href: "/service/digital-commerce" },
-  { k: "07", title: "AI & Agentic Engineering", body: "Designing what happens when software decides.", href: "/service/ai-and-intelligent-automation" },
+  { k: "01", title: "Digital Strategy", body: "Deciding what's worth designing in the first place.", href: "/services/digital-strategy" },
+  { k: "03", title: "Software Engineering", body: "Building it exactly as it was designed.", href: "/services/software-development" },
+  { k: "06", title: "Digital Commerce", body: "Where design decisions become revenue.", href: "/services/digital-commerce" },
+  { k: "07", title: "AI & Agentic Engineering", body: "Designing what happens when software decides.", href: "/services/ai-and-intelligent-automation" },
 ];
 
 function RelatedCard({ k, title, body, href }: (typeof RELATED)[number]) {

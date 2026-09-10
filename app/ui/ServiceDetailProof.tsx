@@ -62,7 +62,7 @@ function resolveLinkHref(link: PlainEntry<DataLinkSkeleton>): string | undefined
 }
 
 /**
- * The `/service/<slug>` detail pages' proof band — a `composableElement`
+ * The `/services/<slug>` detail pages' proof band — a `composableElement`
  * section (`subType: "serviceProof"` — see `ComposableElementRenderer`),
  * ported from `Refrence/serviceDetail/service-0N-*.html`'s `.proof-band`:
  *

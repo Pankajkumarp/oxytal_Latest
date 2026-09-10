@@ -74,7 +74,7 @@ const SERVICE_NUMBERS: Record<string, string> = {
 };
 
 /**
- * The `/service/<slug>` detail pages' "explore the rest" cross-link grid
+ * The `/services/<slug>` detail pages' "explore the rest" cross-link grid
  * — a `composableElement` section (`subType: "serviceOthers"` — see
  * `ComposableElementRenderer`), ported from
  * `Refrence/serviceDetail/service-0N-*.html`'s `.other-grid`:
@@ -120,7 +120,7 @@ export default function ServiceDetailOthers({ entry }: Props) {
     )
     .map((card) => ({
       title: card.fields.title ?? "",
-      href: card.fields.slug ? `/service/${card.fields.slug}` : "/services",
+      href: card.fields.slug ? `/services/${card.fields.slug}` : "/services",
     }));
 
   const eyebrow = copy?.fields.eyebrow;

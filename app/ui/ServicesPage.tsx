@@ -362,11 +362,11 @@ export default function ServicesPage({ entry }: Props) {
   // every other composableElement section calls `theme.heading`.
   const headingClass = theme?.heading ?? "text-white";
   // Card chrome (background + border) for the rail stages, index column,
-  // and service panels. Previously driven by this page's own hardcoded
+  // and services panels. Previously driven by this page's own hardcoded
   // `--ink-1`/`--ink-2`/`--rule` CSS custom properties (see
   // ServicesPage.module.css) — those were defined in the `:root` block of
-  // the standalone `/service` route's own layout, which no longer exists
-  // (see `app/(content)/service/layout.tsx` in git history), so every
+  // the standalone `/services` route's own layout, which no longer exists
+  // (see `app/(content)/services/layout.tsx` in git history), so every
   // `var(--ink-*)`/`var(--rule)` reference had gone dangling: cards
   // rendered with no background/border at all. Migrated to the same
   // theme-driven Tailwind classes every sibling section's cards use, with

@@ -14,7 +14,7 @@
  * queries and pseudo-elements. The mockup's `:root`, bare `body`/`*`
  * selectors are folded into `.page` (the component's own root element)
  * since Next.js CSS Modules require every selector to contain at least one
- * local class — see `app/(content)/service/layout.tsx` for the couple of
+ * local class — see `app/(content)/services/layout.tsx` for the couple of
  * truly global (`html`, reduced-motion) rules that can't be expressed that
  * way and live in a plain <style> tag there instead.
  *
@@ -28,8 +28,8 @@
  * tokens — not colors, so they don't vary by `themeColor` the way the
  * rest of this file was migrated to (see ServicesPage.tsx's own
  * `cardBgClass`/`cardBorderClass`/etc. comment for that story). They used
- * to be defined in the standalone `/service` route's own `:root` (see
- * `app/(content)/service/layout.tsx` in git history), which no longer
+ * to be defined in the standalone `/services` route's own `:root` (see
+ * `app/(content)/services/layout.tsx` in git history), which no longer
  * exists, so they'd gone dangling here too — restored as plain static
  * values on `.page` itself instead, since a gutter width/font choice
  * isn't something an editor's `themeColor` pick should change.
