@@ -646,7 +646,8 @@ export default function ServicesPage({ entry }: Props) {
                     className={cx(
                       styles.railNum,
                       "inline-block transition-transform duration-300 ease-out group-hover:scale-125",
-                      activeId === stage.id ? accentClass : mutedClass
+                      activeId === stage.id ? accentClass : mutedClass,
+                      "group-hover:text-sky-600"
                     )}
                   >
                     {stage.num}
@@ -655,7 +656,8 @@ export default function ServicesPage({ entry }: Props) {
                     className={cx(
                       styles.railLabel,
                       "inline-block transition-transform duration-300 ease-out group-hover:translate-x-1",
-                      headingClass
+                      headingClass,
+                      "group-hover:text-sky-600"
                     )}
                   >
                     {stage.label}
