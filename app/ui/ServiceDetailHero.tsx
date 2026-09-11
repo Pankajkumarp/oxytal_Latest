@@ -86,7 +86,7 @@ function parseProgress(eyebrow: string): { current: number; total: number } | nu
 }
 
 /**
- * The `/service/<slug>` detail pages' hero — a `composableElement`
+ * The `/services/<slug>` detail pages' hero — a `composableElement`
  * section (`subType: "serviceHero"` — see `ComposableElementRenderer`),
  * ported from `Refrence/serviceDetail/service-0N-*.html`'s own `.hero`:
  *

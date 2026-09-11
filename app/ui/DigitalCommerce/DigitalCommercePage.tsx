@@ -104,7 +104,7 @@ const SVG_BRAND = "#fe7f52";
 const SECTION = "py-[60px] sm:py-20 lg:py-28";
 const LEDE = "max-w-[62ch] text-[1.05rem] leading-[1.7] text-[#5C6072]";
 const BTN_BASE =
-  "inline-flex items-center gap-[9px] rounded-[10px] border px-[26px] py-[14px] text-[0.95rem] font-medium transition duration-150";
+  "inline-flex items-center gap-[9px] rounded-[10px] border px-[15px] py-[14px] text-[0.9rem] font-medium transition duration-150";
 const BTN_PRIMARY = cx(BTN_BASE, "border-transparent bg-[#fe7f52] text-white hover:-translate-y-px hover:bg-[#f56937]");
 const BTN_SECONDARY = cx(BTN_BASE, "border-[#EDE5E9] bg-white text-[#1A1220] hover:-translate-y-px hover:border-[#8D8E9E]");
 
@@ -194,22 +194,22 @@ function Hero({ backgroundUrl }: { backgroundUrl?: string }) {
           decorative bloom below (a stand-in for the reference's bespoke
           inline art) when no image is configured. */}
       {backgroundUrl && (
-        <div aria-hidden className="pointer-events-none absolute inset-y-0 left-0 lg:left-[38%] right-0 z-[-1] overflow-hidden">
+        <div aria-hidden className="pointer-events-none relative z-[-1] w-full aspect-[1200/750] overflow-hidden lg:absolute lg:inset-y-0 lg:left-[49%] lg:right-0 lg:max-w-full lg:aspect-auto xl:left-[45%] 2xl:left-[42%]">
           <img
             src={backgroundUrl}
             alt=""
             aria-hidden
-            className="absolute inset-0 h-full w-full object-cover object-center"
+            className="h-full w-full object-cover object-center"
           />
         </div>
       )}
 
       <div className="container relative mx-auto px-5 md:px-10">
-        <div ref={copyRef} className="relative z-10 max-w-[720px] pt-4 md:pt-6">
+        <div ref={copyRef} className="relative z-10 max-w-full lg:max-w-[45%] xl:max-w-[42%] 2xl:max-w-[38%] pt-4 md:pt-6">
           <Eyebrow>Digital Commerce</Eyebrow>
           <h1
             ref={titleRef}
-            className="max-w-[680px] text-[28px] font-extrabold leading-[1.1] tracking-[-0.045em] sm:text-[34px] md:text-[46px] lg:text-[50px] mb-3 text-[#1A1220]"
+            className="max-w-[680px] text-[28px] font-extrabold leading-[1.1] tracking-[-0.045em] sm:text-[34px] md:text-[40px] xl:text-[50px] mb-3 text-[#1A1220]"
           >
             Commerce experiences built to perform.
           </h1>
@@ -237,12 +237,12 @@ function Hero({ backgroundUrl }: { backgroundUrl?: string }) {
 
         <div
           ref={logosRef}
-          className="relative z-10 mt-11 flex flex-wrap items-center gap-x-9 gap-y-4 border-t border-[#EDE5E9] pt-[26px] sm:mt-16"
+          className="relative max-w-full lg:max-w-[45%] xl:max-w-[42%] 2xl:max-w-[38%] z-10 mt-11 flex flex-wrap items-center gap-x-9 gap-y-4 border-t border-[#EDE5E9] pt-[26px] sm:mt-16"
         >
           <span className="text-[10.5px] font-semibold uppercase tracking-[0.14em] text-[#8D8E9E]">Commerce clients</span>
-          <ul className="flex flex-wrap gap-x-9 gap-y-4">
+          <ul className="flex flex-wrap gap-x-7 gap-y-4">
             {["Bundaberg Rum", "Johnnie Walker Style", "Taffer's Mixologist"].map((name) => (
-              <li key={name} className="text-[0.98rem] font-semibold text-[#95919F]">
+              <li key={name} className="text-[0.95rem] font-semibold text-[#95919F]">
                 {name}
               </li>
             ))}

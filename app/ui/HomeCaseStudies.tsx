@@ -957,7 +957,7 @@ export default function HomeCaseStudies({ entry }: Props) {
         <ThemePattern theme={theme} pattern={entry?.fields.pattern} patternColor={entry?.fields.patternColor} />
       </div>
 
-      <div className="container mx-auto px-5 py-16 md:px-10 md:py-24 lg:py-28">
+      <div className="container mx-auto px-5 py-16 md:px-10 md:py-24 lg:py-28" id="work">
         {/* =================================================
             INTRO
         ================================================= */}

@@ -110,7 +110,7 @@ const SVG_INDIGO = "#4351E6";
 const SECTION = "py-[60px] sm:py-20 lg:py-28";
 const LEDE = "max-w-[62ch] text-[1.05rem] leading-[1.7] text-[#55677f]";
 const BTN_BASE =
-  "inline-flex items-center gap-[9px] rounded-[10px] border px-[26px] py-[14px] text-[0.95rem] font-medium transition duration-150";
+  "inline-flex items-center gap-[9px] rounded-[10px] border px-[15px] py-[14px] text-[0.9rem] font-medium transition duration-150";
 const BTN_PRIMARY = cx(BTN_BASE, "border-transparent bg-[#2c87cc] text-white hover:-translate-y-px hover:bg-[#065ea2]");
 const BTN_SECONDARY = cx(BTN_BASE, "border-[#EDE5E9] bg-white text-[#0D1B2A] hover:-translate-y-px hover:border-[#8D8E9E]");
 
@@ -186,7 +186,6 @@ function SectionHeading({
 // ────────────────────────────── hero ──────────────────────────────
 function Hero({ backgroundUrl }: { backgroundUrl?: string }) {
   const copyRef = useFadeUp<HTMLDivElement>();
-  const titleRef = useSplitReveal<HTMLHeadingElement>();
   const logosRef = useFadeUp<HTMLDivElement>();
 
   return (
@@ -200,20 +199,20 @@ function Hero({ backgroundUrl }: { backgroundUrl?: string }) {
           decorative bloom below (a stand-in for the reference's bespoke
           inline art) when no image is configured. */}
       {backgroundUrl && (
-        <div aria-hidden className="pointer-events-none absolute inset-y-0 left-0 lg:left-[38%] right-0 z-[-1] overflow-hidden">
+        <div aria-hidden className="pointer-events-none relative z-[-1] w-full aspect-[1200/750] overflow-hidden lg:absolute lg:inset-y-0 lg:left-[49%] lg:right-0 lg:max-w-full lg:aspect-auto xl:left-[45%] 2xl:left-[42%]">
           <img
             src={backgroundUrl}
             alt=""
             aria-hidden
-            className="absolute inset-0 h-full w-full object-cover object-center"
+            className="h-full w-full object-cover object-center"
           />
         </div>
       )}
 
       <div className="container relative mx-auto px-5 md:px-10">
-        <div ref={copyRef} className="relative z-10 max-w-[720px] pt-4 md:pt-6">
+        <div ref={copyRef} className="relative z-10 max-w-full lg:max-w-[45%] xl:max-w-[42%] 2xl:max-w-[38%] pt-4 md:pt-6">
           
-          <p className="mb-8 max-w-[620px] text-[16px] leading-[1.9] text-[#55677f] mt-[120px]">
+          <p className="mb-8 max-w-[620px] text-[16px] leading-[1.9] text-[#55677f] mt-[40px] md:mt-[120px]">
             We move systems, data and documents from on-premise infrastructure to the cloud &mdash; and use AI to
             clean, classify and govern everything that moves. You land on something genuinely better, not the same
             problems at a higher monthly cost.
@@ -233,10 +232,10 @@ function Hero({ backgroundUrl }: { backgroundUrl?: string }) {
 
         <div
           ref={logosRef}
-          className="relative z-10 mt-11 flex flex-wrap items-center gap-x-9 gap-y-4 border-t border-[#EDE5E9] pt-[26px] sm:mt-16"
+          className="relative max-w-full lg:max-w-[45%] xl:max-w-[42%] 2xl:max-w-[38%] z-10 mt-11 flex flex-wrap items-center gap-x-9 gap-y-4 border-t border-[#EDE5E9] pt-[26px] sm:mt-16"
         >
           <span className="text-[10.5px] font-semibold uppercase tracking-[0.14em] text-[#8D8E9E]">Partners &amp; standards</span>
-          <ul className="flex flex-wrap gap-x-9 gap-y-4">
+          <ul className="flex flex-wrap gap-x-7 gap-y-4">
             {["Microsoft Solutions Partner", "AWS Qualified", "Google Cloud Partner", "GDPR Compliant"].map((name) => (
               <li key={name} className="flex items-center gap-[8px] text-[0.9rem] font-medium text-[#66798F]">
                 <span aria-hidden className="h-[6px] w-[6px] rounded-full bg-[#2c87cc]" />
