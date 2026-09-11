@@ -177,13 +177,18 @@ const ERROR_MESSAGES: Record<FieldName, string> = {
   company: "Please enter your company name.",
   email: "Please enter a valid work email address.",
   phoneNo: "Phone number should be 7–15 digits, numbers only.",
-  description: "Tell us a little about what you need — this field can't be empty.",
+  description: "Tell us a little about what you need — between 20 and 500 characters.",
   terms: "Please accept the privacy policy to continue.",
 };
 
 const EMAIL_PATTERN = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 /** Digits only — the phone input strips everything else as the visitor types (see `handlePhoneChange`), so this just double-checks length on submit. */
 const PHONE_PATTERN = /^\d{7,15}$/;
+const DESCRIPTION_MIN_LENGTH = 20;
+const DESCRIPTION_MAX_LENGTH = 500;
+/** `description`'s own too-short/too-long messages — more specific than the generic `ERROR_MESSAGES.description` fallback (used only when the field is empty). */
+const DESCRIPTION_TOO_SHORT_MESSAGE = `Please enter at least ${DESCRIPTION_MIN_LENGTH} characters.`;
+const DESCRIPTION_TOO_LONG_MESSAGE = `Please keep it under ${DESCRIPTION_MAX_LENGTH} characters.`;
 
 /** Strips every non-digit character from a phone input's value as the visitor types, so only numbers can ever land in the field (paste included, since this runs on the resulting `change` event either way). */
 function handlePhoneChange(event: React.ChangeEvent<HTMLInputElement>) {
@@ -216,8 +221,10 @@ function validateForm(data: FormData): Partial<Record<FieldName, string>> {
   }
 
   const description = String(data.get("description") ?? "").trim();
-  if (!description) {
-    errors.description = ERROR_MESSAGES.description;
+  if (description.length < DESCRIPTION_MIN_LENGTH) {
+    errors.description = DESCRIPTION_TOO_SHORT_MESSAGE;
+  } else if (description.length > DESCRIPTION_MAX_LENGTH) {
+    errors.description = DESCRIPTION_TOO_LONG_MESSAGE;
   }
 
   if (!data.get("terms")) {

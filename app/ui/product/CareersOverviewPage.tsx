@@ -36,8 +36,8 @@ interface Props {
  * `Refrence/oxytal-careers_2.html`. Same treatment as this folder's other
  * static pages (`ProductsOverviewPage`, the `*CaseStudy` components): no
  * Contentful wiring, keeps the reference's own colour identity (`--ink`
- * `#0B1B2B`, `--body` `#546A7E`, `--muted` `#8598AA`, `--accent` `#0E9BC4`,
- * `--accent-2` `#16B9E8`, `--accent-soft` `#E5F5FB`, the `--deep-1`/
+ * `#0B1B2B`, `--body` `#546A7E`, `--muted` `#8598AA`, `--accent` `#0B7FA2`,
+ * `--accent-2` `#0F7F9F`, `--accent-soft` `#E5F5FB`, the `--deep-1`/
  * `--deep-2` `#061223`/`#0C2138` navy gradient, `--ok` `#12A67C`, `--warm`
  * `#D9820A`) rather than the site's per-page `themeColor` accent, and
  * typography stays the site's own inherited `Poppins` — the reference's
@@ -242,7 +242,7 @@ const PORTAL_FEATURES = [
 ========================================================= */
 
 function Eyebrow({ children, dark, center }: { children: ReactNode; dark?: boolean; center?: boolean }) {
-  const color = dark ? "#16B9E8" : "#0E9BC4";
+  const color = dark ? "#0F7F9F" : "#0B7FA2";
   return (
     <span
       className={cx("mb-3.5 flex items-center gap-2.5 text-[12px] font-bold uppercase", center && "justify-center")}
@@ -294,8 +294,8 @@ function SectionHead({
 
 const BTN_BASE =
   "inline-flex items-center gap-2 rounded-full px-7 py-3.5 text-[15px] font-semibold transition duration-150";
-const BTN_PRIMARY = cx(BTN_BASE, "border border-transparent bg-[#0E9BC4] text-white hover:-translate-y-px hover:bg-[#0B87AC]");
-const BTN_GHOST = cx(BTN_BASE, "border border-white/[0.26] bg-white/[0.06] text-white hover:-translate-y-px hover:border-[#16B9E8] hover:bg-[rgba(22,185,232,0.12)]");
+const BTN_PRIMARY = cx(BTN_BASE, "border border-transparent bg-[#0B7FA2] text-white hover:-translate-y-px hover:bg-[#0B87AC]");
+const BTN_GHOST = cx(BTN_BASE, "border border-white/[0.26] bg-white/[0.06] text-white hover:-translate-y-px hover:border-[#0F7F9F] hover:bg-[rgba(22,185,232,0.12)]");
 
 /* =========================================================
    HERO
@@ -314,7 +314,7 @@ function Hero({ headingLevel = "h1" }: { headingLevel?: HeadingLevel }) {
         style={{ background: "radial-gradient(circle, rgba(22,185,232,.22), transparent 64%)" }}
       />
       <div ref={copyRef} className="container relative mx-auto px-5 md:px-10">
-        <span className="mb-3 block text-[12px] font-bold text-[#16B9E8] uppercase">Careers</span>
+        <span className="mb-3 block text-[12px] font-bold text-[#0F7F9F] uppercase">Careers</span>
         <DynamicHeading
           level={headingLevel}
           ref={titleRef}
@@ -360,7 +360,7 @@ function HonestCard({ n, title, body }: (typeof HONEST)[number]) {
   const cardRef = useCardHover<HTMLDivElement>({ y: -4 });
   return (
     <div ref={cardRef} className="bg-white p-7">
-      <span className="mb-3.5 block text-[11px] font-bold text-[#0E9BC4]">{n}</span>
+      <span className="mb-3.5 block text-[11px] font-bold text-[#0B7FA2]">{n}</span>
       <span className="mb-2.5 text-[18px] leading-[1.32] font-bold text-[#0B1B2B] block">{title}</span>
       <p className="text-[14px] leading-[1.75] text-[#546A7E]">{body}</p>
     </div>
@@ -467,7 +467,7 @@ function WorkCard({ label, title, body, tags }: (typeof WORK)[number]) {
   const cardRef = useCardHover<HTMLDivElement>({ y: -4 });
   return (
     <div ref={cardRef} className="bg-white p-8">
-      <span className="mb-3.5 block text-[10.5px] font-bold tracking-[0.1em] text-[#0E9BC4] uppercase">{label}</span>
+      <span className="mb-3.5 block text-[10.5px] font-bold tracking-[0.1em] text-[#0B7FA2] uppercase">{label}</span>
       <span className="mb-3 text-[18px] leading-[1.3] font-bold text-[#0B1B2B] block">{title}</span>
       <p className="text-[14.5px] leading-[1.7] text-[#546A7E]">{body}</p>
       <ul className="mt-4 flex flex-wrap gap-1.75 list-none">
@@ -533,7 +533,7 @@ function HowWeHireSection() {
                 index > 0 && "border-t border-[#E3ECF2]"
               )}
             >
-              <span className="pt-0.5 text-[11px] font-bold tracking-[0.1em] text-[#0E9BC4]">{phase.n}</span>
+              <span className="pt-0.5 text-[11px] font-bold tracking-[0.1em] text-[#0B7FA2]">{phase.n}</span>
               <div>
                 <span className="mb-1.75 text-[16.5px] font-bold text-[#0B1B2B] block">{phase.title}</span>
                 <p className="text-[14.5px] leading-[1.65] text-[#546A7E]">{phase.body}</p>
@@ -542,7 +542,7 @@ function HowWeHireSection() {
           ))}
         </div>
 
-        <div ref={noteRef} className="mt-6.5 rounded-r-[14px] border-l-[3px] border-[#0E9BC4] bg-[#E5F5FB] py-5.5 pr-6.5 pl-7">
+        <div ref={noteRef} className="mt-6.5 rounded-r-[14px] border-l-[3px] border-[#0B7FA2] bg-[#E5F5FB] py-5.5 pr-6.5 pl-7">
           <p className="text-[15.5px] leading-[1.65] text-[#0B1B2B]">
             <strong className="font-semibold">If we&apos;re not hiring for your discipline right now,</strong> register
             anyway. Roles open at short notice and we look at the portal before we look anywhere else — a registered
@@ -587,7 +587,7 @@ function PortalSection() {
         </div>
 
         <div ref={cardRef} className="rounded-2xl border border-white/[0.12] bg-white/[0.05] p-7 sm:p-8.5">
-          <span className="mb-4.5 block text-[11px] font-bold tracking-[0.1em] text-[#16B9E8]">career.oxyem.io</span>
+          <span className="mb-4.5 block text-[11px] font-bold tracking-[0.1em] text-[#0F7F9F]">career.oxyem.io</span>
           <ul className="mb-6 list-none">
             {PORTAL_FEATURES.map((feature, i) => (
               <li
@@ -597,7 +597,7 @@ function PortalSection() {
                   i > 0 && "border-t border-white/[0.08]"
                 )}
               >
-                <Check size={15} aria-hidden className="mt-1 shrink-0 text-[#16B9E8]" />
+                <Check size={15} aria-hidden className="mt-1 shrink-0 text-[#0F7F9F]" />
                 {feature}
               </li>
             ))}
@@ -638,7 +638,7 @@ function EeoSection() {
         </p>
         <p className="text-[14.5px] leading-[1.72] text-[#546A7E]">
           Applications are handled in line with our{" "}
-          <Link href="/privacy-policy" className="text-[#0E9BC4]">
+          <Link href="/privacy-policy" className="text-[#0B7FA2]">
             Privacy Policy
           </Link>
           . Candidate data is stored in our own portal and is not sold or shared with third parties.
