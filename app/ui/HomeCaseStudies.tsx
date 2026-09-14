@@ -330,7 +330,7 @@ function CaseStudySlide({
 
         <span
           className={cx(
-            "text-[26px] leading-tight font-extrabold sm:text-[28px] md:text-[32px] block",
+            "text-[26px] leading-tight font-extrabold sm:text-[28px] md:text-[32px] block min-h-[60px] md:min-h-auto",
             theme?.heading ?? "text-gray-900"
           )}
         >
