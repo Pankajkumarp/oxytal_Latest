@@ -372,6 +372,7 @@ export default function CommonTrustedBy({
                             rel: "noopener noreferrer",
                           }
                         : {})}
+                      role="group"
                       aria-label={item.name}
                       className={cx(
                         "flex h-full items-center justify-center logo-card",
