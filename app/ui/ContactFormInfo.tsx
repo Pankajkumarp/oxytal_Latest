@@ -195,6 +195,44 @@ function handlePhoneChange(event: React.ChangeEvent<HTMLInputElement>) {
   event.target.value = event.target.value.replace(/\D/g, "");
 }
 
+/** Collapses any run of consecutive (horizontal) spaces down to a single one — shared by every field below that enforces "only one space between words." Deliberately only matches the literal space character, not all of `\s`, so it never eats the textarea's newlines. */
+function collapseSpaces(value: string): string {
+  return value.replace(/ {2,}/g, " ");
+}
+
+/**
+ * Sanitizes a name-like input (full name, company name) as the visitor
+ * types (same "clean up the value on every `change` event" approach
+ * `handlePhoneChange` uses above): strips a leading digit or space, so the
+ * field can never start with either, and collapses repeated spaces via
+ * `collapseSpaces`, so only one space is ever allowed between words.
+ */
+function handleNameLikeChange(event: React.ChangeEvent<HTMLInputElement>) {
+  event.target.value = collapseSpaces(event.target.value.replace(/^[\d\s]+/, ""));
+}
+
+/**
+ * Strips every space character from an email input as the visitor types.
+ * Unlike the name-like fields above, a leading digit is perfectly valid in
+ * an email's local part (e.g. `123abc@example.com`), and no space is ever
+ * valid anywhere in an email address — so this removes spaces outright
+ * rather than collapsing runs of them down to one.
+ */
+function handleEmailChange(event: React.ChangeEvent<HTMLInputElement>) {
+  event.target.value = event.target.value.replace(/ /g, "");
+}
+
+/**
+ * Sanitizes the description textarea as the visitor types: strips leading
+ * spaces and collapses repeated spaces via `collapseSpaces`, same
+ * "single space between words" rule as the name-like fields. Deliberately
+ * doesn't strip a leading digit — unlike a name, a free-text description
+ * legitimately starting with a number (e.g. "24/7 support...") is common.
+ */
+function handleDescriptionChange(event: React.ChangeEvent<HTMLTextAreaElement>) {
+  event.target.value = collapseSpaces(event.target.value.replace(/^ +/, ""));
+}
+
 /** Validates the intake form's required fields from a submitted `FormData`, returning one message per failing field (see `ERROR_MESSAGES`) — empty when everything's valid. */
 function validateForm(data: FormData): Partial<Record<FieldName, string>> {
   const errors: Partial<Record<FieldName, string>> = {};
@@ -833,6 +871,9 @@ export default function ContactFormInfo({ entry }: Props) {
               </div>
 
               <div>
+                <label htmlFor="interstedIn" className="sr-only">
+                  What&apos;s this about?
+                </label>
                 <div className="relative">
                   <Layers size={17} aria-hidden className="pointer-events-none absolute top-1/2 left-4 -translate-y-1/2 text-[#8598AA]" />
                   <select id="interstedIn" name="interstedIn" defaultValue="" className={cx(fieldClasses(), "appearance-none pr-10")}>
@@ -851,6 +892,9 @@ export default function ContactFormInfo({ entry }: Props) {
               </div>
               <div className="grid gap-5 sm:grid-cols-2">
                 <div>
+                  <label htmlFor="fullName" className="sr-only">
+                    Full name
+                  </label>
                   <div className="relative">
                     <User size={17} aria-hidden className="pointer-events-none absolute top-1/2 left-4 -translate-y-1/2 text-[#8598AA]" />
                     <input
@@ -861,13 +905,19 @@ export default function ContactFormInfo({ entry }: Props) {
                       placeholder="Full name"
                       aria-invalid={Boolean(errors.fullName)}
                       aria-describedby={errors.fullName ? "fullName-error" : undefined}
-                      onChange={() => clearError("fullName")}
+                      onChange={(event) => {
+                        handleNameLikeChange(event);
+                        clearError("fullName");
+                      }}
                       className={fieldClasses(Boolean(errors.fullName))}
                     />
                   </div>
                   <FieldError id="fullName-error" message={errors.fullName} />
                 </div>
                 <div>
+                  <label htmlFor="company" className="sr-only">
+                    Company name
+                  </label>
                   <div className="relative">
                     <Building2 size={17} aria-hidden className="pointer-events-none absolute top-1/2 left-4 -translate-y-1/2 text-[#8598AA]" />
                     <input
@@ -878,7 +928,10 @@ export default function ContactFormInfo({ entry }: Props) {
                       placeholder="Company name"
                       aria-invalid={Boolean(errors.company)}
                       aria-describedby={errors.company ? "company-error" : undefined}
-                      onChange={() => clearError("company")}
+                      onChange={(event) => {
+                        handleNameLikeChange(event);
+                        clearError("company");
+                      }}
                       className={fieldClasses(Boolean(errors.company))}
                     />
                   </div>
@@ -888,6 +941,9 @@ export default function ContactFormInfo({ entry }: Props) {
 
               <div className="grid gap-5 sm:grid-cols-2">
                 <div>
+                  <label htmlFor="email" className="sr-only">
+                    Work email
+                  </label>
                   <div className="relative">
                     <Mail size={17} aria-hidden className="pointer-events-none absolute top-1/2 left-4 -translate-y-1/2 text-[#8598AA]" />
                     <input
@@ -898,7 +954,10 @@ export default function ContactFormInfo({ entry }: Props) {
                       placeholder="you@company.com"
                       aria-invalid={Boolean(errors.email)}
                       aria-describedby={errors.email ? "email-error" : undefined}
-                      onChange={() => clearError("email")}
+                      onChange={(event) => {
+                        handleEmailChange(event);
+                        clearError("email");
+                      }}
                       className={fieldClasses(Boolean(errors.email))}
                     />
                   </div>
@@ -908,6 +967,9 @@ export default function ContactFormInfo({ entry }: Props) {
                   <FieldError id="email-error" message={errors.email} />
                 </div>
                 <div>
+                  <label htmlFor="phoneNo" className="sr-only">
+                    Phone number
+                  </label>
                   <div className="relative">
                     <Phone size={17} aria-hidden className="pointer-events-none absolute top-1/2 left-4 -translate-y-1/2 text-[#8598AA]" />
                     <input
@@ -934,6 +996,9 @@ export default function ContactFormInfo({ entry }: Props) {
 
 
               <div>
+                <label htmlFor="description" className="sr-only">
+                  Tell us about your project
+                </label>
                 <div className="relative">
                   <FileText size={17} aria-hidden className="pointer-events-none absolute top-4 left-4 text-[#8598AA]" />
                   <textarea
@@ -943,7 +1008,10 @@ export default function ContactFormInfo({ entry }: Props) {
                     placeholder="What are you trying to achieve, and what's getting in the way? Any deadline or constraint we should know about?"
                     aria-invalid={Boolean(errors.description)}
                     aria-describedby={errors.description ? "description-error" : undefined}
-                    onChange={() => clearError("description")}
+                    onChange={(event) => {
+                      handleDescriptionChange(event);
+                      clearError("description");
+                    }}
                     className={cx(fieldClasses(Boolean(errors.description)), "resize-none")}
                   />
                 </div>
