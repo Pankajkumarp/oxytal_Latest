@@ -225,7 +225,7 @@ export default function ContactHero({ entry }: Props) {
       </div>
 
 
-      <div className="container relative z-2 mx-auto grid gap-12 px-5 py-16 md:px-10 md:py-20 md:pt-24 lg:grid-cols-2 lg:items-center lg:py-24 lg:pt-28">
+      <div className="container relative z-2 mx-auto grid gap-12 px-5 py-16 pt-[100px] md:px-10 md:py-20 md:pt-24 lg:grid-cols-2 lg:items-center lg:py-24 lg:pt-28">
         <div className="flex flex-col gap-6">
           <span
             className={cx(

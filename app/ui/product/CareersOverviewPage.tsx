@@ -307,7 +307,7 @@ function Hero({ headingLevel = "h1" }: { headingLevel?: HeadingLevel }) {
   const locRef = useFadeUp<HTMLDivElement>();
 
   return (
-    <header className="relative overflow-hidden bg-[linear-gradient(160deg,#061223,#0C2138)] sm:min-h-screen px-0 py-16 text-[#EAF2F8] sm:px-8 sm:py-20 lg:py-[110px] pt-[120px] lg:pt-[150px]">
+    <header className="relative overflow-hidden bg-[linear-gradient(160deg,#061223,#0C2138)] sm:min-h-screen px-0 py-16 text-[#EAF2F8] sm:px-8 sm:py-20 lg:py-[110px] pt-[100px] lg:pt-[150px]">
       <div
         aria-hidden
         className="pointer-events-none absolute -top-[44%] -right-[18%] h-[860px] w-[860px] rounded-full"
