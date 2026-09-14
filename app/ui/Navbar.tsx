@@ -342,7 +342,16 @@ function gridColsClass(count: number, hasCta: boolean) {
    MEGA MENU
 ========================================================= */
 
-function MegaPanel({ menu, theme }: { menu: MegaMenu; theme?: SectionTheme }) {
+function MegaPanel({
+  menu,
+  theme,
+  onNavigate,
+}: {
+  menu: MegaMenu;
+  theme?: SectionTheme;
+  /** Called when a link inside this panel is clicked — lets `Navbar` close the open menu/overlay state, since a client-side navigation alone doesn't (see `closeAllMenus`'s own doc comment). */
+  onNavigate?: () => void;
+}) {
   const hasCta = hasCtaContent(menu.cta);
 
   return (
@@ -380,6 +389,7 @@ function MegaPanel({ menu, theme }: { menu: MegaMenu; theme?: SectionTheme }) {
             <Link
               key={entry.title}
               href={entry.href ?? "#"}
+              onClick={onNavigate}
               className={cx(
                 "-m-2 block rounded-lg p-2 transition-colors",
                 theme ? "hover:opacity-70" : "hover:bg-gray-50"
@@ -442,6 +452,7 @@ function MegaPanel({ menu, theme }: { menu: MegaMenu; theme?: SectionTheme }) {
 {menu.cta?.linkLabel && (
           <Link
             href={menu.cta.href ?? "#"}
+            onClick={onNavigate}
             className={cx(
               "group mt-auto inline-flex items-center gap-1.5 text-sm",
               theme?.buttonText ?? "text-emerald-100"
@@ -465,7 +476,16 @@ function MegaPanel({ menu, theme }: { menu: MegaMenu; theme?: SectionTheme }) {
    SIMPLE DROPDOWN
 ========================================================= */
 
-function DropdownPanel({ menu, theme }: { menu: MegaMenu; theme?: SectionTheme }) {
+function DropdownPanel({
+  menu,
+  theme,
+  onNavigate,
+}: {
+  menu: MegaMenu;
+  theme?: SectionTheme;
+  /** See `MegaPanel`'s own doc comment on this same prop. */
+  onNavigate?: () => void;
+}) {
   return (
     <div
       className={cx(
@@ -483,6 +503,7 @@ function DropdownPanel({ menu, theme }: { menu: MegaMenu; theme?: SectionTheme }
         <Link
           key={entry.title}
           href={entry.href ?? "#"}
+          onClick={onNavigate}
           className={cx(
             "block rounded-lg px-4 py-3 transition-colors",
             theme ? "hover:opacity-70" : "hover:bg-gray-50"
@@ -597,6 +618,27 @@ export default function Navbar({ entry }: Props) {
     closeTimer.current = setTimeout(() => {
       setActiveMenu(null);
     }, 120);
+  };
+
+  /**
+   * Closes every open menu/overlay state at once — the desktop mega/dropdown
+   * panel (`activeMenu`), the desktop reveal and full-screen mobile panel
+   * (`navOpen`), and the expanded mobile accordion item (`mobileExpanded`).
+   * A Next `<Link>` click already navigates on its own; nothing about that
+   * navigation touches this component's own state, so without calling this
+   * on every navigating link, the panel/overlay you clicked through just
+   * stays open on top of the page that loaded underneath it — on mobile
+   * that's a full-screen panel, so it looks like the page never changed at
+   * all even though the URL did.
+   */
+  const closeAllMenus = () => {
+    if (closeTimer.current) {
+      clearTimeout(closeTimer.current);
+    }
+
+    setActiveMenu(null);
+    setNavOpen(false);
+    setMobileExpanded(null);
   };
 
   /* Close on outside click / Escape */
@@ -912,6 +954,7 @@ export default function Navbar({ entry }: Props) {
             <Link
               href="/"
               ref={logoRef}
+              onClick={closeAllMenus}
               className={cx(
                 "flex items-center text-[30px]  tracking-tight",
                 navOpen
@@ -947,6 +990,7 @@ export default function Navbar({ entry }: Props) {
                   <li key={menu.key}>
                     <Link
                       href={menu.href ?? "#"}
+                      onClick={closeAllMenus}
                       className={cx(
                         "block rounded-lg px-3.5 py-2.5 text-[17px] lg:text-[13.6px] xl:text-[17px] font-medium transition-colors",
                         theme?.link ?? "text-gray-900",
@@ -989,7 +1033,7 @@ export default function Navbar({ entry }: Props) {
                         theme?.link ?? "text-gray-900",
                       )}
                     >
-                      <Link href={menu.href}>{menu.label}</Link>
+                      <Link href={menu.href} onClick={closeAllMenus}>{menu.label}</Link>
 
                       {hasContent && (
                         <button
@@ -1071,13 +1115,13 @@ export default function Navbar({ entry }: Props) {
                             theme?.sectionBg ?? "bg-white"
                           )}
                         >
-                          <MegaPanel menu={menu} theme={theme} />
+                          <MegaPanel menu={menu} theme={theme} onNavigate={closeAllMenus} />
                         </div>
                       )}
 
                       {/* SIMPLE DROPDOWN */}
                       {menu.menuType === "dropdown" && (
-                        <DropdownPanel menu={menu} theme={theme} />
+                        <DropdownPanel menu={menu} theme={theme} onNavigate={closeAllMenus} />
                       )}
                     </div>
                   )}
@@ -1201,6 +1245,7 @@ export default function Navbar({ entry }: Props) {
                 <Link
                   key={menu.key}
                   href={menu.href ?? "/"}
+                  onClick={closeAllMenus}
                   className={cx(
                     "border-b py-3.5 text-[15px] font-semibold",
                     theme?.cardBorder ?? "border-gray-100",
@@ -1230,7 +1275,7 @@ export default function Navbar({ entry }: Props) {
                     theme?.heading ?? "text-gray-900"
                   )}
                 >
-                  <Link href={menu.href || ""}>
+                  <Link href={menu.href || ""} onClick={closeAllMenus}>
                   {menu.label}
                   </Link>
 
@@ -1267,6 +1312,7 @@ export default function Navbar({ entry }: Props) {
                           <Link
                             key={entry.title}
                             href={entry.href ?? "#"}
+                            onClick={closeAllMenus}
                             className="block"
                           >
                             <div
@@ -1292,6 +1338,7 @@ export default function Navbar({ entry }: Props) {
                         {hasCtaContent(menu.cta) && (
                           <Link
                             href={menu.cta.href ?? "#"}
+                            onClick={closeAllMenus}
                             className={cx(
                               "mt-1 inline-flex items-center gap-1.5 text-[14px] font-bold",
                               theme?.accentText ?? "text-emerald-600"
@@ -1314,6 +1361,7 @@ export default function Navbar({ entry }: Props) {
                           <Link
                             key={entry.title}
                             href={entry.href ?? "#"}
+                            onClick={closeAllMenus}
                             className={cx(
                               "block rounded-lg px-2 py-2",
                               theme ? "hover:opacity-70" : "hover:bg-gray-50"
