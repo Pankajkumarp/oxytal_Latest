@@ -130,8 +130,10 @@ export default async function Page(): Promise<ReactElement<any>> {
 
   return (
     <>
+    <header>
       <SkipToContent />
       <Navbar entry={navigation} />
+      </header>
       <main id="main-content">
         {page ? <PageBody blocks={page.fields.body} /> : <Home404 entry={NOT_FOUND_FALLBACK_ENTRY} />}
       </main>

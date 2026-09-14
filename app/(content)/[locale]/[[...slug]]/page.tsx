@@ -156,8 +156,10 @@ export default async function Page({ params }: Props) {
   if (page) {
     return (
       <>
+      <header>
         <SkipToContent />
         <Navbar entry={navigation} />
+      </header>
         <main id="main-content" suppressHydrationWarning >
           <PageBody blocks={page.fields.body} />
         </main>
@@ -175,8 +177,10 @@ export default async function Page({ params }: Props) {
 
   return (
     <>
+    <header>
       <SkipToContent />
       <Navbar entry={navigation} />
+      </header>
       <main id="main-content">
         <CaseStudyDetail entry={study} />
       </main>
