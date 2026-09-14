@@ -68,7 +68,14 @@ export default async function RootLayout({
         <link crossOrigin="" href="https://fonts.gstatic.com" rel="preconnect" />
         <meta content="yes" name="mobile-web-app-capable" />
       </head>
-      <body className="mx-auto w-full">
+      <body className="mx-auto w-full" role="region" aria-label="Page content">
+        {/* `role`/`aria-label` here give `<body>` a named ARIA landmark
+            so Next's route announcer (appended straight to
+            `document.body` on client-side navigations — see
+            `app/(content)/[locale]/layout.tsx`'s own doc comment on this
+            same attribute) ends up contained in a landmark instead of
+            tripping automated accessibility scanners' "text not in a
+            landmark" check. */}
         <GoogleTagManagerNoScript />
         {children}
         <CookieConsentBanner />

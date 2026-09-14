@@ -135,7 +135,14 @@ export default async function GlobalNotFound(): Promise<ReactElement<any>> {
 
   return (
     <html lang="en" className={`${poppins.variable} h-full antialiased`}>
-      <body className="min-h-full flex flex-col">
+      <body className="min-h-full flex flex-col" role="region" aria-label="Page content">
+        {/* `role`/`aria-label` here give `<body>` a named ARIA landmark
+            so Next's route announcer (appended straight to
+            `document.body` on client-side navigations — see
+            `app/(content)/[locale]/layout.tsx`'s own doc comment on this
+            same attribute) ends up contained in a landmark instead of
+            tripping automated accessibility scanners' "text not in a
+            landmark" check. */}
         <GoogleTagManagerNoScript />
         <SkipToContent />
         <Navbar entry={navigation} />

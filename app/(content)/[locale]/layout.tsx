@@ -60,7 +60,18 @@ export default function RootLayout({
       lang="en"
       className={`${poppins.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">
+      <body className="min-h-full flex flex-col" role="region" aria-label="Page content">
+        {/* `role`/`aria-label` here aren't decorative — they give `<body>`
+            itself a named ARIA landmark, so Next's built-in route
+            announcer (`next-route-announcer`, appended straight to
+            `document.body` by the framework on every client-side
+            navigation — see that file's own doc comment) ends up
+            contained in a landmark like everything else on the page,
+            rather than tripping automated accessibility scanners' "text
+            not in a landmark" check. No JSX inside this file can wrap
+            that announcer node directly, since Next attaches it as a
+            sibling of whatever this layout renders, not a child of it —
+            `<body>` is the one element both share. */}
         <GoogleTagManagerNoScript />
         {children}
         <CookieConsentBanner />
