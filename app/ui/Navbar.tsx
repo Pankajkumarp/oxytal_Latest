@@ -1335,20 +1335,19 @@ export default function Navbar({ entry }: Props) {
                           </Link>
                         ))}
 
-                        {hasCtaContent(menu.cta) && (
-                          <Link
-                            href={menu.cta.href ?? "#"}
-                            onClick={closeAllMenus}
-                            className={cx(
-                              "mt-1 inline-flex items-center gap-1.5 text-[14px] font-bold",
-                              theme?.accentText ?? "text-emerald-600"
-                            )}
-                          >
-                            {menu.cta.linkLabel}
-
-                            <ArrowRight size={14} />
-                          </Link>
-                        )}
+                        {hasCtaContent(menu.cta) && menu.cta.linkLabel && (
+  <Link
+    href={menu.cta.href ?? "#"}
+    onClick={closeAllMenus}
+    className={cx(
+      "mt-1 inline-flex items-center gap-1.5 text-[14px] font-bold",
+      theme?.accentText ?? "text-emerald-600"
+    )}
+  >
+    {menu.cta.linkLabel}
+    <ArrowRight size={14} />
+  </Link>
+)}
                       </div>
                     )}
 
