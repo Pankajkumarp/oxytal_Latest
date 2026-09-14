@@ -58,12 +58,12 @@ export default async function RootLayout({
       className={`${poppins.variable}`}
     >
       <head>
-        {/* No manual favicon <link> here anymore — app/icon.tsx and
-            app/apple-icon.tsx (the site-wide, top-level app/ favicon,
-            see that file's own doc comment) are inherited by this route
-            automatically; the previous hardcoded /favicon.png links
-            pointed at a file that was never in public/, so they always
-            404ed. */}
+        {/* No manual favicon <link> here anymore — app/favicon.ico,
+            app/icon.png and app/apple-icon.png (the site-wide, top-level
+            app/ favicon images — Next's file-based icon convention) are
+            inherited by this route automatically; the previous hardcoded
+            /favicon.png links pointed at a file that was never in
+            public/, so they always 404ed. */}
         <link crossOrigin="" href="https://fonts.googleapis.com" rel="preconnect" />
         <link crossOrigin="" href="https://fonts.gstatic.com" rel="preconnect" />
         <meta content="yes" name="mobile-web-app-capable" />

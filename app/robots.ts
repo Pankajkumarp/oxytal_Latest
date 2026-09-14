@@ -3,7 +3,7 @@ import { SITE_URL } from "./lib/siteUrl";
 
 /**
  * Placed at the true top-level `app/` (same reasoning as `sitemap.ts` and
- * `icon.tsx`/`apple-icon.tsx` — a sibling of the `(content)` route group)
+ * `favicon.ico`/`icon.png`/`apple-icon.png` — a sibling of the `(content)` route group)
  * so it serves at the bare `/robots.txt` crawlers expect, unrewritten by
  * `proxy.ts` (its matcher already excludes any dotted path).
  *

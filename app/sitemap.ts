@@ -50,8 +50,8 @@ function dedupeByUrl(entries: MetadataRoute.Sitemap): MetadataRoute.Sitemap {
 }
 
 /**
- * Placed at the true top-level `app/` (a sibling of `icon.tsx`/
- * `apple-icon.tsx`, not inside the `(content)` route group) so it serves
+ * Placed at the true top-level `app/` (a sibling of `favicon.ico`/
+ * `icon.png`/`apple-icon.png`, not inside the `(content)` route group) so it serves
  * at the bare `/sitemap.xml` Google/Bing expect. `proxy.ts`'s matcher
  * already excludes any path with a dot in it, so this is reachable
  * without the `/en-US` locale rewrite every other content path gets.
