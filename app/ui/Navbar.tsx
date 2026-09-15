@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useLayoutEffect } from "react";
+import { flushSync } from "react-dom";
 import { ChevronDown, Menu, X, ArrowRight } from "lucide-react";
 import gsap from "gsap";
 import { Entry, EntrySkeletonType } from "contentful";
@@ -16,6 +17,7 @@ import {
   NavMenuSkeleton,
 } from "../types/contentful";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 /**
  * `Entry<Skeleton>` on its own leaves `Modifiers` unconstrained, which
@@ -636,10 +638,64 @@ export default function Navbar({ entry }: Props) {
       clearTimeout(closeTimer.current);
     }
 
+    // `flushSync` rather than a plain batched `setState`: this runs from
+    // a `<Link>`'s `onClick`, synchronously *before* Next's own click
+    // handler kicks off the actual navigation (see next/link's `onClick`
+    // — it calls our `onClick` prop first, then `linkClicked`). Without
+    // forcing an immediate paint here, the "close the menu" update can
+    // end up committed together with whatever the navigation itself
+    // schedules, so the open panel visually lingers until the new page
+    // lands instead of closing the instant you click — and a second
+    // click on the hamburger during that window can land mid-swap
+    // between the old open DOM and the new collapsed one, misfiring.
+    flushSync(() => {
+      setActiveMenu(null);
+      setNavOpen(false);
+      setMobileExpanded(null);
+    });
+  };
+
+  /**
+   * Safety net for `closeAllMenus` above only running from each navigating
+   * `<Link>`'s own `onClick`: this component never remounts across a
+   * client-side navigation (it's rendered from inside `page.tsx`, a
+   * Server Component whose returned tree reconciles into the *same*
+   * `<Navbar>` instance under the shared locale layout — see the
+   * `closeAllMenus` doc comment above for why a plain navigation doesn't
+   * reset state on its own). So `navOpen`/`activeMenu`/`mobileExpanded`
+   * only ever get reset by whichever `onClick` happened to fire. Any
+   * route change that doesn't go through one of those exact handlers —
+   * the browser's Back/Forward buttons, or a click Next's router ends up
+   * resolving without running our handler — leaves the desktop reveal (or
+   * the open mobile panel) exactly as it was on the previous page: on
+   * desktop this can visually look collapsed (the hamburger showing)
+   * while `navOpen` is still `true` underneath, so the hamburger's own
+   * `setNavOpen((v) => !v)` toggle just flips it *back on* instead of
+   * opening it — indistinguishable from "the button doesn't work" until a
+   * refresh resets the component's state from scratch. Re-closing on
+   * every actual pathname change keeps state in sync with the real route
+   * no matter how the navigation happened.
+   *
+   * Done during render (the React-documented way to adjust state in
+   * response to a prop/derived value changing — see "Adjusting state
+   * when a prop changes" in the React docs) rather than in a `useEffect`,
+   * so the reset commits in the same pass as the new route instead of
+   * flashing the stale open state for a frame first.
+   */
+  const pathname = usePathname();
+
+  const [lastPathname, setLastPathname] = useState(pathname);
+
+  if (pathname !== lastPathname) {
+    setLastPathname(pathname);
+    // Inlined rather than calling `closeAllMenus()`: that also clears
+    // `closeTimer` (a ref), and refs can't be touched during render. Any
+    // pending delayed-close timer harmlessly no-ops `setActiveMenu(null)`
+    // again once it fires.
     setActiveMenu(null);
     setNavOpen(false);
     setMobileExpanded(null);
-  };
+  }
 
   /* Close on outside click / Escape */
   useEffect(() => {
