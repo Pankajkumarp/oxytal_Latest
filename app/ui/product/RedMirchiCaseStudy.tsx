@@ -61,7 +61,7 @@ function isEntry(value: unknown): value is AnyEntry {
  * siblings in this folder (`TinyIslandCaseStudy`/`KaneffCaseStudy`/
  * `CasaFamosaCaseStudy`/`StoopDayzCaseStudy`/`TaffersCaseStudy`): keeps
  * the reference's own colour identity (`--ink` `#18100D`, `--body`
- * `#655650`, `--accent` `#C43D1E`, `--accent-2` `#F0855F`, the
+ * `#655650`, `--accent` `#C43D1E`, `--accent-2` `#D24614`, the
  * `--deep-1`/`--deep-2` `#140C09`/`#2A1A13` near-black-to-umber gradient,
  * `--leaf` `#4E7C39` for the catalogue's variety-type labels) rather than
  * the site's per-page `themeColor` accent, and typography stays the
@@ -462,7 +462,7 @@ function Hero({ mainBanner }: { mainBanner?: string }) {
       />
 
       <div className="relative mx-auto max-w-7xl px-5 sm:px-8">
-        <p ref={clientRef} className="mb-4.5 font-semibold text-[12px] text-[#F0855F] uppercase">
+        <p ref={clientRef} className="mb-4.5 font-semibold text-[12px] text-[#D24614] uppercase">
           Case study · Red Mirchi Associates · Jind, Haryana
         </p>
 
@@ -497,7 +497,7 @@ function Hero({ mainBanner }: { mainBanner?: string }) {
           href="https://www.redmirchi.org/"
           target="_blank"
           rel="noopener noreferrer"
-          className="mb-9 inline-flex items-center gap-2.5 rounded-[10px] border border-white/20 px-5.5 py-3.5 text-[15px] font-medium text-white transition-colors duration-150 hover:border-[#F0855F] hover:bg-[#F0855F]/12 sm:mb-12"
+          className="mb-9 inline-flex items-center gap-2.5 rounded-[10px] border border-white/20 px-5.5 py-3.5 text-[15px] font-medium text-white transition-colors duration-150 hover:border-[#D24614] hover:bg-[#D24614]/12 sm:mb-12"
         >
           Visit the live site
           <svg
@@ -819,7 +819,7 @@ function DetailThatMatteredSection() {
         <div ref={introRef} className="max-w-[760px]">
           <SectionHead
             eyebrow="The detail that mattered"
-            eyebrowColor="#F0855F"
+            eyebrowColor="#D24614"
             headingLevel="h3"
             title="The conversion is a phone call."
             dark
@@ -926,7 +926,7 @@ function StillOursSection() {
           <div className="relative">
             <SectionHead
               eyebrow="What happened next"
-              eyebrowColor="#F0855F"
+              eyebrowColor="#D24614"
               headingLevel="h3"
               title="Horticulture runs on a calendar."
               dark
@@ -945,7 +945,7 @@ function StillOursSection() {
           </div>
 
           <div className="relative rounded-2xl border border-white/11 bg-white/5 p-6.5 sm:p-7">
-            <div className="text-[clamp(1.7rem,3vw,2.2rem)] leading-[1.15] font-extrabold tracking-[-0.03em] whitespace-pre-line text-[#F0855F]">
+            <div className="text-[clamp(1.7rem,3vw,2.2rem)] leading-[1.15] font-extrabold tracking-[-0.03em] whitespace-pre-line text-[#D24614]">
               {"Season\nby season"}
             </div>
             <div className="mt-2.5 text-[14.5px] leading-[1.55] text-[#B7A69E]">
