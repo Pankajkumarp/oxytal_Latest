@@ -107,13 +107,21 @@ export default function BannerImage({ entry }: Props) {
   const desktopImage = isEntry(desktopImageEntry)
     ? (desktopImageEntry as unknown as PlainEntry<DataImageSkeleton>)
     : undefined;
-  const desktopUrl = desktopImage ? getAssetUrl(desktopImage.fields.image) : undefined;
+  // Full-bleed banner, so unlike most other images on the site there's no
+  // ambiguity about how large it actually renders — capping the source
+  // resolution to what each breakpoint can ever display avoids shipping a
+  // desktop-sized (or original camera-resolution) file to a phone.
+  const desktopUrl = desktopImage
+    ? getAssetUrl(desktopImage.fields.image, { width: 1920 })
+    : undefined;
 
   const mobileImageEntry = entry?.fields.mobileImage;
   const mobileImage = isEntry(mobileImageEntry)
     ? (mobileImageEntry as unknown as PlainEntry<DataImageSkeleton>)
     : desktopImage;
-  const mobileUrl = mobileImage ? getAssetUrl(mobileImage.fields.image) : desktopUrl;
+  const mobileUrl = mobileImage
+    ? getAssetUrl(mobileImage.fields.image, { width: 828 })
+    : desktopUrl;
 
   const desktopRatio = resolveAspectRatioStyle(entry?.fields.desktopAspectRatio, DEFAULT_DESKTOP_RATIO);
   const mobileRatio = resolveAspectRatioStyle(entry?.fields.mobileAspectRatio, DEFAULT_MOBILE_RATIO);

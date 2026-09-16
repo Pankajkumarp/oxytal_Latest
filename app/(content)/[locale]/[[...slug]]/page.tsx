@@ -35,6 +35,25 @@ type Props = {
 export const revalidate = 86400; // 24 hours
 
 /**
+ * Required for `revalidate` above to actually take effect as ISR. Per
+ * Next's own docs (generateStaticParams.md, "Good to know"): a dynamic
+ * route with no `generateStaticParams` at all skips prerendering/caching
+ * entirely and is *fully* dynamically rendered — every request re-executes
+ * the function, `revalidate` or not. Returning `[]` (rather than
+ * enumerating every known slug) means no path is built at deploy time, but
+ * the *first* request to any given path is cached going forward, exactly
+ * like `dynamicParams`'s on-demand fallback behavior for a route that
+ * *does* list some paths. Confirmed empirically (see `app/api/revalidate/
+ * route.ts`'s doc comment) that omitting this was why this route showed up
+ * as `ƒ` (fully dynamic) in the build output and re-rendered on every hit
+ * regardless of `revalidate` — this is what actually makes on-demand ISR
+ * caching kick in for it.
+ */
+export function generateStaticParams() {
+  return [];
+}
+
+/**
  * `proxy.ts` rewrites every locale-less request to `/en-US/...` before this
  * route ever sees it, so *every* content URL — including `/case-studies/
  * <slug>` — arrives here as `/en-US/case-studies/<slug>`, never as a bare
