@@ -5,9 +5,9 @@ import {
   getFooter,
   getNavigation,
   getPageBySlug,
-} from "../../../lib/contentEntry";
-import { getAssetUrl } from "../../../lib/contentfulAsset";
-import { SITE_URL } from "../../../lib/siteUrl";
+} from "@/app/lib/contentEntry";
+import { getAssetUrl } from "@/app/lib/contentfulAsset";
+import { SITE_URL } from "@/app/lib/siteUrl";
 import Navbar from "@/app/ui/Navbar";
 import PageBody from "@/app/ui/PageBody";
 import Footer from "@/app/ui/Footer";
@@ -16,7 +16,6 @@ import SkipToContent from "@/app/ui/SkipToContent";
 
 type Props = {
   params: Promise<{
-    locale: string;
     slug?: string[];
   }>;
 };
@@ -54,19 +53,18 @@ export function generateStaticParams() {
 }
 
 /**
- * `proxy.ts` rewrites every locale-less request to `/en-US/...` before this
- * route ever sees it, so *every* content URL — including `/case-studies/
- * <slug>` — arrives here as `/en-US/case-studies/<slug>`, never as a bare
- * top-level path a separate route folder could intercept. A case study's
- * own detail page therefore has to be handled as a fallback right inside
- * this catch-all rather than as its own route.
- *
- * `caseStudySlugFromPath` recognizes that shape (`"case-studies/<rest>"`,
- * with something after the slash) and returns just `<rest>` — the slug
- * `getCaseStudyBySlug` looks up directly against `contentDetail.slug` (see
- * app/lib/contentEntry.ts). This only ever fires once `getPageBySlug` has
- * already come back empty, so an actual `page` entry at that path (there
- * isn't one today, but nothing stops an editor from adding one) still wins.
+ * This is an optional catch-all (`[[...slug]]`) mounted directly at the
+ * `(content)` route group's root, so it matches every content URL as-is —
+ * the bare `/` (empty `slug`, treated as `"home"` below), `/about`,
+ * `/case-studies/<slug>`, anything. There's no separate route folder for
+ * a case study's own detail page, so it's handled as a fallback right
+ * inside this catch-all: `caseStudySlugFromPath` recognizes the
+ * `"case-studies/<rest>"` shape (something after the slash) and returns
+ * just `<rest>` — the slug `getCaseStudyBySlug` looks up directly against
+ * `contentDetail.slug` (see app/lib/contentEntry.ts). This only ever fires
+ * once `getPageBySlug` has already come back empty, so an actual `page`
+ * entry at that path (there isn't one today, but nothing stops an editor
+ * from adding one) still wins.
  */
 const CASE_STUDY_PREFIX = "case-studies/";
 

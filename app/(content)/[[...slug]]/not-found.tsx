@@ -41,18 +41,18 @@ const NOT_FOUND_FALLBACK_ENTRY = {
 } as unknown as PlainEntry<ComposableElementSkeleton>;
 
 /**
- * Renders when `[locale]/[[...slug]]/page.tsx` calls `notFound()` (no
- * Contentful `page` entry — and no case study — matches the requested
- * slug). Deliberately placed *inside* `[locale]/`, not at the `(content)`
+ * Renders when `[[...slug]]/page.tsx` calls `notFound()` (no Contentful
+ * `page` entry — and no case study — matches the requested slug).
+ * Deliberately placed *inside* `[[...slug]]/`, not at the `(content)`
  * group root: `(content)` sits above two independent root layouts
- * (`[locale]/layout.tsx` and `page-not-found/layout.tsx`), and Next.js
+ * (`[[...slug]]/layout.tsx` and `page-not-found/layout.tsx`), and Next.js
  * can't compose a `not-found.tsx` boundary across multiple root layouts —
  * a `(content)/not-found.tsx` silently never rendered at all, falling
  * through to Next's own generic built-in 404 UI instead (see
  * node_modules/next/dist/docs/.../not-found.md, "Your app has multiple
  * root layouts... so there's no single layout to compose a global 404
- * from"). Nested here, under `[locale]/layout.tsx` alone, there's no such
- * ambiguity.
+ * from"). Nested here, under `[[...slug]]/layout.tsx` alone, there's no
+ * such ambiguity.
  *
  * Renders the real Contentful-driven 404 content in place (same content
  * `app/(content)/page-not-found/page.tsx` and `app/global-not-found.tsx`

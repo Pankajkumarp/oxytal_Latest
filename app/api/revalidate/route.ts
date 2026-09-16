@@ -11,9 +11,10 @@ import { revalidatePath, revalidateTag } from "next/cache";
  * webhook call is ever missed, content only then falls back to
  * self-healing within that 24h window instead of staying stale forever.
  *
- * `proxy.ts`'s matcher explicitly excludes `api` from its locale rewrite,
- * so this route is reachable at the plain `/api/revalidate` path, not
- * `/en-US/api/revalidate`.
+ * This route lives outside the `(content)` route group's `[[...slug]]`
+ * catch-all entirely (it's its own top-level `app/api/` route), so it's
+ * always reachable at the plain `/api/revalidate` path regardless of how
+ * content pages are routed.
  *
  * Every `unstable_cache`-wrapped query in app/lib/contentEntry.ts is
  * already tagged with one of `TAGS` below. Revalidating all of them on
@@ -33,20 +34,19 @@ import { revalidatePath, revalidateTag } from "next/cache";
  * `revalidateTag` alone marks the underlying *data* stale, but doesn't by
  * itself force an already fully static page's *built HTML* to
  * regenerate — that only happens once the page's own render actually
- * re-executes. Traced empirically: `/[locale]/[[...slug]]` (dynamic, `ƒ`
- * in the build output) re-renders on every request, so it picks up a
- * revalidated tag immediately; `/page-not-found` and `/_not-found`
- * (static, `○`) don't re-render at all once built, and kept serving the
- * old HTML through repeated `revalidateTag` calls in testing. Hence the
- * explicit `revalidatePath` calls below, covering both of this app's
- * independent root layouts (see PageBody/layout doc comments on why
- * there are two): `/` under `[locale]/layout.tsx` for every real content
- * page plus its own not-found boundary, and `/page-not-found` under its
- * own separate root layout. `global-not-found.tsx` (`/_not-found`) isn't
- * a normal file-route path `revalidatePath` can target directly — it
- * only refreshes via its own 24h window or the next deploy; low-stakes,
- * since it's the generic top-level 404 fallback rather than content
- * anyone edits often.
+ * re-executes. `/[[...slug]]` is ISR-cached (`generateStaticParams`
+ * returning `[]` — see that file's own doc comment) rather than fully
+ * dynamic, exactly like `/page-not-found`: both are prerendered/cached
+ * HTML that a tag going stale alone won't force to regenerate before the
+ * next real visit. Hence the explicit `revalidatePath` calls below,
+ * covering both of this app's independent root layouts (see PageBody/
+ * layout doc comments on why there are two): `/` under `[[...slug]]/
+ * layout.tsx` for every real content page plus its own not-found
+ * boundary, and `/page-not-found` under its own separate root layout.
+ * `global-not-found.tsx` (`/_not-found`) isn't a normal file-route path
+ * `revalidatePath` can target directly — it only refreshes via its own
+ * 24h window or the next deploy; low-stakes, since it's the generic
+ * top-level 404 fallback rather than content anyone edits often.
  *
  * Protected by a shared secret so this doesn't become a public "force
  * everyone's cache to reset" button: set `CONTENTFUL_REVALIDATE_SECRET`

@@ -37,7 +37,7 @@ const NOT_FOUND_FALLBACK_ENTRY = {
 
 // `global-not-found.tsx` bypasses this app's normal layout composition
 // entirely (see node_modules/next/dist/docs/.../not-found.md), so it has to
-// import its own font instead of inheriting `app/(content)/[locale]/layout`'s
+// import its own font instead of inheriting `app/(content)/[[...slug]]/layout`'s
 // `poppins` — same font/weights/CSS variable, so the rendered UI (Navbar,
 // Home404, Footer) looks identical either way.
 const poppins = Poppins({
@@ -62,7 +62,7 @@ export const revalidate = 86400; // 24 hours
  * Handles every URL that doesn't match any real route in the app (Next.js
  * 16's `global-not-found.js` convention — enabled via `experimental.
  * globalNotFound` in next.config.ts). This app needs it specifically
- * because it has two independent root layouts (`[locale]/layout.tsx` and
+ * because it has two independent root layouts (`[[...slug]]/layout.tsx` and
  * `page-not-found/layout.tsx`), and Next.js can't compose a normal
  * `app/(content)/not-found.tsx` boundary across multiple root layouts —
  * without this file, a genuinely mistyped/broken URL silently fell back to
@@ -72,7 +72,7 @@ export const revalidate = 86400; // 24 hours
  * was an attempt to route around that same limitation and never actually
  * fired for this reason; it's kept only for the (rare) case of an explicit
  * in-app `notFound()` call inside a route that *does* resolve under
- * `[locale]`, where a normal not-found boundary can compose correctly.
+ * `[[...slug]]`, where a normal not-found boundary can compose correctly.
  *
  * Renders the exact same Contentful-driven content as
  * `app/(content)/page-not-found/page.tsx` (Navbar + the "404" page's own
@@ -139,7 +139,7 @@ export default async function GlobalNotFound(): Promise<ReactElement<any>> {
         {/* `role`/`aria-label` here give `<body>` a named ARIA landmark
             so Next's route announcer (appended straight to
             `document.body` on client-side navigations — see
-            `app/(content)/[locale]/layout.tsx`'s own doc comment on this
+            `app/(content)/[[...slug]]/layout.tsx`'s own doc comment on this
             same attribute) ends up contained in a landmark instead of
             tripping automated accessibility scanners' "text not in a
             landmark" check. */}

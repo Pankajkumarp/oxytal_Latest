@@ -72,7 +72,7 @@ export default async function RootLayout({
         {/* `role`/`aria-label` here give `<body>` a named ARIA landmark
             so Next's route announcer (appended straight to
             `document.body` on client-side navigations — see
-            `app/(content)/[locale]/layout.tsx`'s own doc comment on this
+            `app/(content)/[[...slug]]/layout.tsx`'s own doc comment on this
             same attribute) ends up contained in a landmark instead of
             tripping automated accessibility scanners' "text not in a
             landmark" check. */}
